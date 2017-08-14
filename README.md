@@ -1,12 +1,20 @@
-# Autonomous Wind Turbine Inspections (AWTI)
+# Structural Inspections Using Mobile Robots
 
-This repository contains my written masters thesis about Autonomous Wind Turbine 
-Inspections performed under Mitacs project IT08812 as a collaboration between
+This repository contains my written masters thesis about Structural Inspections Using Mobile Robots
+partially performed under Mitacs project IT08812 as a collaboration between
 Polytechnique Montreal and Microdrones Canada Inc. As part of the agreement
-all intellectual property belongs to Microdrones, as such the implementation of
+all intellectual property pertaining to the wind turbine inspection project
+belongs to Microdrones, as such the implementation of
 this project is kept in a seperate repository.
 
-## Project Scope
+## Project Definition
+
+This thesis encompasses both UGV and UAV based inspections methods. The first
+project was my participation in the journal article titled: *A Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures*
+The second project was my participation in the development of a system for autonomous
+Wind turbine inspections with Microdrones.
+
+## Wind Turbine Inspection Project Scope
 
 * **Knowing** that current wind turbine inspection methods involve two surveyors climbing up a turbine and rapelling down a blade to inspect it up close.
 * **Knowing** that current methods can take anywhere between two and four hours to complete a full inspection.
