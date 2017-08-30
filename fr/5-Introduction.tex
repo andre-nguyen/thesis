@@ -21,9 +21,12 @@ En général, le but de ses inspections est multiple, outre la recherche de déf
 L'objectif principal de la recherche est de développer des méthodes d'inspection d'infrastructure adaptées aux robot terrestres non-habité (UGV) ainsi qu'aux robots aériens non-habité (UAV). Alors que la navigation du robot se fait entièrement de façon autonome, il est attendu qu'un opérateur intervienne lors de l'analyse des données et dans le cas du UAV qu'il intervienne dans la prise de photos.
 
 \subsection{Inspections au sol}
-Dans un premier lieu, nous nous attardons au cas où un UGV fait l'inspection de la partie visible d'une structure au sol, sans aucune information \textit{a priori}, au moyen d'un capteur de profondeur. Pour commencer, nous nous basons sur des algorithmes de navigation et de localisation existants tel que les champs de potentiel, le Simultaneous Localization and Mapping (SLAM) visuel et la fusion d'odométrie de roues avec une centrale inertielle (IMU) pour effecture le contrôle du véhicuke. L'objectif est d'avoir une méthode génération de trajectoire en temps réel qui, d'une part facilite la précision du système SLAM et d'autre part qui garantie la couverture entière de la surface de l'édifice.
+Dans un premier lieu, nous nous attardons au cas où un UGV fait l'inspection de la partie visible d'une structure au sol, sans aucune information \textit{a priori}, au moyen d'un capteur de profondeur. Le but final étant de créer une carte 3D précise de la structure sous inspection pour être utilisée dans des applications de réalité virtuelle ou de surveillance de chantiers de construction.
 
-\textcolor{red}{Développer plus}
+
+Pour commencer, nous nous basons sur des algorithmes de navigation et de localisation existants tel que les champs de potentiel, le Simultaneous Localization and Mapping (SLAM) visuel et la fusion d'odométrie de roues avec une centrale inertielle (IMU) pour effecture le contrôle du véhicuke. L'objectif est d'avoir une méthode génération de trajectoire en temps réel qui, d'une part facilite la précision du système SLAM et d'autre part garantie la couverture entière de la surface de l'édifice. 
+
+Pour ce faire l'inspection 
 
 \subsection{Inspections aériennes}
 Dans un second lieu, nous considérons le cas où un UAV fait l'inspection de la surface d'une éolienne. Cette partie du projet, réalisé conjointement avec la compagnie Microdrones Canada, s'inscrit dans le cadre d'un plus large projet de développement qui vise à développer une solution complète d'inspection d'éoliennes par UAV autonome permettant de réduire le temps nécessaire à une inspection. Tout d'abord, une inspection sert à repérer des défauts dans la structure d'une éolienne. Laissés seuls, ces défauts peuvent se traduirent en pertent d'efficacité et dans le pire cas, en un bris fatal.
