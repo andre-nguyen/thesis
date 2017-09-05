@@ -1,10 +1,11 @@
 % !TEX root = Document.tex
 \Chapter{REVUE DE LITTÉRATURE}\label{sec:RevLitt}
 
-Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément.
+Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans cette section blah blah blah
 
 \section{Méthodes de positionnement}
 
+\color{red}
 Nous faisons usage de trois types de systèmes de positionnement soit:
 \begin{enumerate}
   \item Les systèmes \textit{dead reckoning} fonctionnant par l'intégration d'une mesure à travers le temps tel que l'odométrie provenant des roues d'un robot.
@@ -13,24 +14,26 @@ Nous faisons usage de trois types de systèmes de positionnement soit:
 \end{enumerate}
 
 De base, tout système de positionnement modernes sont développés autour d'une centrale inertielle, un module contenant un accéléromètre pour mesurer l'accélération du véhicule, un gyroscope pour mesurer la vitesse angulaire et souvent aussi d'un magnétomètre pour mesurer le champ magnétique de la terre. Ces capteurs nous permettent au minimum d'estimer l'attitude de notre véhicule dans le monde
+\color{black}
+
 
 \section{Génération de trajectoires et couverture de surfaces}
 
 En général, le but des générateurs de trajectoire est d'optimiser une certaine métrique permettant de décider à quel endroit il faut placer le véhicule et son capteur pour faire l'inspection de la structure.
 
-Tout d'abord, considérant le cas d'une mission sans information \textit{a priori}, il s'agit d'une mission d'exploration où la génération de trajectoire doit se faire itérativement en temps réel pour envoyer le robot aux confins de l'espace connu. On tente en fait de répondre à la question:
+Tout d'abord, considérant le cas d'une mission sans information \textit{a priori}. Il s'agit d'une mission d'exploration où la génération de trajectoire doit se faire itérativement en temps réel pour envoyer le robot aux confins de l'espace connu. On tente en fait de répondre à la question:
 
 \begin{quote}
   Given what you know about the world, where should you move to gain as much new information as possible? (Sachant ce que nous savons à propos du monde, où devrions nous aller pour gagner le plus d'information possible?) \citep{Yamauchi1997}.
 \end{quote}
 
-Pour ce faire Yamauchi introduit le concept de \textit{frontier-based exploration} qui cherche à guider un robot vers la frontière entre l'espace connu et libre et l'espace inconnu. Suivant cette idée plusieurs chercheurs proposent des fonctions de coût à minimiser permettant de choisir à quel endroit de la frontière explorer. \citep{Wirth2007} proposent de subdiviser une carte 2D en celulles pour lesquelles une fonction de coût est calculée en prenant en compte non seulement la plus courte distance par rapport au robot mais aussi la distance par rapport à l'obstacle le plus proche. Chaque nouvelle position objectif minimise ainsi la distance pour s'y rendre mais aussi le risque encouru par le robot. Au lieu d'utiliser les \textit{frontier} comme objectifs \citep{Dornhege2011} proposent une formulation du problème utilisant les \textit{frontier} en tant que candidats possibles d'ouvertures dans les murs qui permmetraient à une caméra de cartographier l'espace vide se retrouvant derrière.
+Pour ce faire Yamauchi introduit le concept de \textit{frontier-based exploration} qui cherche à guider un robot vers la frontière entre l'espace connu et libre et l'espace inconnu. Suivant cette idée plusieurs chercheurs proposent des fonctions de coût à minimiser permettant de choisir à quel endroit de la frontière explorer. \citep{Wirth2007} proposent de subdiviser une carte 2D en celulles pour lesquelles une fonction de coût est calculée en prenant en compte non seulement la plus courte distance par rapport au robot mais aussi la distance par rapport à l'obstacle le plus proche. Chaque nouvelle position objectif minimise ainsi la distance pour s'y rendre mais aussi le risque encouru par le robot. Au lieu d'utiliser les \textit{frontier} comme objectifs \citep{Dornhege2011} proposent une formulation du problème utilisant les \textit{frontier} en tant que candidats possibles d'ouvertures dans les murs qui permetteraient à une caméra de cartographier l'espace vide se retrouvant derrière.
 
-\citep{Bircher2016} proposent une méthode d'exploration 3D basé sur l'algorithme \textit{Rapidly exploring Random Trees} (RRT) où un arbre est grandit dans l'espace ouvert connu. À chaque sommet, l'angle de vue de la caméra est utilisé pour estimer le gain exploratoire de la position. Une fois l'arbre construit, le véhicule exécute la première étape de la branche possédant le plus grand gain total. L'arbre complet est ensuite recalculé en utilisant la branche choisie comme point de départ. En d'autres mots, leur méthode tente de maximiser le gain exploratoire en prenant aussi en compte les gains futurs d'une trajectoire. \citep{Papachristos2017} améliorent la méthode de Bircher en sélectionnant un trajectoire qui permet aussi de minimiser l'incertitude sur leur système de cartographie et d'odométrie visuelle.
+\citep{Bircher2016} proposent une méthode d'exploration 3D basé sur l'algorithme \textit{Rapidly exploring Random Trees} (RRT) où un arbre est grandit dans l'espace ouvert connu. À chaque sommet, l'angle de vue de la caméra est utilisé pour estimer le gain exploratoire de la position. Une fois l'arbre construit, le véhicule exécute la première étape de la branche possédant le plus grand gain total. L'arbre complet est ensuite recalculé en utilisant la branche choisie comme point de départ. En d'autres mots, leur méthode tente de maximiser le gain exploratoire en prenant aussi en compte les gains futurs d'une trajectoire. Outre les gains exploratoires, certains auteurs tentent aussi de prendre en compte l'effet des trajectoires sur leurs systèmes de navigation. Par exemple \citep{Papachristos2017} améliorent la méthode de Bircher en sélectionnant un trajectoire qui permet aussi de minimiser l'incertitude sur leur système de cartographie et d'odométrie visuelle. \citep{Wirth2007} notent d'ailleurs que la proximité d'un obstacle est un danger (de collision) mais l'éloignement des obstacle en est aussi puisque la portée limitée des capteurs pourrait rendre un système de SLAM temporairement aveugle.
 
-Alors que les méthodes précédentes se préoccupent de maximiser le gain d'information, elles ne prennent pas en compte les contraintes de temps liées à l'autonomie des robots; Un problème qui affecte grandement les véhicules aériens multi-rotors. En combinant une fonction d'entropie calculée 
+Alors que les méthodes précédentes se préoccupent de maximiser le gain d'information, elles ne prennent pas en compte les contraintes de temps liées à l'autonomie des robots; Un problème qui affecte grandement les véhicules aériens multi-rotors. En combinant une fonction d'entropie calculée dans un voisinage local avec le coût en distance d'une trajectoire, \citep{Wang2017} proposent une méthode d'exploration se basant sur les \textit{Information Potential Fields} (les champs de potentiels d'information). Similaire à la méthode des champs de potentiels pour l'évitement d'obstacles, le robot fini par être attiré aux régions les plus proches à haut gain d'information. Toutefois, minimiser la longueur de la trajectoire n'assure pas nécessairement une minimisation du temps d'exploration si nous prenons aussi en compte l'accélération ou le jerk requis pour exécuter celle-ci. Pour résoudre ce problème \citep{Cieslewski2017} proposent une extension de la méthode de \citep{Yamauchi1997} où le prochain \textit{frontier} choisi est sélectionné dans le champ de vision du véhicule et est choisis pour minimiser le changement de vitesse requis au robot.
 
-Dans un autre ordres d'idée, une trajectoire globalement optimale peut être générée au préalable si de l'information \textit{a priori} est disponible. Pour une mission 
+Dans un autre ordres d'idée, une trajectoire globalement optimale peut être générée au préalable si de l'information \textit{a priori} est disponible. Pour une mission
 
 
 
