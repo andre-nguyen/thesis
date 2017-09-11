@@ -35,8 +35,13 @@ Alors que les méthodes précédentes se préoccupent de maximiser le gain d'inf
 
 Dans un autre ordres d'idée, une trajectoire complète et globalement optimale peut être générée au préalable si de l'information \textit{a priori} est disponible. Pour une mission où la géométrie de la structure à inspecter est connue \citep{Bircher2015} proposent de résoudre le problème en deux temps. En subdivisant le modèle en un maillage de triangles, on obtient pour chaque face un ensemble de points de vues admissibles. À chaque itération, des point de vus sont choisis séquentiellement en résolvant un problème d'optimisation QP où la fonction de coût minimise la distance par rapport aux points de vue voisin et où les contraintes assurent que la surface soit visible par le véhicule. Une fois l'ensemble choisi, une recherche heuristique est effectuée pour résoudre un problème du commis voyageur à travers l'ensemble. Bircher réexécute les deux étables jusqu'à ce qu'une trajectoire satisfaisante soit trouvée.
 
+Comparativement à l'inspection par exploration (en temps réel) la génération de trajectoire hors-ligne permet de créer des plans plus optimals en termes de temps et de distance à parcourir. Par contre, cette trajectoire peut avoir un risque de collision s'il s'avère que le modèle utilisé diffère de la structure réelle, par exemple dans la cas d'un édifice partiellement endommagé par un désastre naturel ou une variation dans l'angle des pales d'une éolienne. \citep{Hepp2017} présentent un système faisant une première passe à haute altitude pour construire une carte rudimentaire dans laquelle la seconde inspection de près est planifiée suivant une maximization du gain d'information.
+
 \section{Méthodes automatiques d'inspection d'éoliennes}
 
-\section{Méthodes de navigation}
+L'inspection d'éoliennes par UAV autonome étant une application relativement nouvelle, peu de travail a été publié à ce sujet particulier et à ce jour, la majorité du travail demeure théorique, \textcolor{red}{en simulation ou en environnements contrôlés}. Avant tout, \citep{Zhang2014} démontrent la faisabilité de repérer automatiquement des craques sur la surface d'une éolienne au moyen des détecteurs de bordures bien connus Canny et Sobel. 
 
 \section{Reconstruction 3D}
+
+
+\section{Méthodes de navigation}
