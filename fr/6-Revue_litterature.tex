@@ -5,17 +5,16 @@ Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées
 
 \section{Méthodes de positionnement}
 
-\color{red}
-Nous faisons usage de trois types de systèmes de positionnement soit:
+Selon \citep{Borenstein1997} les systèmes de positionnement se regroupent dans l'une de deux catégories:
+
 \begin{enumerate}
-  \item Les systèmes \textit{dead reckoning} fonctionnant par l'intégration d'une mesure à travers le temps tel que l'odométrie provenant des roues d'un robot.
-  \item Les systèmes absolus tel que GPS ou GLONASS reposant sur les données de satelittles.
-  \item Les systèmes relatifs à une structure tel que le \textit{Simultaneous Localization And Mapping} (SLAM).
+  \item Les systèmes à l'estime fonctionnant par l'intégration d'une mesure à travers le temps tel que l'odométrie provenant des roues d'un robot ou la double intégrale d'une accélération pour estimer une position.
+  \item Les systèmes absolus tel que GPS ou GLONASS reposant sur les données de satellites.
 \end{enumerate}
 
-De base, tout système de positionnement modernes sont développés autour d'une centrale inertielle, un module contenant un accéléromètre pour mesurer l'accélération du véhicule, un gyroscope pour mesurer la vitesse angulaire et souvent aussi d'un magnétomètre pour mesurer le champ magnétique de la terre. Ces capteurs nous permettent au minimum d'estimer l'attitude de notre véhicule dans le monde
-\color{black}
+Les systèmes de navigation complets vont habituellement se doter d'une combinaison des deux types de capteurs pour obtenir une estimation de la pose (position et orientation) du robot dans l'espace. Le plus souvent, un système de positionnement absolu va être augmenté d'une centrale inertielle qui consiste en une combinaison de gyroscopes et d'accéléromètres permettant de mesurer la vitesse de rotation et l'accélération d'un corps rigide. Ces capteurs inertiels ont l'avantage d'avoir une fréquence de mise à jour élevée mais en prenant l'intégrale de ceux-cis une accumulation d'erreur peut rapidement faire diverger l'estimation d'état. 
 
+% De base, les systèmes de positionnement modernes sont souvent développés autour d'une centrale inertielle, un module contenant un accéléromètre pour mesurer l'accélération du véhicule, un gyroscope pour mesurer la vitesse angulaire et souvent aussi d'un magnétomètre pour mesurer le champ magnétique de la terre. Ces capteurs nous permettent au minimum d'estimer l'orientation de notre véhicule.
 
 \section{Génération de trajectoires et couverture de surfaces}
 
