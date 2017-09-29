@@ -1,7 +1,7 @@
 % !TEX root = Document.tex
 \Chapter{REVUE DE LITTÉRATURE}\label{sec:RevLitt}
 
-Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans cette section blah blah blah
+Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément. \color{red}Dans cette section blah blah blah\color{black}
 
 \section{Méthodes de positionnement}
 
@@ -9,12 +9,16 @@ Selon \citep{Borenstein1997} les systèmes de positionnement se regroupent dans 
 
 \begin{enumerate}
   \item Les systèmes à l'estime fonctionnant par l'intégration d'une mesure à travers le temps tel que l'odométrie provenant des roues d'un robot ou la double intégrale d'une accélération pour estimer une position.
-  \item Les systèmes absolus tel que GPS ou GLONASS reposant sur les données de satellites.
+  \item Les systèmes absoluts fonctionnant grâce à de l'information externe tel que les GNSS reposant sur les données de satellites.
 \end{enumerate}
 
-Les systèmes de navigation complets vont habituellement se doter d'une combinaison des deux types de capteurs pour obtenir une estimation de la pose (position et orientation) du robot dans l'espace. Le plus souvent, un système de positionnement absolu va être augmenté d'une centrale inertielle qui consiste en une combinaison de gyroscopes et d'accéléromètres permettant de mesurer la vitesse de rotation et l'accélération d'un corps rigide. Ces capteurs inertiels ont l'avantage d'avoir une fréquence de mise à jour élevée mais en prenant l'intégrale de ceux-cis une accumulation d'erreur peut rapidement faire diverger l'estimation d'état. 
+Les systèmes de navigation complets vont habituellement se doter d'une combinaison des deux types de capteurs pour obtenir une estimation de la pose (position et orientation) du robot dans l'espace. Les systèmes de positionnement absolus tel que le GPS ayant normalement des fréquences de mise à jour lentes près de 1 Hz ils sont souvent augmentés d'une centrale inertielle (IMU), c'est-à-dire un combinaison de gyroscopes et d'accéléromètres permettant de mesurer la vitesse de rotation et l'accélération d'un corps rigide \citep{Noureldin2013}. Bien que les capteurs inertiels permettent d'estimer la position à de hautes fréquences, parfois même 1 kHz, en prenant l'intégrale de ceux cis, une accumulation d'erreur peut rapidement faire diverger l'estimation d'état. Ainsi, un système inertiel à l'estime et un système GPS absolut jouent des rôles complémentaires où le système inertiel calcule la position à haute fréquence puis une correction est faire par GPS à basse fréquence.
 
-% De base, les systèmes de positionnement modernes sont souvent développés autour d'une centrale inertielle, un module contenant un accéléromètre pour mesurer l'accélération du véhicule, un gyroscope pour mesurer la vitesse angulaire et souvent aussi d'un magnétomètre pour mesurer le champ magnétique de la terre. Ces capteurs nous permettent au minimum d'estimer l'orientation de notre véhicule.
+On appelle tout système reposant sur des capteurs inertiels un Système de Navigation Inertiel (INS). De nos jours, ceux-cis sont faciles d'accès et peuvent êtres achetés pour quelques milliers de dollars. La fusion de ces différents capteurs peut se faire au travers de différents moyens tels que les filtres à particules \citep{Carvalho1997} ou les graphes de facteurs \citep{Indelman2012} mais l'outil normalement utilisé est le filtre de Kalman \citep{Noureldin2013}.
+
+\color{red}Explication rapide du filtre de Kalman\color{black}
+
+Les GNSS n'étant pas la seule façon de corriger l'erreure cumulative d'un INS, certains auteurs proposent des filtres de Kalman modulaires permettant de fusionner une quantité arbitraire de capteurs hétérogènes tels que des IMU, l'odométrie d'encodeurs de roues, l'odométrie visuelle, receveurs GNSS, etc. \citep{MooreEkf2014}. Pour le cas spécifique des UAV \citep{Lynen2013} proposent aussi une architecture modulaire pour un filtre de Kalman étendu itéré qui permet de faire une calibration inter-capteurs pour estimer les délais temporels et les différences en d'échelle, chose importante dans le cas d'odométrie visuel monoculaire où l'échelle des mesure est arbitraire et peut dériver avec le temps.
 
 \section{Génération de trajectoires et couverture de surfaces}
 
