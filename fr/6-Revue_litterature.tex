@@ -1,9 +1,9 @@
 % !TEX root = Document.tex
 \Chapter{REVUE DE LITTÉRATURE}\label{sec:RevLitt}
 
-Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément. \color{red}Dans cette section blah blah blah\color{black}
+Bien que les deux types d'inspections traités dans cet ouvrage sont exécutées sur des véhicules entièrements différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans ce chapitre nous présentons d'abord dans la section \ref{subsec:positionnement} diverses méthodes de positionnement couramment utilisées par les robots mobiles pour naviguer leur environnement. Dans le même ordre d'idées nous présentons ensuite dans la section \ref{subsec:reconstruction} diverses façons pour un robot de résoudre le problème de \textit{Simultaneous Localization and Mapping} (SLAM) pour calculer la position relative du robot dans son environnement. La section \ref{subsec:generation} présente l'état de l'art en termes de génération de trajectoires pour la couverture de surfaces et de volumes. Puis la section \ref{subsec:navigation} présente quelques algorithmes couramment utilisés pour la navigation de robots moviles. Finalement dans la section \ref{subsec:eolienne} nous abordons le sujet spécifique de l'inspection d'éoliennes au moyen de robots autonomes.
 
-\section{Méthodes de positionnement}
+\section{Méthodes de positionnement}\label{subsec:positionnement}
 
 Selon \citep{Borenstein1997} les systèmes de positionnement se regroupent dans l'une de deux catégories:
 
@@ -12,15 +12,19 @@ Selon \citep{Borenstein1997} les systèmes de positionnement se regroupent dans 
   \item Les systèmes absoluts fonctionnant grâce à de l'information externe tel que les GNSS reposant sur les données de satellites.
 \end{enumerate}
 
-Les systèmes de navigation complets vont habituellement se doter d'une combinaison des deux types de capteurs pour obtenir une estimation de la pose (position et orientation) du robot dans l'espace. Les systèmes de positionnement absolus tel que le GPS ayant normalement des fréquences de mise à jour lentes près de 1 Hz ils sont souvent augmentés d'une centrale inertielle (IMU), c'est-à-dire un combinaison de gyroscopes et d'accéléromètres permettant de mesurer la vitesse de rotation et l'accélération d'un corps rigide \citep{Noureldin2013}. Bien que les capteurs inertiels permettent d'estimer la position à de hautes fréquences, parfois même 1 kHz, en prenant l'intégrale de ceux cis, une accumulation d'erreur peut rapidement faire diverger l'estimation d'état. Ainsi, un système inertiel à l'estime et un système GPS absolut jouent des rôles complémentaires où le système inertiel calcule la position à haute fréquence puis une correction est faire par GPS à basse fréquence.
+Les systèmes de navigation complets vont habituellement se doter d'une combinaison des deux types de capteurs pour obtenir une estimation de la pose (position et orientation) du robot dans l'espace. Les systèmes de positionnement absolus tel que le GPS ayant normalement des fréquences de mise à jour lentes, autour de 1 Hz, ils sont souvent jumelés à une centrale inertielle (IMU), c'est-à-dire un combinaison de gyroscopes et d'accéléromètres permettant de mesurer la vitesse angulaire et l'accélération d'un corps rigide \citep{Noureldin2013}. Bien que les capteurs inertiels permettent d'estimer la position à de hautes fréquences, parfois même 1 kHz, en prenant l'intégrale de ceux cis, une accumulation d'erreur peut rapidement faire diverger l'estimation d'état. Ainsi, un système inertiel à l'estime et un système GPS absolut jouent des rôles complémentaires où le système inertiel calcule la position à haute fréquence puis une correction est faire par GPS à basse fréquence.
 
 On appelle tout système reposant sur des capteurs inertiels un Système de Navigation Inertiel (INS). De nos jours, ceux-cis sont faciles d'accès et peuvent êtres achetés pour quelques milliers de dollars. La fusion de ces différents capteurs peut se faire au travers de différents moyens tels que les filtres à particules \citep{Carvalho1997} ou les graphes de facteurs \citep{Indelman2012} mais l'outil normalement utilisé est le filtre de Kalman \citep{Noureldin2013}.
 
-\color{red}Explication rapide du filtre de Kalman\color{black}
+De base, le filtre de Kalman (KF) est un algorithme récursif permettant de faire une estimation aux moindres carrés d'un vecteur d'états au travers d'une procédure de prédiction de l'évolution du vecteur d'état suivant un modèle du système suvit de la correction de celui-ci par les mesures entrantes au filtre. Cet algorithme fonctionne pourvu que la transformation entre l'état et les mesures en entrées soit linéaire. Dans le cas d'un système non-linéaire une linéarisation par un développement de Taylor autour de l'estimé optimal courant du vecteur d'état est effectuée résultant en un filtre de Kalman étendu (EKF) \citep{Chui2017}.
 
-Les GNSS n'étant pas la seule façon de corriger l'erreure cumulative d'un INS, certains auteurs proposent des filtres de Kalman modulaires permettant de fusionner une quantité arbitraire de capteurs hétérogènes tels que des IMU, l'odométrie d'encodeurs de roues, l'odométrie visuelle, receveurs GNSS, etc. \citep{MooreEkf2014}. Pour le cas spécifique des UAV \citep{Lynen2013} proposent aussi une architecture modulaire pour un filtre de Kalman étendu itéré qui permet de faire une calibration inter-capteurs pour estimer les délais temporels et les différences en d'échelle, chose importante dans le cas d'odométrie visuel monoculaire où l'échelle des mesure est arbitraire et peut dériver avec le temps.
+Les GNSS n'étant pas la seule façon de corriger l'erreure cumulative d'un INS, certains auteurs proposent des filtres de Kalman modulaires permettant de fusionner une quantité arbitraire de capteurs hétérogènes tels que des IMU, l'odométrie d'encodeurs de roues, l'odométrie visuelle, receveurs GNSS, etc. \citep{MooreEkf2014} pour estimer la position et l'orientation du robot. Pour le cas spécifique des UAV \citep{Lynen2013} proposent aussi une architecture modulaire pour un filtre de Kalman étendu itéré qui permet de faire une calibration inter-capteurs en-ligne pour estimer les délais temporels et les différences en d'échelle des mesures, chose importante dans le cas d'odométrie visuel monoculaire où l'échelle des mesures est arbitraire et peut dériver avec le temps.
 
-\section{Génération de trajectoires et couverture de surfaces}
+\section{\textit{Simultaneous Localization and Mapping}}\label{subsec:reconstruction}
+
+En 
+
+\section{Génération de trajectoires et couverture de surfaces}\label{subsec:generation}
 
 En général, le but des générateurs de trajectoire est d'optimiser une certaine métrique permettant de décider à quel endroit il faut placer le véhicule et son capteur pour faire l'inspection de la structure.
 
@@ -40,11 +44,10 @@ Dans un autre ordres d'idée, une trajectoire complète et globalement optimale 
 
 Comparativement à l'inspection par exploration (en temps réel) la génération de trajectoire hors-ligne permet de créer des plans plus optimals en termes de temps et de distance à parcourir. Par contre, cette trajectoire peut avoir un risque de collision s'il s'avère que le modèle utilisé diffère de la structure réelle, par exemple dans la cas d'un édifice partiellement endommagé par un désastre naturel ou une variation dans l'angle des pales d'une éolienne. \citep{Hepp2017} présentent un système faisant une première passe à haute altitude pour construire une carte rudimentaire dans laquelle la seconde inspection de près est planifiée suivant une maximization du gain d'information.
 
-\section{Méthodes automatiques d'inspection d'éoliennes}
+\section{Méthodes de navigation}\label{subsec:navigation}
+
+Champs de potentiel
+
+\section{Méthodes automatiques d'inspection d'éoliennes}\label{subsec:eolienne}
 
 L'inspection d'éoliennes par UAV autonome étant une application relativement nouvelle, peu de travail a été publié à ce sujet particulier et à ce jour, la majorité du travail demeure théorique, \textcolor{red}{en simulation ou en environnements contrôlés}. Avant tout, \citep{Zhang2014} démontrent la faisabilité de repérer automatiquement des craques sur la surface d'une éolienne au moyen des détecteurs de bordures bien connus Canny et Sobel. Du travail préliminaire a été réalisé sur les éléments de base requis pour faire une inspection autonome. Notamment au niveau de l'utilisation du principe du flux optique pour l'estimation de la vitesse relative entre un véhicule aérien et une éolienne \citep{Hoglund2014} ainsi que l'utilisation de la transformée de Hough linéaire et de traitements géométriques pour la reconaissance automatique d'éoliennes \citep{Stokkeland2015}.
-
-\section{Reconstruction 3D}
-
-
-\section{Méthodes de navigation}
