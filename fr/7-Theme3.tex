@@ -11,24 +11,37 @@ En temps normal, une inspection se fait par une équipe d'une ou deux personnes 
 
 En plus de prendre beaucoup de temps, les inspection d'éoliennes posent un réel risque au niveau de la santé et sécurité des travailleurs nottament à cause des chutes possibles dans la tour pouvant faire plus d'une centaine de pieds de haut ou aussi par le fait de devoir naviguer des espaces confins pour se rendre au sommet de la tour \citep{Osha2017}. Ainsi, automatiser les inspections bénéfierait directement la santé des travailleurs et permetterait de sauver du temps et de l'argent.
 
-Le but du projet est de réaliser un système capable de naviguer un quadricoptère autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec un humain intervenant seulement au niveau de la prise de données. Puisque maneuvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cheche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners lasers et l'autre par caméras stereo. 
+Certains opérateurs d'UAV offrent maintenant des services d'inspection d'éoliennes. Une caméra haute définition est montée sur un cardan stabilisateur à trois axes qui est à son tour monté sur le véhicule. Ce dernier est desfois aussi augmenté d'un télémètre permettant au pilote de savoir à quelle distance il est de la structure, chose difficile à estimer lorsque le véhicule est à 100 mètres d'altitude. Ces inspections peuvent prendre jusqu'à trois employés dont un pilote, un opérateur pour la caméra et un observateur sous l'éolienne.
 
-\section{Stratégie}
+Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de naviguer un quadricoptère autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec seulement le pilote de présent. Ce projet peut aussi servir de tremplin vers un projet futur dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque maneuvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cheche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners lasers et l'autre par caméras stereo.
 
-\subsection{Approche de loin}
+\section{Méthode d'inspection}
 
-\subsection{Approche en remontant la tour}
+La mission se divise en deux phases: l'approche du rotor et le suivit de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanner lasers. Pour le suivit des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivit à tâtons. Puisque ce projet est réalisé conjointement avec la compagnie Microdrones, le quadricoptère md4-1000 a été choisi sur lequel nous installons deux scanners lasers LeddarTech Vu8, l'un horizontal et l'autre vertical et puis une caméra stereo ZED. Il est à noter que ces capteurs ne servent qu'à la navigation de l'UAV alors que la caméra haute définition sur stabilisateur resterait le moyen par lequel prendre des photos de défauts à la surface des pales.
+
+\subsection{Approche du rotor}
+
+\subsubsection{Approche de loin}
+
+L'approche à longue distance comporte plusieurs avantages dont l'absence du besoin d'information \textit{a priori} à propos du placement des pales. Avec une vue d'ensemble de l'éolienne à inspecter, il devient possible de mesurer l'angle des pales, une information cruciale qui sera exploitée lorsque l'UAV devra choisir où se diriger lorsqu'il est près du rotor. Le deuxième avantage est qu'il est possible de mesurer l'angle de lacet relatif entre l'UAV et l'éolienne, permettant ainsi de placer le véhicule perpendiculaire à la surface des pales.
+
+Dans cette section nous détaillons une méthode légèrement modifiée de celle de \citep{Stokkeland2015} pour détecter le centre du rotor d'une éolienne à partir d'une image. En somme les étapes restent les mêmes mais de la robustesse additionnelle est introduite au moyen d'algorithmes de regroupement, une représentation différente des pales détectées est utilisée et un filtre de Kalman non-linéaire (au lieu d'un filtre de Kalman linéaire) est proposé.
+
+La méthode
+
+\subsubsection{Approche en remontant la tour}
 
 
-\subsection{Traitement des lasers}
+\subsection{Suivit des pales}
 
 
 \subsection{Implémentation}
 
 
-\section{Simulation results}
+\section{Résultats en simulation}
 
 
-\section{Experimental results}
+\section{Résultats de tests sur le terrain}
+
 
 \subsection{}
