@@ -27,7 +27,15 @@ L'approche à longue distance comporte plusieurs avantages dont l'absence du bes
 
 Dans cette section nous détaillons une méthode légèrement modifiée de celle de \citep{Stokkeland2015} pour détecter le centre du rotor d'une éolienne à partir d'une image. En somme les étapes restent les mêmes mais de la robustesse additionnelle est introduite au moyen d'algorithmes de regroupement, une représentation différente des pales détectées est utilisée et un filtre de Kalman non-linéaire (au lieu d'un filtre de Kalman linéaire) est proposé.
 
-La méthode
+La méthode est comme suit:
+
+\begin{enumerate}
+  \item Élimination du bruit par filtre gaussien par convolution
+  \item Canny
+  \item Hough
+  \item Trouve une ou des lignes verticales près du bas de l'image
+  
+\end{enumerate}
 
 \subsubsection{Approche en remontant la tour}
 
