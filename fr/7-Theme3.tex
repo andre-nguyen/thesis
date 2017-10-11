@@ -3,7 +3,7 @@
 
 Dans ce chapitre nous traitons du projet de l'automatisation d'inspection d'éoliennes par un véhicule aérien autonome réalisé conjointement avec la compagnie Microdrones Canada Inc.
 
-\section{Description du problème}
+\section{Description du problème et méthode d'inspection}
 
 Les éoliennes doivent régulièrement être inspectées pour détecter et réparer le plus tôt possible des failles structurelles sur leurs pales qui peuvent apparaître avec le temps dû aux intempéries ou même quand elles sont frappées par la foudre. La peinture recouvrant celles-cis étant moins élastique que le composite de fibre de verre dont elles sont construites, un défaut structurel se manifeste inévitablement à la surface de la pale sous la forme de craques ou de trous. C'est pourquoi une inspection visuelle doit être régulièrement faite pour déceler et réparer toute irrégularité dans la structure avant qu'un bris catastrophique ne se produise.
 
@@ -15,13 +15,34 @@ Certains opérateurs d'UAV offrent maintenant des services d'inspection d'éolie
 
 Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de naviguer un quadricoptère autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec seulement le pilote de présent. Ce projet peut aussi servir de tremplin vers un projet futur dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque maneuvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cheche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners lasers et l'autre par caméras stereo.
 
-\section{Méthode d'inspection}
-
 La mission se divise en deux phases: l'approche du rotor et le suivit de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanner lasers. Pour le suivit des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivit à tâtons. Puisque ce projet est réalisé conjointement avec la compagnie Microdrones, le quadricoptère md4-1000 a été choisi sur lequel nous installons deux scanners lasers LeddarTech Vu8, l'un horizontal et l'autre vertical et puis une caméra stereo ZED. Il est à noter que ces capteurs ne servent qu'à la navigation de l'UAV alors que la caméra haute définition sur stabilisateur resterait le moyen par lequel prendre des photos de défauts à la surface des pales.
 
-\subsection{Approche du rotor}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/placeholder.png}
+  \caption{Systèmes de coordonnées sur le md4-1000}
+  \label{fig:md41000}
+\end{figure}
 
-\subsubsection{Approche de loin}
+\begin{figure}
+  \centering
+  \setlength{\tabcolsep}{12pt}
+  \begin{tabular}[htp]{|c|l|p{10cm}|}
+    \hline
+    Symbole & Nom                   & Description\\\hline
+    $W$     &  \textit{World}       & Suivant la convention \textit{East-North-Up} (ENU), centré au point de décollage du véhicule avec l'axe $x$ pointant vers l'est, $y$ pointant vers le nord et $z$ pointant vers le haut.\\ \hline
+    $B$     &  \textit{Body}        & Encore suivant la convention ENU, l'axe $x$ pointant vers la droite, $y$ vers l'avant et $z$ vers le haut. \\ \hline
+    $\mathit{C[L,R]}$ & \textit{Camera} & Suivant la convention de représentation d'images, nous avons l'axe $x$ vers la droite, $y$ vers le bas et $z$ sortant de la caméra. Les suffixes $L$ et $R$ indiquent la caméra gauche et droite respectivement. Par souci de brièveté si le repère est écrit $C$ sans préciser la caméra gauche ou droite, il indique la caméra droite.   \\ \hline
+    $\mathit{L[H,V]}$ & \textit{Laser}& Les lasers aussi suivent un repère main droite avec $x$ vers l'avant, $y$ a gauche et $z$ vers le haut. Les données de distance du laser se situe tous sur son plan $XY$. Les suffixes $H$ et $V$ indique la direction du scan, horizontal et vertical, par rapport au repère $B$. \\ \hline
+  \end{tabular}
+  \setlength{\tabcolsep}{6pt}
+  \caption{Repères présents dans le système}
+  \label{table:coordinate_frames}
+\end{figure}
+
+\section{Approche du rotor}
+
+\subsection{Approche de loin}
 
 L'approche à longue distance comporte plusieurs avantages dont l'absence du besoin d'information \textit{a priori} à propos du placement des pales. Avec une vue d'ensemble de l'éolienne à inspecter, il devient possible de mesurer l'angle des pales, une information cruciale qui sera exploitée lorsque l'UAV devra choisir où se diriger lorsqu'il est près du rotor. Le deuxième avantage est qu'il est possible de mesurer l'angle de lacet relatif entre l'UAV et l'éolienne, permettant ainsi de placer le véhicule perpendiculaire à la surface des pales.
 
@@ -46,15 +67,17 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 
 \textbf{\textit{Étape 1: Prétraitement de l'image}} Avant de commencer la détection, quelques corrections à l'image doivent être apportées. Puisque la procédure ne requiert pas de données de couleur, une conversion RGB à échelle de gris est effectuée au moyen de la transformée
 
-\[
+\begin{align}
  Y \leftarrow 0.299 R + 0.587 G + 0.114 B
-\]
+ \label{eq:rgb2gray}
+\end{align}
 
 où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
   p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
   H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
+  \label{eq:egalisation_histogramme}
 \end{align}
 
 Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
@@ -67,9 +90,10 @@ Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. 
       1 & 1 & 1
     \end{bmatrix}
   \Bigg)
+  \label{eq:boxfilter}
 \end{align}
 
-Pour les convolutions sur les bords de l'image nous répétons la valeur du pixel du bord pour les valeurs manquantes dans l'opération de convolution.
+Pour les convolutions sur les bords de l'image nous répétons la valeur du pixel du bord pour les données manquantes dans l'opération de convolution.
 
 \begin{figure}[htp]
 \centering
@@ -97,7 +121,7 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
 \label{fig:detection_pretraitement}
 \end{figure}
 
-\textbf{\textit{Étape 2: Détection de contours}} La détection de contours se fait au moyen de la transformée de Canny 
+\textbf{\textit{Étape 2: Détection de contours}} La détection de contours se fait au moyen de l'algorithme de Canny
 
 \textbf{\textit{Étape 3: Détection de lignes}}
 
@@ -107,19 +131,25 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
 
 \textbf{\textit{Étape 6: Recherche du rotor}}
 
-\subsubsection{Approche en remontant la tour}
+\subsection{Approche en remontant la tour}
+
+Dans cette méthode le véhicule est placé à proximité de la tour de tel sorte que le scanner laser puisse capter la forme de la tour.
+
+\begin{enumerate}
+  \item Projection des lasers en coordonnées dans le body frame
+  \item PID
+\end{enumerate}
+
+\section{Suivit des pales}
 
 
-\subsection{Suivit des pales}
+\section{Implémentation}
 
 
-\subsection{Implémentation}
+\subsection{Résultats en simulation}
 
 
-\section{Résultats en simulation}
-
-
-\section{Résultats de tests sur le terrain}
+\subsection{Résultats de tests sur le terrain}
 
 
 \subsection{}
