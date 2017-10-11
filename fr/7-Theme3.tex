@@ -34,12 +34,12 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 %  \begin{enumerate}
 %    \item Conversion de l'image couleur à une échelle de gris
 %    \item Suppression du bruit par un filtre à convolution Gaussien
-%    \item Correction du contraste par égalisation de l'histogramme 
+%    \item Correction du contraste par égalisation de l'histogramme
 %  \end{enumerate}
 %  \item Détection de contours par l'algorithme de Canny
 %  \item Détection de lignes par transformée de Hough probabiliste
 %  \item Trouver la tour de l'éolienne en cherchant des segments verticaux débutant au bas de l'image avec compensation de l'angle de roulis du véhicule.
-%  \item Trouver les candidats de segments de pales. Ce sont les segments ayant un sommet près du plus haut point détectable de la tour. 
+%  \item Trouver les candidats de segments de pales. Ce sont les segments ayant un sommet près du plus haut point détectable de la tour.
 %  \item Regroupement des segments par l'algorithme DBSCAN suivit du rejet de données aberrantes par une procédure de vote.
 %  \item Moyenner les segments de pales et trouver le rotor par l'intersection du prolongement des pales.
 %\end{enumerate}
@@ -53,14 +53,14 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
-  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\ 
+  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
   H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
 \end{align}
 
 Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
 
 \begin{align}
-  F_{i,j} = H_{i,j} * \Bigg(\frac{1}{9} 
+  F_{i,j} = H_{i,j} * \Bigg(\frac{1}{9}
     \begin{bmatrix}
       1 & 1 & 1\\
       1 & 1 & 1\\
@@ -77,7 +77,7 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
   \centering
   \includegraphics[width=\linewidth]{images/placeholder.png}
   (A)
-\end{minipage}  
+\end{minipage}
 \begin{minipage}{0.4\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/placeholder.png}
@@ -87,17 +87,17 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
   \centering
   \includegraphics[width=\linewidth]{images/placeholder.png}
   (C)
-\end{minipage}  
+\end{minipage}
 \begin{minipage}{0.4\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/placeholder.png}
   (D)
-\end{minipage}  
+\end{minipage}
 \caption{(A) Image originale (B) Image en tons de gris (C) Image avec égalisation d'histogramme (D) Image floutée par un filtre Gaussien}
 \label{fig:detection_pretraitement}
 \end{figure}
 
-\textbf{\textit{Étape 2: Détection de contours}}
+\textbf{\textit{Étape 2: Détection de contours}} La détection de contours se fait au moyen de la transformée de Canny 
 
 \textbf{\textit{Étape 3: Détection de lignes}}
 
