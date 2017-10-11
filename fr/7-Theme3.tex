@@ -50,15 +50,26 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
  Y \leftarrow 0.299 R + 0.587 G + 0.114 B
 \]
 
-où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image de la Figure \ref{fig:detection_pretraitement} . Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ nous avons
+où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
   p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\ 
   H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
 \end{align}
 
-Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit Gaussien et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre Gaussien 2D par convolution.
+Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
 
+\begin{align}
+  F_{i,j} = H_{i,j} * \Bigg(\frac{1}{9} 
+    \begin{bmatrix}
+      1 & 1 & 1\\
+      1 & 1 & 1\\
+      1 & 1 & 1
+    \end{bmatrix}
+  \Bigg)
+\end{align}
+
+Pour les convolutions sur les bords de l'image nous répétons la valeur du pixel du bord pour les valeurs manquantes dans l'opération de convolution.
 
 \begin{figure}[htp]
 \centering
