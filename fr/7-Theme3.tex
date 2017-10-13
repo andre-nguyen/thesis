@@ -65,14 +65,14 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 %  \item Moyenner les segments de pales et trouver le rotor par l'intersection du prolongement des pales.
 %\end{enumerate}
 
-\textbf{\textit{Étape 1: Prétraitement de l'image}} Avant de commencer la détection, quelques corrections à l'image doivent être apportées. Puisque la procédure ne requiert pas de données de couleur, une conversion RGB à échelle de gris est effectuée au moyen de la transformée
+\subsubsection{Étape 1: Prétraitement de l'image} Avant de commencer la détection, quelques corrections à l'image doivent être apportées. Puisque la procédure ne requiert pas de données de couleur, une conversion RGB à échelle de gris est effectuée au moyen de la transformée
 
 \begin{align}
  Y \leftarrow 0.299 R + 0.587 G + 0.114 B
  \label{eq:rgb2gray}
 \end{align}
 
-où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
+où $Y$ est le niveau de gris du pixel entre $0$ et $255$ ce qui donne comme résultat l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
   p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
@@ -83,13 +83,13 @@ où $Y$ est le niveau de gris du pixel entre $0$ et $255$ résultant en l'image 
 Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
 
 \begin{align}
-  F_{i,j} = H_{i,j} * \Bigg(\frac{1}{9}
+  F = \Bigg(\frac{1}{9}
     \begin{bmatrix}
       1 & 1 & 1\\
       1 & 1 & 1\\
       1 & 1 & 1
     \end{bmatrix}
-  \Bigg)
+  \Bigg) * H
   \label{eq:boxfilter}
 \end{align}
 
@@ -117,19 +117,58 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
   \includegraphics[width=\linewidth]{images/placeholder.png}
   (D)
 \end{minipage}
-\caption{(A) Image originale (B) Image en tons de gris (C) Image avec égalisation d'histogramme (D) Image floutée par un filtre Gaussien}
+\caption{(A) Image originale (B) Image en tons de gris (C) Image avec égalisation d'histogramme (D) Image floutée par un filtre moyenneur}
 \label{fig:detection_pretraitement}
 \end{figure}
 
-\textbf{\textit{Étape 2: Détection de contours}} La détection de contours se fait au moyen de l'algorithme de Canny
+\subsubsection{Étape 2: Détection de contours} La détection de contours se fait au moyen de l'algorithme de Canny \citep{Canny1986} qui a son tour se fait en une série de 4 étapes:
 
-\textbf{\textit{Étape 3: Détection de lignes}}
+\begin{enumerate}
+  \item Un filtre Gaussien par convolution est appliqué pour atténuer le bruit. Pour générer un masque Gaussien $H$ en deux dimensions il suffit de suivre l'équation:
+  \begin{align}
+    H_{ij}= \frac{1}{2\pi\sigma^2}\exp \left(-\frac{(i-(k+1))^2+(j-(k+1))^2}{2\sigma^2} \right) ; 1 \leq i, j \leq (2k + 1)
+  \end{align}
+  où $k$ est la taille du masque, $\sigma$ est l'écart type de la distribution et $i$ et $j$ sont les indexes de rangée et de colonne respectivement. Pour $k = 5$ et $\sigma = 1.4$ nous avons
+  \begin{align}
+    I_{\text{floue}} = \frac{1}{159} \begin{bmatrix}
+      2 & 4 & 5 & 4 & 2\\
+      4 & 9 & 12 & 9 & 4\\
+      5 & 12 & 15 & 12 & 5\\
+      4 & 9 & 12 & 9 & 4\\
+      2 & 4 & 5 & 4 & 2
+    \end{bmatrix} * I_{\text{originale}}
+  \end{align}
+  \item Pour chaque pixel le gradient $G$ et l'angle du gradient $\Theta$ est calculé à partir des quantitées $G_x$ le gradient horizontal et $G_y$ le gradient vertical suivant les équations:
+  \begin{align}
+    G_x =  \begin{bmatrix} -1 & 0 & 1 \\
+    -2 & 0 & 2 \\
+    -1 & 0 & 1
+  \end{bmatrix} * I_{\text{floue}}
+  \end{align}
+  \begin{align}
+    G_y = \begin{bmatrix}
+    -1 & -2 & -1\\
+    0 & 0 & 0 \\
+    1 & 2 & 1
+  \end{bmatrix} * I_{\text{floue}}
+  \end{align}
+  \begin{align}
+    G = \sqrt{G_x^2 + G_y^2}
+  \end{align}
+  \begin{align}
+    \Theta = \atantwo(G_y^2, G_x^2)
+  \end{align}
+  \item Suppression des non-maxima (expliquer AVEC $\theta$)
+  \item Un double seuil, l'un haut $T_h$ et l'autre bas $T_b$, est appliqué par hystéresis pour atténuer les pixels de contours trop faibles. Un pixel $G_{ij}$ plus fort que $T_h$ est marqué comme un pixel au contour fort. Les pixels plus faibles que $T_b$ sont supprimés (mise à $0$). Les pixels entre les deux sont gardés seulement s'ils sont adjacents à un pixel fort.
+\end{enumerate}
 
-\textbf{\textit{Étape 4: Recherche de la tour}}
+\subsubsection{Étape 3: Détection de lignes}
 
-\textbf{\textit{Étape 5: Recherche des pales}}
+\subsubsection{Étape 4: Recherche de la tour}
 
-\textbf{\textit{Étape 6: Recherche du rotor}}
+\subsubsection{Étape 5: Recherche des pales}
+
+\subsubsection{Étape 6: Recherche du rotor}
 
 \subsection{Approche en remontant la tour}
 
