@@ -13,7 +13,7 @@ En plus de prendre beaucoup de temps, les inspection d'éoliennes posent un rée
 
 Certains opérateurs d'UAV offrent maintenant des services d'inspection d'éoliennes. Une caméra haute définition est montée sur un cardan stabilisateur à trois axes qui est à son tour monté sur le véhicule. Ce dernier est desfois aussi augmenté d'un télémètre permettant au pilote de savoir à quelle distance il est de la structure, chose difficile à estimer lorsque le véhicule est à 100 mètres d'altitude. Ces inspections peuvent prendre jusqu'à trois employés dont un pilote, un opérateur pour la caméra et un observateur sous l'éolienne.
 
-Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de naviguer un quadricoptère autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec seulement le pilote de présent. Ce projet peut aussi servir de tremplin vers un projet futur dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque maneuvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cheche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners lasers et l'autre par caméras stereo.
+Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de naviguer un quadricoptère autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec seulement le pilote de sécurité de présent et le moins d'information \textit{a priori} possible. Ce projet peut aussi servir de tremplin vers un projet futur dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque maneuvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cheche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners lasers et l'autre par caméras stereo.
 
 La mission se divise en deux phases: l'approche du rotor et le suivit de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanner lasers. Pour le suivit des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivit à tâtons. Puisque ce projet est réalisé conjointement avec la compagnie Microdrones, le quadricoptère md4-1000 a été choisi sur lequel nous installons deux scanners lasers LeddarTech Vu8, l'un horizontal et l'autre vertical et puis une caméra stereo ZED. Il est à noter que ces capteurs ne servent qu'à la navigation de l'UAV alors que la caméra haute définition sur stabilisateur resterait le moyen par lequel prendre des photos de défauts à la surface des pales.
 
@@ -24,7 +24,7 @@ La mission se divise en deux phases: l'approche du rotor et le suivit de ses pal
   \label{fig:md41000}
 \end{figure}
 
-\begin{figure}[htp]
+\begin{table}[htp]
   \centering
   \setlength{\tabcolsep}{12pt}
   \begin{tabular}[htp]{|c|l|p{10cm}|}
@@ -34,11 +34,12 @@ La mission se divise en deux phases: l'approche du rotor et le suivit de ses pal
     $B$     &  \textit{Body}        & Encore suivant la convention ENU, l'axe $x$ pointant vers la droite, $y$ vers l'avant et $z$ vers le haut. \\ \hline
     $\mathit{C[L,R]}$ & \textit{Camera} & Suivant la convention de représentation d'images, nous avons l'axe $x$ vers la droite, $y$ vers le bas et $z$ sortant de la caméra. Les suffixes $L$ et $R$ indiquent la caméra gauche et droite respectivement. Par souci de brièveté si le repère est écrit $C$ sans préciser la caméra gauche ou droite, il indique la caméra droite.   \\ \hline
     $\mathit{L[H,V]}$ & \textit{Laser}& Les lasers aussi suivent un repère main droite avec $x$ vers l'avant, $y$ a gauche et $z$ vers le haut. Les données de distance du laser se situe tous sur son plan $XY$. Les suffixes $H$ et $V$ indique la direction du scan, horizontal et vertical, par rapport au repère $B$. \\ \hline
+    $\mathit{T}$ & \textit{Turbine} & Le système de coordonnées de la turbine est centré sur le rotor avec $x$ vers la droite (vu de devant), $y$ vers l'intérieur de la nacelle et $z$ vers le haut. \\ \hline
   \end{tabular}
   \setlength{\tabcolsep}{6pt}
-  \caption{Repères présents dans le système}
+  \caption{Repères présents dans le système d'inspection d'éoliennes}
   \label{table:coordinate_frames}
-\end{figure}
+\end{table}
 
 \section{Approche du rotor}
 
@@ -75,7 +76,7 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 où $Y$ est le niveau de gris du pixel entre $0$ et $255$ ce qui donne comme résultat l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
-  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
+  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\ 
   H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
   \label{eq:egalisation_histogramme}
 \end{align}
@@ -177,13 +178,38 @@ Outre la méthode de Canny, il existe des méthodes modernes plus performantes q
 
 \subsubsection{Étape 3: Détection de lignes}
 
-Une fois les contours trouvés, nous pouvons les utiliser pour détecter des segments de droite dans l'image. Plusieurs méthodes de détection de segments existent, nous comparons trois méthodes dont la bien connue transformée de Hough probabiliste, Edge Drawling lines (EDLines) et le Line Segment Detector (LSD).
+Une fois les contours trouvés, nous pouvons les utiliser pour détecter des segments de droite dans l'image. Dans le cas où des parties du véhicule sont visibles dans l'image, il suffit d'appliquer un masque avant de débuter cette étape. Pour trouver les segments, nous appliquons la transformée de Hough probabiliste pour détecter des segments de droites dans l'image de contours.
 
 \subsubsection{Étape 4: Recherche de la tour}
+\label{subsubsec:approach4}
+
+Stokkeland explique que la partie la plus facile à détecter est la tour puisqu'elle est toujours verticale et répond fortement à la détection de lignes. Pour la trouver, il suffit de chercher une ligne verticale (compensée pour l'angle de roulis de l'UAV) dont l'un des sommets repose dans le base de l'image. Puisqu'il arrive parfois que la détection de ligne défait la tour en plusieurs segments, une fois le segment initial choisit on recherche aussi des prolongements de ce segment à une certaine distance du plus haut sommet.
 
 \subsubsection{Étape 5: Recherche des pales}
 
+À la fin de l'étape 4 nous avons un ensemble de segments appartenant à la tour. À partir du plus haut point de ces segments nous recherchons tout autre segment ayant un sommet dans un certain rayon du point. Ces segments sont considérés en tant que candidats à être des segments d'une pale. 
+
+Nous divergeons de la méthode proposée par Stokkeland où il tente de regrouper les segments selon l'angle par rapport à la tour; Au travers d'une procédure vorace simple où un nouveau groupe est créé lorsqu'un segment est à un angle au dessus d'un certain seuil du groupe courant. Nous notons que ceci fonctionne acceptablement sur le jeu de données à Stokkeland où le ciel est clair et son éolienne est sur une colline près de la mer, mettant donc l'horizon bien en dessous du rotor. Lors de nos essais tant en simulation que sur le terrain, nous avons noté que l'horizon était très proche de rotor donnant lieu à une grande présence de segments près du rotor faussant ainsi les résultats de la recherche de pales. C'est pourquoi nous implémentons l'étape 5 avec un algorithme de groupage formel qui inclut la résistance au bruit de mesure nommé \textit{Density-based spatial clustering of applications with noise} (DBSCAN) proposé par \citep{Ester1996}.
+
+La particularité de DBSCAN par rapport à d'autres algorithmes de partionnage tel que $k$-means est que nous n'avons pas à fournir le nombre $k$ de partitions recherchées. À la place, nous fournissons que deux paramètres $\epsilon$ (eps) la distance d'un point à son entourage et \matht{MinPts} le nombre minimum de points pour qu'une partition soit formée. Pour chaque segment, nous projettons leur angle par rapport à la tour sur un cercle unitaire. Ceci permet d'exécuter DBSCAN dans un espace euclidien pour regrouper les segments adjacents.
+
+Une fois les groupes formés, Stokkeland utilise une stratégie de vote pour éliminer les fausses détections. La moyenne des angles est calculée et une procédure de vote débute s'il y a plus de 2 groupes. Nous choisissons 2 au lieu de 3 tel que proposé par Stokkeland pour prendre en compte le cas où 1 pale est vis-à-vis la tour. Sachant que les éoliennes ont toujours 3 pales espacées de $120$ degrés, chaque groupe calcule sa distance angulaire par rapport aux autres et vote pour les groups n'étant pas à $120$ degrés de eux-mêmes. Dans le cas où DBSCAN ressort que 2 groupes, la direction de la troisième pale est approximée à 120 degrés des deux autres pales.
+
 \subsubsection{Étape 6: Recherche du rotor}
+
+L'étape 5 nous a donc fournis 3 groupes de segments représentant chacuns les pales de l'éolienne. Le centre do rotor peut donc être calculé en moyennant chaque groupe puis en prenant la moyenne de l'intersection des prolongements de chaque segment.
+
+Une fois le point dans l'image trouvé, il suffit d'appliquer le modèle de caméra sténopé et sa matrice de paramètre intrinsèques $K$ pour obtenir un vecteur unitaire $u_C$ dans le repère caméra pointant vers le rotor. Puisque la distance entre l'UAV et le rotor est beaucoup plus grande que la distance entre la caméra et le centre du véhicule nous pouvons la négliger. Ce qui implique que nous pouvons appliquer quelques rotations pour remettre ce vecteur unitaire dans le système d'axes $W$ (centré sur $B$) à partir de $C$ pour obtenir $u_W$. 
+
+\color{red}
+Mettre les équations de rotation et expliquer ce que stokkeland a fait
+\color{black}
+
+Stokkeland met ensuite 
+
+\color{red}
+Text à propos du filtre EKF à la place du KF pour track le centre du hub
+\color{black}
 
 \subsection{Approche en remontant la tour}
 
