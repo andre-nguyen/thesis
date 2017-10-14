@@ -237,10 +237,10 @@ Le principe opérationel est simple et illustré dans la Figure \ref{fig:approac
 L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $T_{LH}^B$, $T_{LV}^B$ ainsi que la rotation $R_B^{BT}$ sont connues, il suffit de transformer chaque $p_L$ au repère ${BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
 
 \begin{align}
-  p_{BT} = \begin{bmatrix}
+  \begin{bmatrix}p_{BT} \\ 1\end{bmatrix} = \begin{bmatrix}
     R_B^{BT} & 0 \\
     0 & 1
-  \end{bmatrix} T_{L}^B p_L
+  \end{bmatrix} T_{L}^B\begin{bmatrix}p_L \\ 1\end{bmatrix}
   \label{eq:pointcloud_bodytangent}
 \end{align}
 
