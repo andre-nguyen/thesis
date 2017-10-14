@@ -32,6 +32,7 @@ La mission se divise en deux phases: l'approche du rotor et le suivit de ses pal
     Symbole & Nom                   & Description\\\hline
     $W$     &  \textit{World}       & Suivant la convention \textit{East-North-Up} (ENU), centré au point de décollage du véhicule avec l'axe $x$ pointant vers l'est, $y$ pointant vers le nord et $z$ pointant vers le haut.\\ \hline
     $B$     &  \textit{Body}        & Encore suivant la convention ENU, l'axe $x$ pointant vers la droite, $y$ vers l'avant et $z$ vers le haut. \\ \hline
+    $\mathit{BT}$  &  \textit{Body Tangent} & Repère centré sur $B$ mais compensé pour ses angles de roulis et de tangage (mais pas de lacet). En d'autres mots, le repère ${BT}$ est donc tangent à la surface de la Terre et centré sur $B$. \\ \hline
     $\mathit{C[L,R]}$ & \textit{Camera} & Suivant la convention de représentation d'images, nous avons l'axe $x$ vers la droite, $y$ vers le bas et $z$ sortant de la caméra. Les suffixes $L$ et $R$ indiquent la caméra gauche et droite respectivement. Par souci de brièveté si le repère est écrit $C$ sans préciser la caméra gauche ou droite, il indique la caméra droite.   \\ \hline
     $\mathit{L[H,V]}$ & \textit{Laser}& Les lasers aussi suivent un repère main droite avec $x$ vers l'avant, $y$ a gauche et $z$ vers le haut. Les données de distance du laser se situe tous sur son plan $XY$. Les suffixes $H$ et $V$ indique la direction du scan, horizontal et vertical, par rapport au repère $B$. \\ \hline
     $\mathit{T}$ & \textit{Turbine} & Le système de coordonnées de la turbine est centré sur le rotor avec $x$ vers la droite (vu de devant), $y$ vers l'intérieur de la nacelle et $z$ vers le haut. \\ \hline
@@ -76,7 +77,7 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
 où $Y$ est le niveau de gris du pixel entre $0$ et $255$ ce qui donne comme résultat l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
 
 \begin{align}
-  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\ 
+  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
   H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
   \label{eq:egalisation_histogramme}
 \end{align}
@@ -187,7 +188,7 @@ Stokkeland explique que la partie la plus facile à détecter est la tour puisqu
 
 \subsubsection{Étape 5: Recherche des pales}
 
-À la fin de l'étape 4 nous avons un ensemble de segments appartenant à la tour. À partir du plus haut point de ces segments nous recherchons tout autre segment ayant un sommet dans un certain rayon du point. Ces segments sont considérés en tant que candidats à être des segments d'une pale. 
+À la fin de l'étape 4 nous avons un ensemble de segments appartenant à la tour. À partir du plus haut point de ces segments nous recherchons tout autre segment ayant un sommet dans un certain rayon du point. Ces segments sont considérés en tant que candidats à être des segments d'une pale.
 
 Nous divergeons de la méthode proposée par Stokkeland où il tente de regrouper les segments selon l'angle par rapport à la tour; Au travers d'une procédure vorace simple où un nouveau groupe est créé lorsqu'un segment est à un angle au dessus d'un certain seuil du groupe courant. Nous notons que ceci fonctionne acceptablement sur le jeu de données à Stokkeland où le ciel est clair et son éolienne est sur une colline près de la mer, mettant donc l'horizon bien en dessous du rotor. Lors de nos essais tant en simulation que sur le terrain, nous avons noté que l'horizon était très proche de rotor donnant lieu à une grande présence de segments près du rotor faussant ainsi les résultats de la recherche de pales. C'est pourquoi nous implémentons l'étape 5 avec un algorithme de groupage formel qui inclut la résistance au bruit de mesure nommé \textit{Density-based spatial clustering of applications with noise} (DBSCAN) proposé par \citep{Ester1996}.
 
@@ -199,13 +200,13 @@ Une fois les groupes formés, Stokkeland utilise une stratégie de vote pour él
 
 L'étape 5 nous a donc fournis 3 groupes de segments représentant chacuns les pales de l'éolienne. Le centre do rotor peut donc être calculé en moyennant chaque groupe puis en prenant la moyenne de l'intersection des prolongements de chaque segment.
 
-Une fois le point dans l'image trouvé, il suffit d'appliquer le modèle de caméra sténopé et sa matrice de paramètre intrinsèques $K$ pour obtenir un vecteur unitaire $u_C$ dans le repère caméra pointant vers le rotor. Puisque la distance entre l'UAV et le rotor est beaucoup plus grande que la distance entre la caméra et le centre du véhicule nous pouvons la négliger. Ce qui implique que nous pouvons appliquer quelques rotations pour remettre ce vecteur unitaire dans le système d'axes $W$ (centré sur $B$) à partir de $C$ pour obtenir $u_W$. 
+Une fois le point dans l'image trouvé, il suffit d'appliquer le modèle de caméra sténopé et sa matrice de paramètre intrinsèques $K$ pour obtenir un vecteur unitaire $u_C$ dans le repère caméra pointant vers le rotor. Puisque la distance entre l'UAV et le rotor est beaucoup plus grande que la distance entre la caméra et le centre du véhicule nous pouvons la négliger. Ce qui implique que nous pouvons appliquer quelques rotations pour remettre ce vecteur unitaire dans le système d'axes $W$ (centré sur $B$) à partir de $C$ pour obtenir $u_W$.
 
 \color{red}
 Mettre les équations de rotation et expliquer ce que stokkeland a fait
 \color{black}
 
-Stokkeland met ensuite 
+Stokkeland met ensuite
 
 \color{red}
 Text à propos du filtre EKF à la place du KF pour track le centre du hub
@@ -213,12 +214,39 @@ Text à propos du filtre EKF à la place du KF pour track le centre du hub
 
 \subsection{Approche en remontant la tour}
 
-Dans cette méthode le véhicule est placé à proximité de la tour de tel sorte que le scanner laser puisse capter la forme de la tour.
-
+Dans cette méthode le véhicule est placé à proximité de la tour de tel sorte que le scanner laser puisse capter la forme de la tour et de la discontinuité introduite à l'endroit où la tour rencontre le rotor. Cette méthode est plus simple et plus fiable que l'approche visuelle mais elle repose sur deux suppositions:
 \begin{enumerate}
-  \item Projection des lasers en coordonnées dans le body frame
-  \item PID
+  \item Le véhicule est bien placé par l'opérateur devant l'éolienne de tel sorte les capteurs seront perpendiculaires à la surface des pales.
+  \item Aucune pale n'est placée ni proche, ni devant la tour.
 \end{enumerate}
+
+Le principe opérationel est simple et illustré dans la Figure \ref{fig:approach}, le scanner laser horizontal est utilisé pour centrer l'UAV devant la tour alors que le scanner vertical est utilisé pour détecter le rotor. Pour ce faire il faut tout d'abord projetter le vecteur de distances à un nuage de points 3D au moyen de l'équation \ref{eq:scan2cloud} où $r$ est une distance et $\theta$ est l'angle correspondant à celle-ci.
+
+\begin{align}
+  p_{L} = \begin{bmatrix}x \\ y \\ z\end{bmatrix} = \begin{bmatrix}r\cos \theta \\ r \sin \theta \\ 0 \end{bmatrix}
+    \label{eq:scan2cloud}
+\end{align}
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/placeholder.png}
+  \caption{Principe d'opération de l'approche du rotor par laser.}
+  \label{fig:approach}
+\end{figure}
+
+L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $T_{LH}^B$, $T_{LV}^B$ ainsi que la rotation $R_B^{BT}$ sont connues, il suffit de transformer chaque $p_L$ au repère ${BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
+
+\begin{align}
+  p_{BT} = \begin{bmatrix}
+    R_B^{BT} & 0 \\
+    0 & 1
+  \end{bmatrix} T_{L}^B p_L
+  \label{eq:pointcloud_bodytangent}
+\end{align}
+
+\color{red}
+test
+\color{black}
 
 \section{Suivit des pales}
 
