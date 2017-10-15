@@ -213,17 +213,23 @@ Text à propos du filtre EKF à la place du KF pour track le centre du hub
 \color{black}
 
 \subsection{Approche en remontant la tour}
+\label{subsec:laser_tower}
 
-Dans cette méthode le véhicule est placé à proximité de la tour de tel sorte que le scanner laser puisse capter la forme de la tour et de la discontinuité introduite à l'endroit où la tour rencontre le rotor. Cette méthode est plus simple et plus fiable que l'approche visuelle mais elle repose sur deux suppositions:
+
+Dans cette méthode le véhicule est placé à proximité de la tour de telle sorte que le scanner laser puisse capter la forme de la tour et de la discontinuité introduite à l'endroit où la tour rencontre le rotor. Cette méthode est plus simple et plus fiable que l'approche visuelle mais elle repose sur deux suppositions:
 \begin{enumerate}
   \item Le véhicule est bien placé par l'opérateur devant l'éolienne de tel sorte les capteurs seront perpendiculaires à la surface des pales.
-  \item Aucune pale n'est placée ni proche, ni devant la tour.
+  \item Aucune pale n'est placée ni proche, ni devant la tour et l'angle de chaque pale est connue d'avance.
 \end{enumerate}
 
-Le principe opérationel est simple et illustré dans la Figure \ref{fig:approach}, le scanner laser horizontal est utilisé pour centrer l'UAV devant la tour alors que le scanner vertical est utilisé pour détecter le rotor. Pour ce faire il faut tout d'abord projetter le vecteur de distances à un nuage de points 3D au moyen de l'équation \ref{eq:scan2cloud} où $r$ est une distance et $\theta$ est l'angle correspondant à celle-ci.
+Le principe opérationel est simple et illustré dans la Figure \ref{fig:approach}, le scanner laser horizontal est utilisé pour centrer l'UAV devant la tour et garder une distance de sécurité alors que le scanner vertical est utilisé pour détecter le rotor. Pour ce faire il faut tout d'abord projetter le vecteur de distances à un nuage de points 3D au moyen de l'équation \ref{eq:scan2cloud} où $r_i$ est une distance, $\theta_i$ est l'angle correspondant à la mesure $i$ et $n$ est le nombre de mesures retournées par le laser.
 
 \begin{align}
-  p_{L} = \begin{bmatrix}x \\ y \\ z\end{bmatrix} = \begin{bmatrix}r\cos \theta \\ r \sin \theta \\ 0 \end{bmatrix}
+  {p_{L}}_i = \begin{bmatrix}
+    {{p_L}_i}_x \\ 
+    {{p_L}_i}_y \\ 
+    {{p_L}_i}_z
+  \end{bmatrix} = \begin{bmatrix}r_i \cos \theta_i \\ r_i \sin \theta_i \\ 0 \end{bmatrix} & \text{ où } i=1,\ldots,n
     \label{eq:scan2cloud}
 \end{align}
 
@@ -237,26 +243,58 @@ Le principe opérationel est simple et illustré dans la Figure \ref{fig:approac
 L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $T_{LH}^B$, $T_{LV}^B$ ainsi que la rotation $R_B^{BT}$ sont connues, il suffit de transformer chaque $p_L$ au repère ${BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
 
 \begin{align}
-  \begin{bmatrix}p_{BT} \\ 1\end{bmatrix} = \begin{bmatrix}
+  \begin{bmatrix}{p_{BT}}_i \\ 1\end{bmatrix} = \begin{bmatrix}
     R_B^{BT} & 0 \\
     0 & 1
-  \end{bmatrix} T_{L}^B\begin{bmatrix}p_L \\ 1\end{bmatrix}
+  \end{bmatrix} T_{L}^B\begin{bmatrix}{p_{L}}_i \\ 1\end{bmatrix}
   \label{eq:pointcloud_bodytangent}
 \end{align}
 
-\color{red}
-test
-\color{black}
+Une fois ces mesures transformées dans le bon repère nous pouvons appliquer une loi de contrôle PID sur les axes $x$ et $y$ en plus d'une vitesse constante $v_z$ en $z$ pour calculer la commande de vitesse $u(t)$ à envoyer à l'UAV tel que présenté dans l'équation \ref{eq:tower_pid}.
+
+\begin{align}
+  u(t) = \begin{bmatrix}u_x(t)\\ u_y(t)\\ u_z(t)\end{bmatrix} =
+  \begin{bmatrix}{K_p}_x e_x(t)\\ {K_p}_y e_y(t)\\ v_z\end{bmatrix} +
+  \begin{bmatrix}{K_d}_x \dot{e}_x(t)\\ {K_d}_y \dot{e}_y(t)\\ 0\end{bmatrix} +
+  \begin{bmatrix}{K_i}_x \int e_x dt\\ {K_i}_y \int e_y dt\\ 0\end{bmatrix}
+  \label{eq:tower_pid}
+\end{align}
+\begin{align}
+  e_x = \frac{1}{n} \sum_{i = 1}^n {{p_{BT}}_i}_x
+  \label{eq:error_x}
+\end{align}
+\begin{align}
+  e_y = d - {\text{min}}({{p_{BT}}_i}_y)
+  \label{eq:error_y}
+\end{align}
+
+L'équation \ref{eq:error_x} présente le terme d'erreur $e_x$ calculé en moyennant la composante $x$ des points ${p_{BT}}_i$ provenant du laser horizontal pour déterminer si l'UAV doit bouger vers sa gauche ou sa droite pour se centrer devant la tour. L'équation \ref{eq:error_y} présente le terme d'erreur $e_y$ qui prend la plus petite mesure en $y$ pour savoir la distance par rapport à la surface de la tour et $d$ est la distance de sécurité à garder par rapport à la tour.
+
+La détection du rotor se fait au moyen d'une détection de discontinuité en faisant une convolution (voir l'équation \ref{eq:gaussian_derivative_conv}) de la composante $y$ des points du laser vertical avec un filtre à dérivée de Gaussienne $\Gamma(x)$ discrétisé sur $n$ points pour $x=[-5\sigma,5\sigma]$ généré par l'équation \ref{eq:gaussian_derivative}. Une discontinuité est détectée si la réponse $r$ du filtre est plus haut qu'un certain seuil à déterminer de façon empirique.
+\begin{align}
+  \Gamma(x) = - \frac{x}{\sigma^3 \sqrt{2\pi}} \exp\left(\frac{-x^2}{2 \sigma^2}\right)
+  \label{eq:gaussian_derivative}
+\end{align}
+\begin{align}
+  r = {p_{BT}}_y * \Gamma(x)
+  \label{eq:gaussian_derivative_conv}
+\end{align}
+Pour contrer le bruit de mesure et s'assurer que la détection est valide, le véhicule s'arrête que si la détection s'active plusieurs fois dans un certain lapse de temps.
 
 \section{Suivit des pales}
+
+Une fois devant le rotor
 
 \subsection{Suivit par nuage de points}
 
 \subsection{Suivit par scanner laser 2D}
+\label{subsec:laser_blade}
 
 \subsection{Suivit visuel pur}
 
 \section{Implémentation}
+
+Pour l'implémentation nous avons décidé de faire une approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables et dépendent moins de paramètres à ajuster manuellement.
 
 \subsection{Résultats en simulation}
 
