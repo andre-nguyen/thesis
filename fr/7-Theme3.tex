@@ -218,8 +218,8 @@ Text à propos du filtre EKF à la place du KF pour track le centre du hub
 
 Dans cette méthode le véhicule est placé à proximité de la tour de telle sorte que le scanner laser puisse capter la forme de la tour et de la discontinuité introduite à l'endroit où la tour rencontre le rotor. Cette méthode est plus simple et plus fiable que l'approche visuelle mais elle repose sur deux suppositions:
 \begin{enumerate}
-  \item Le véhicule est bien placé par l'opérateur devant l'éolienne de tel sorte les capteurs seront perpendiculaires à la surface des pales.
-  \item Aucune pale n'est placée ni proche, ni devant la tour et l'angle de chaque pale est connue d'avance.
+  \item Le véhicule est bien placé par l'opérateur devant l'éolienne de tel sorte les capteurs seront perpendiculaires au plan sur lequel les pales reposent.
+  \item Aucune pale n'est placée ni proche, ni devant la tour et l'angle de chaque pale est connu d'avance.
 \end{enumerate}
 
 Le principe opérationel est simple et illustré dans la Figure \ref{fig:approach}, le scanner laser horizontal est utilisé pour centrer l'UAV devant la tour et garder une distance de sécurité alors que le scanner vertical est utilisé pour détecter le rotor. Pour ce faire il faut tout d'abord projetter le vecteur de distances à un nuage de points 3D au moyen de l'équation \ref{eq:scan2cloud} où $r_i$ est une distance, $\theta_i$ est l'angle correspondant à la mesure $i$ et $n$ est le nombre de mesures retournées par le laser.
@@ -279,7 +279,7 @@ La détection du rotor se fait au moyen d'une détection de discontinuité en fa
   r = {p_{BT}}_y * \Gamma(x)
   \label{eq:gaussian_derivative_conv}
 \end{align}
-Pour contrer le bruit de mesure et s'assurer que la détection est valide, le véhicule s'arrête que si la détection s'active plusieurs fois dans un certain lapse de temps. Un exemple de résultat en simulation est démontré dans la Figure \ref{fig:step_result}. Le masque de convolution est de taille $1\times8$ et $\sigma = ???$ \incomplete
+Pour contrer le bruit de mesure et s'assurer que la détection est valide, le véhicule s'arrête que si la détection s'active plusieurs fois dans un certain lapse de temps. Un exemple de résultat en simulation est démontré dans la Figure \ref{fig:step_result}. Le masque de convolution est de taille $1\times8$ et $\sigma = 0.5$.
 
 \begin{figure}[htp]
   \centering
@@ -297,16 +297,42 @@ Pour contrer le bruit de mesure et s'assurer que la détection est valide, le v�
 
 \section{Suivit des pales}
 
-Une fois devant le rotor le véhicule utilise l'information sur l'angle des pales acquise au préalable (visuellement ou par entrée utilisateur) pour savoir dans quelle direction se diriger. Il est important à cette étape de garder une grande distance de sécurité ($8$m ou plus) du rotor puisque celui-ci, constitué de multiples lignes électriques hautes tension et d'une grande quandtité de métal, peut causer de l'interférence magnétique avec le magnétomètre de l'UAV qui peut potentiellement résulter en une perte de l'orientation.
+Une fois devant le rotor le véhicule utilise l'information sur l'angle des pales acquise au préalable (visuellement ou par entrée utilisateur) pour savoir dans quelle direction se diriger. Il est important à cette étape de garder une grande distance de sécurité ($8$m ou plus) du rotor puisque celui-ci, constitué de multiples lignes électriques hautes tension et d'une grande quantité de métal, peut causer de l'interférence magnétique avec le magnétomètre de l'UAV qui peut potentiellement résulter en une perte de l'orientation. Cette distance peut être diminuée lors du suivit une fois que le véhicule commence à s'éloigner du rotor.
 
-Dans l'étape de suivit des pales, le principe est de bouger dans la direction de la pale à une vitesse constante tout en se stabilisant vis-à-vis celle-ci à une distance constante.
+Dans l'étape de suivit des pales, le principe est similaire à la montée de la tour, le robot cherche à suivre la pale à une vitesse constante tout en restant à une distance désiré de la pale. Nous présentons trois approches possibles, la première dans la Section \ref{subsec:pcl_blade} par nuage de point applicable à des scanner lasers 3D ou un capteur par vision active, la deuxième dans la Section \ref{subsec:laser_blade} usant que de scanner laser 2D et la troisième dans la Section \ref{subsec:visual_blade} fonctionnant que visuellement. Suivant la machine à états de la mission, une fois la fin de la pale détectée, le robot revient aux coordonnées GPS où le rotor a été détecté initialement. Puisque les pales d'une éolienne sont droites ou courbent vers l'avant, une trajectoire en ligne droite entre la fin de la pale et le devant du rotor est garantie d'être libre d'obstacles.
 
 \subsection{Suivit par nuage de points}
+\label{subsec:pcl_blade}
+
+Dans cette méthode nous reprenons l'algorithme proposé dans le Chapitre \ref{sec:ugv} pour le suivit de mur par UGV. L'algorithme est d'ailleurs plus simple puisqu'il n'y aucun sol à filtrer du nuage de points, cependant l'avantage majeur de cette méthode est que avec le calcul de la normale de la surface il devient possible de toujour placer le véhicule perpendiculaire à celle-ci, améliorant ainsi la qualité des images prises pendant l'inspection.
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.45\linewidth]{images/placeholder.png}
+  \caption{Exemple de suivit de pale par nuage de points.}
+  \label{fig:pcl_blade_follow}
+\end{figure}
+
+La fin de la pale est détecté de la même façon qu'un mur à angle aigü est détecté dans la section \color{red}XXX\color{black}. À mesure que le véhicule avance vers la fin de la pale, le nuage de points $\mathcal{S}$ devient de plus en plus petit, ainsi il devient possible de détecter la fin une fois que $\mathcal{S}$ passe un certain seuil.
 
 \subsection{Suivit par scanner laser 2D}
 \label{subsec:laser_blade}
 
+Le suivit par scanner laser se fait de la même façon que la montée de la tour au moyen de deux scanner lasers perpendiculaires l'un à l'autre. Suivant les mêmes formules de projection 2D à 3D présentées dans la section \ref{subsec:laser_tower} le véhicule tente de se centrer par rapport à la pale tout en appliquant une vitesse constante dans la direction estimée de suivit. Dépendamment de l'angle de la pale seulement un des deux lasers est utilisé pour le suivit.
+
+La loi de controle est donc encore un PID où les termes d'erreurs sont calculés à partir de la projection laser et la sortie est une commande de vitesse dans le repère ${BT}$.
+
+\begin{align}
+  u(t)
+  \label{eq:pid_laser_blade}
+\end{align}
+
 \subsection{Suivit visuel pur}
+\label{subsec:visual_blade}
+
+\color{red}
+XXX drop this section?
+\color{black}
 
 \section{Implémentation}
 
