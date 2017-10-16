@@ -226,8 +226,8 @@ Le principe opérationel est simple et illustré dans la Figure \ref{fig:approac
 
 \begin{align}
   {p_{L}}_i = \begin{bmatrix}
-    {{p_L}_i}_x \\ 
-    {{p_L}_i}_y \\ 
+    {{p_L}_i}_x \\
+    {{p_L}_i}_y \\
     {{p_L}_i}_z
   \end{bmatrix} = \begin{bmatrix}r_i \cos \theta_i \\ r_i \sin \theta_i \\ 0 \end{bmatrix} & \text{ où } i=1,\ldots,n
     \label{eq:scan2cloud}
@@ -279,11 +279,27 @@ La détection du rotor se fait au moyen d'une détection de discontinuité en fa
   r = {p_{BT}}_y * \Gamma(x)
   \label{eq:gaussian_derivative_conv}
 \end{align}
-Pour contrer le bruit de mesure et s'assurer que la détection est valide, le véhicule s'arrête que si la détection s'active plusieurs fois dans un certain lapse de temps.
+Pour contrer le bruit de mesure et s'assurer que la détection est valide, le véhicule s'arrête que si la détection s'active plusieurs fois dans un certain lapse de temps. Un exemple de résultat en simulation est démontré dans la Figure \ref{fig:step_result}. Le masque de convolution est de taille $1\times8$ et $\sigma = ???$ \incomplete
+
+\begin{figure}[htp]
+  \centering
+  \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/placeholder.png}
+  \end{minipage}
+  \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/placeholder.png}
+  \end{minipage}
+  \caption{Résultat de la convolution sur un exemple de mesure.}
+  \label{fig:step_result}
+\end{figure}
 
 \section{Suivit des pales}
 
-Une fois devant le rotor
+Une fois devant le rotor le véhicule utilise l'information sur l'angle des pales acquise au préalable (visuellement ou par entrée utilisateur) pour savoir dans quelle direction se diriger. Il est important à cette étape de garder une grande distance de sécurité ($8$m ou plus) du rotor puisque celui-ci, constitué de multiples lignes électriques hautes tension et d'une grande quandtité de métal, peut causer de l'interférence magnétique avec le magnétomètre de l'UAV qui peut potentiellement résulter en une perte de l'orientation.
+
+Dans l'étape de suivit des pales, le principe est de bouger dans la direction de la pale à une vitesse constante tout en se stabilisant vis-à-vis celle-ci à une distance constante.
 
 \subsection{Suivit par nuage de points}
 
