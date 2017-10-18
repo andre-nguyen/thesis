@@ -318,10 +318,7 @@ La fin de la pale est détecté de la même façon qu'un mur à angle aigü est 
 \subsection{Suivit par scanner laser 2D}
 \label{subsec:laser_blade}
 
-Le suivit par scanner laser se fait de la même façon que la montée de la tour au moyen de deux scanner lasers perpendiculaires l'un à l'autre. Suivant les mêmes formules de projection 2D à 3D présentées dans la section \ref{subsec:laser_tower} le véhicule tente de se centrer par rapport à la pale en moyennant les points du nuage résultant.
-
-
-tout en appliquant une vitesse constante $V_C$ dans la direction estimée de suivit. Dépendamment de l'angle de la pale seulement l'un des deux lasers est utilisé pour le suivit.
+Le suivit par scanner laser se fait de la même façon que la montée de la tour au moyen de deux scanner lasers perpendiculaires l'un à l'autre. Suivant les mêmes formules de projection 2D à 3D présentées dans la section \ref{subsec:laser_tower} le véhicule tente de se centrer par rapport à la pale en moyennant les points du nuage résultant tout en appliquant une vitesse constante $V_C$ dans la direction estimée de suivit. Dépendamment de l'angle de la pale seulement l'un des deux lasers est utilisé pour le suivit.
 
 La loi de controle est donc encore un PID où les termes d'erreurs sont calculés à partir de la projection laser et la sortie est une commande de vitesse dans le repère ${BT}$.
 
@@ -329,12 +326,15 @@ La loi de controle est donc encore un PID où les termes d'erreurs sont calculé
   u(t) = V_C(t) + K_P e(t) + K_D\dot{e}(t) + K_I\int{e(t)dt}
   \label{eq:pid_laser_blade}
 \end{align}
-%avec le terme d'erreur calcué par
-%\[
-%e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} = \begin{bmatrix}
-%a \\ a
-%\end{bmatrix}
-%\]
+$e(t)$ est calculé différemment selon la direction de la pale, en pratique, on peut utiliser la moyenne du laser horizontal si la pale est à $\pm15^{\circ}$ de la verticale et le laser vertical dans tous les autres cas. Pour une pale horizontale nous aurions par exemple
+\[
+e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} = 
+\begin{bmatrix}
+0 \\ d - \min(p_{BT}_i_y) \\ \frac{1}{n}\sum_{i=1}^{n}p_{BT}_i_z
+\end{bmatrix} \text{ avec } & i=1,\ldots,n
+\]
+Dans le cas où une erreur de capteur survient, par exemple si la pale devient assez mince pour passer entre deux rayons du laser, on répète la commande de vitesse précédente $u(t) = u(t-1)$. Ceci implique qu'une fois que le véhicule passe la fin de la pale, il continuera à voler dans le vide. La détection de fin de pale se fait donc aisément en comptant le nombre de lectures vides dans un certain lapse de temps avec un seuil à ajuster en prenant en compte que des lectures vides peuvent survenir pendant le suivit de la pale.
+
 
 \subsection{Suivit visuel pur}
 \label{subsec:visual_blade}
@@ -345,12 +345,16 @@ XXX drop this section?
 
 \section{Implémentation}
 
-Pour l'implémentation nous avons décidé de faire une approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables et dépendent moins de paramètres à ajuster manuellement.
+Pour l'implémentation nous avons décidé de faire une approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables, dépendent moins de paramètres à ajuster manuellement et sont peut coûteuses en termes de matériel comparé à une approche par scanner laser 3D. Le suivit par nuage de point de la section \ref{subsec:pcl_blade} a aussi été implémenté séparement pour nour permettre de vérifier la possibilité d'utiliser une caméra stereo au lieu des lasers plus dispendieux. Nous prouverons plus tard tant en simulation que sur le terrain qu'une approche par camera stereo n'est pas viable pour ce problème.
+
+Pour l'implémentation, nous équipons donc un quadricoptère md4-1000 de Microdrones avec deux lidar LeddarVu8 de LeddarTech, une camera stereo Zed de ZedLabs et un ordinateur de bord Nvidia TX2. Les lidars Vu8 ont été sélectionnés avec un angle de vu de $48^{\circ}$ et ont la propriété particulière d'émettre des segments au lieu de faisceaux collimatés de la même manière que les lidars traditionnels. Par conséquent il devient improbable en pratique qu'une pale d'éolienne puisse se perdre entre deux rayons du lidar.
 
 \subsection{Résultats en simulation}
-
+\label{subsec:results_simu}
+La simulation se base sur celle pour véhicules multi-rotors développée par \citep{Furrer2016} dans l'environnement Gazebo\footnote{http://gazebosim.org} et de l'intergiciel Robot Operating System\footnote{http://www.ros.org/} (ROS).
 
 \subsection{Résultats de tests sur le terrain}
+\label{subsec:results_field}
 
 
-\subsection{}
+\section{Discussion des résultats et perspectives pour le futur}
