@@ -56,10 +56,31 @@ Du côté commercial, peu de compagnies se sont aventurées dans le domaine \foo
 
 \section{Traitement d'images}
 
-\subsection{Canny}
+\subsection{Modèle de caméra}
 
-\subsection{Transformée de Hough}
+Il arrive souvent dans des applications de traitement d'image de devoir passer du domaine 3D à 2D et vice-versa. Pour ce faire, il est important de passer en revue les modèles de projection et de distortion d'images courramment utilisés. Tout point 3D $p_w$ à coordonnées connues peut être projetté sur le plan image à un point en coordonnées en pixels $x_s$ par l'équation \ref{eq:pinhole_projection}.
+\begin{align}
+x_s = K[R|t]p_w = P p_w
+\label{eq:pinhole_projection}
+\end{align}
+On nomme la matrice $4\times3$ $P$ la matrice de caméra, la matrice $3\times3$ $K$ la matrice des paramètres intrinsèques, $R$ est une rotation othogonale et $t$ est une translation. Dépendamment des auteurs $K$ peut être posé différemment, l'équation \ref{eq:intrinsics} présente sa forme générale où $f_{[x,y]}$ sont la distance focale en pixels, $c_{[x,y]}$ le centre optique en pixels, $s$ le \textit{skew} prenant en compte l'angle possible entre les axes du capteur et les axes optiques et finalement $\alpha$ est le facteur de forme.
+\begin{align}
+  K = \begin{bmatrix}
+  f_x & s & c_x \\
+  0   & \alpha f_y & c_y \\
+  0  &  0  & 1
+\end{bmatrix}
+\label{eq:intrinsics}
+\end{align}
+En pratique la majorité des application vont simplifier $K$ au moyen de $s = 0$ et $\alpha = 1$
 
-\subsection{EDLines}
 
-\subsection{LSD}
+\subsection{Détection de lignes}
+
+\begin{enumerate}
+  \item canny
+  \item HED
+  \item Transformée de hough
+  \item edlines
+  \item lsd
+\end{enumerate}

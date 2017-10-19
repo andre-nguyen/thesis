@@ -192,7 +192,7 @@ Stokkeland explique que la partie la plus facile à détecter est la tour puisqu
 
 Nous divergeons de la méthode proposée par Stokkeland où il tente de regrouper les segments selon l'angle par rapport à la tour; Au travers d'une procédure vorace simple où un nouveau groupe est créé lorsqu'un segment est à un angle au dessus d'un certain seuil du groupe courant. Nous notons que ceci fonctionne acceptablement sur le jeu de données à Stokkeland où le ciel est clair et son éolienne est sur une colline près de la mer, mettant donc l'horizon bien en dessous du rotor. Lors de nos essais tant en simulation que sur le terrain, nous avons noté que l'horizon était très proche de rotor donnant lieu à une grande présence de segments près du rotor faussant ainsi les résultats de la recherche de pales. C'est pourquoi nous implémentons l'étape 5 avec un algorithme de groupage formel qui inclut la résistance au bruit de mesure nommé \textit{Density-based spatial clustering of applications with noise} (DBSCAN) proposé par \citep{Ester1996}.
 
-La particularité de DBSCAN par rapport à d'autres algorithmes de partionnage tel que $k$-means est que nous n'avons pas à fournir le nombre $k$ de partitions recherchées. À la place, nous fournissons que deux paramètres $\epsilon$ (eps) la distance d'un point à son entourage et \matht{MinPts} le nombre minimum de points pour qu'une partition soit formée. Pour chaque segment, nous projettons leur angle par rapport à la tour sur un cercle unitaire. Ceci permet d'exécuter DBSCAN dans un espace euclidien pour regrouper les segments adjacents.
+La particularité de DBSCAN par rapport à d'autres algorithmes de partionnage tel que $k$-means est que nous n'avons pas à fournir le nombre $k$ de partitions recherchées. À la place, nous fournissons que deux paramètres $\epsilon$ (eps) la distance d'un point à son entourage et MinPts le nombre minimum de points pour qu'une partition soit formée. Pour chaque segment, nous projettons leur angle par rapport à la tour sur un cercle unitaire. Ceci permet d'exécuter DBSCAN dans un espace euclidien pour regrouper les segments adjacents.
 
 Une fois les groupes formés, Stokkeland utilise une stratégie de vote pour éliminer les fausses détections. La moyenne des angles est calculée et une procédure de vote débute s'il y a plus de 2 groupes. Nous choisissons 2 au lieu de 3 tel que proposé par Stokkeland pour prendre en compte le cas où 1 pale est vis-à-vis la tour. Sachant que les éoliennes ont toujours 3 pales espacées de $120$ degrés, chaque groupe calcule sa distance angulaire par rapport aux autres et vote pour les groups n'étant pas à $120$ degrés de eux-mêmes. Dans le cas où DBSCAN ressort que 2 groupes, la direction de la troisième pale est approximée à 120 degrés des deux autres pales.
 
@@ -328,7 +328,7 @@ La loi de controle est donc encore un PID où les termes d'erreurs sont calculé
 \end{align}
 $e(t)$ est calculé différemment selon la direction de la pale, en pratique, on peut utiliser la moyenne du laser horizontal si la pale est à $\pm15^{\circ}$ de la verticale et le laser vertical dans tous les autres cas. Pour une pale horizontale nous aurions par exemple
 \[
-e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} = 
+e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} =
 \begin{bmatrix}
 0 \\ d - \min(p_{BT}_i_y) \\ \frac{1}{n}\sum_{i=1}^{n}p_{BT}_i_z
 \end{bmatrix} \text{ avec } & i=1,\ldots,n
