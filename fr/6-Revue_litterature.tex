@@ -58,12 +58,12 @@ Du côté commercial, peu de compagnies se sont aventurées dans le domaine \foo
 
 \subsection{Modèle de caméra}
 
-Il arrive souvent dans des applications de traitement d'image de devoir passer du domaine 3D à 2D et vice-versa. Pour ce faire, il est important de passer en revue les modèles de projection et de distortion d'images courramment utilisés. Tout point 3D $p_w$ à coordonnées connues peut être projetté sur le plan image à un point en coordonnées en pixels $x_s$ par l'équation \ref{eq:pinhole_projection}.
+Il arrive souvent dans des applications de traitement d'image de devoir passer du domaine 3D à 2D et vice-versa. Pour ce faire, il est important de passer en revue les modèles de projection et de distortion d'images courramment utilisés. Tout point 3D $p_w$ à coordonnées connues peut être projetté sur le plan image à un point en coordonnées en pixels $\boldsymbol{x_s}$ par l'équation \ref{eq:pinhole_projection}.
 \begin{align}
-x_s = K[R|t]p_w = P p_w
+\boldsymbol{x_s} = K[R|t]p_w = P p_w
 \label{eq:pinhole_projection}
 \end{align}
-On nomme la matrice $4\times3$ $P$ la matrice de caméra, la matrice $3\times3$ $K$ la matrice des paramètres intrinsèques, $R$ est une rotation othogonale et $t$ est une translation. Dépendamment des auteurs $K$ peut être posé différemment, l'équation \ref{eq:intrinsics} présente sa forme générale où $f_{[x,y]}$ sont la distance focale en pixels, $c_{[x,y]}$ le centre optique en pixels, $s$ le \textit{skew} prenant en compte l'angle possible entre les axes du capteur et les axes optiques et finalement $\alpha$ est le facteur de forme.
+On nomme la matrice $3\times4$ $P$ la matrice de caméra, la matrice $3\times3$ $K$ la matrice des paramètres intrinsèques, $R$ est une rotation othogonale et $t$ est une translation. Dépendamment des auteurs $K$ peut être posé différemment, l'équation \ref{eq:intrinsics} présente sa forme générale où $f_{[x,y]}$ sont la distance focale en pixels, $(c_x, c_y)$ le centre optique en pixels, $s$ le \textit{skew} prenant en compte l'angle possible entre les axes du capteur et les axes optiques et finalement $\alpha$ est le facteur de forme.
 \begin{align}
   K = \begin{bmatrix}
   f_x & s & c_x \\
@@ -72,8 +72,54 @@ On nomme la matrice $4\times3$ $P$ la matrice de caméra, la matrice $3\times3$ 
 \end{bmatrix}
 \label{eq:intrinsics}
 \end{align}
-En pratique la majorité des application vont simplifier $K$ au moyen de $s = 0$ et $\alpha = 1$
+En pratique la majorité des application tel quel la librairie de traitement d'images OpenCV vont simplifier $K$ au moyen de $s = 0$ et $\alpha = 1$ \citep{itseez2015}. Il est aussi utile de passer aux coordonnées homogènes au moyen d'une matrice $\boldsymbol{\tilde{P}}$ $4\times4$ en ajoutant une ligne à $P$,
+\begin{align}
+  \boldsymbol{\tilde{P}} = \begin{bmatrix}K & \boldsymbol{0} \\ \boldsymbol{0} & 1\end{bmatrix}
+  \begin{bmatrix}R & t \\ \boldsymbol{0} & 1\end{bmatrix} = \boldsymbol{\tilde{K}} \boldsymbol{E}
+    \label{eq:homogeneous_projection}
+\end{align}
+où $\boldsymbol{E}$ est une matrice de transformée 3D. La projection se fait de la même façon qu'à l'équation \ref{eq:pinhole_projection} avec $\boldsymbol{\bar{p}_w} = \begin{bmatrix}p_w^\top & 0 \end{bmatrix}^\top$ et $\boldsymbol{x_s} = \begin{bmatrix}x_s & y_s & 1 & d\end{bmatrix}^\top$
+\begin{align}
+  \boldsymbol{x_s} \sim \boldsymbol{\tilde{P}} \boldsymbol{\bar{p}_w}
+\end{align}
+où le symbole $\sim$ indique une égalité à l'échelle et $\boldsymbol{x_s}$ doit être normalisé après la multiplication pour que la troisième composante soit $1$ \citep{Szeliski2011}.
 
+Ces formules sont valides dans le cas de projections entièrement linéaires, par contre les systèmes optiques vont habituellement introduire une certaine distortion de l'image. Par exemple dans la Figure \label{fig:distortion} les lentilles de la caméra Zed avec un angle de vue de $110^\circ$ (D) introduisent beaucoup de distortion courbant ainsi des lignes qui devraient normalement êtres droites.
+
+\begin{figure}[htp]
+  \centering
+  \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/placeholder.png}
+    (A)
+  \end{minipage}
+  \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/placeholder.png}
+    (B)
+  \end{minipage}
+  \caption{Exemple de distortion introduite par une lentille à grand angle. (A) l'image originale (B) l'image rectifiée}
+  \label{fig:distortion}
+\end{figure}
+
+Plusieurs modèles de distortion ont été proposés à travers le temps mais le plus répandu est celui radial-tangentiel, radial puisqu'il dépend de la distance du pixel par rapport au centre optique et tangentiel pour le déplacement des rayons tangentiel au cercle autour du centre optique. La distortion radiale-tangentielle peut-être exprimé par un polynôme permettant de mettre en correspondance les pixels de l'image originale $(x_c, y_c)$ en coordonnées normalisées aux pixels de l'image rectifiée $(u, v)$.
+
+\begin{equation}
+\begin{aligned}
+  \hat{x}_c &= x_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + 2p_1 x_c y_c + p_2(r_c^2 + 2 x_c^2) \\
+  \hat{y}_c &= y_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + p_1 (r_c^2 + 2 y_c^2) + 2p_2 x_c y_c \\
+  r_c^2     &= x_c^2 + y_c^2  
+  \label{eq:rectification}
+\end{aligned}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+  u & = f_x \hat{x}_c + c_x\\
+  v &= f_y \hat{y}_c + c_y
+  \label{eq:focal_scaling}
+\end{aligned}
+\end{equation}
+Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
 
 \subsection{Détection de lignes}
 
