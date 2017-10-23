@@ -57,6 +57,7 @@ Du côté commercial, peu de compagnies se sont aventurées dans le domaine \foo
 \section{Traitement d'images}
 
 \subsection{Modèle de caméra}
+\label{subsec:modele_camera}
 
 Il arrive souvent dans des applications de traitement d'image de devoir passer du domaine 3D à 2D et vice-versa. Pour ce faire, il est important de passer en revue les modèles de projection et de distortion d'images courramment utilisés. Tout point 3D $p_w$ à coordonnées connues peut être projetté sur le plan image à un point en coordonnées en pixels $\boldsymbol{x_s}$ par l'équation \ref{eq:pinhole_projection}.
 \begin{align}
@@ -108,7 +109,7 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \begin{aligned}
   \hat{x}_c &= x_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + 2p_1 x_c y_c + p_2(r_c^2 + 2 x_c^2) \\
   \hat{y}_c &= y_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + p_1 (r_c^2 + 2 y_c^2) + 2p_2 x_c y_c \\
-  r_c^2     &= x_c^2 + y_c^2  
+  r_c^2     &= x_c^2 + y_c^2
   \label{eq:rectification}
 \end{aligned}
 \end{equation}

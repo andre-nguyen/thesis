@@ -29,7 +29,12 @@
 \usepackage{natbib}
 %%
 %% Autres packages.
-\usepackage{amsmath,color,soulutf8,longtable,colortbl,setspace,ifthen,xspace,url,pdflscape}
+\usepackage{amsmath,color,soulutf8,longtable,colortbl,setspace,ifthen,xspace,url,pdflscape,bm}
+
+\newenvironment{sbmatrix}[1]
+ {\def\mysubscript{#1}\mathop\bgroup\begin{bmatrix}}
+ {\end{bmatrix}\egroup_{\textstyle\mathstrut\mysubscript}}
+
 
 \DeclareMathOperator{\atantwo}{atan2}
 \newcommand\incomplete{\color{red}Incomplete\color{black}}
