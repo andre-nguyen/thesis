@@ -1,0 +1,4 @@
+[submodule "data_analysis/bag2matlab"]
+	path = data_analysis/bag2matlab
+	url = git@github.com:MRASL/bag2matlab.git
+	branch = master
