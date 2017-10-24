@@ -57,6 +57,7 @@ Du côté commercial, peu de compagnies se sont aventurées dans le domaine \foo
 \section{Traitement d'images}
 
 \subsection{Modèle de caméra}
+\label{subsec:modele_camera}
 
 Il arrive souvent dans des applications de traitement d'image de devoir passer du domaine 3D à 2D et vice-versa. Pour ce faire, il est important de passer en revue les modèles de projection et de distortion d'images courramment utilisés. Tout point 3D $p_w$ à coordonnées connues peut être projetté sur le plan image à un point en coordonnées en pixels $\boldsymbol{x_s}$ par l'équation \ref{eq:pinhole_projection}.
 \begin{align}
@@ -120,6 +121,8 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \end{aligned}
 \end{equation}
 Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
+
+\subsection{}
 
 \subsection{Détection de lignes}
 
