@@ -338,7 +338,7 @@ $e(t)$ est calculé différemment selon la direction de la pale, en pratique, on
 e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} =
 \begin{bmatrix}
 0 \\ d - \min(p_{{BT}_{i_y}}) \\ \frac{1}{n}\sum_{i=1}^{n}p_{{BT}_{i_z}}
-\end{bmatrix} \text{ avec } & i=1,\ldots,n
+\end{bmatrix} \text{ avec } i=1,\ldots,n
 \]
 Dans le cas où une erreur de capteur survient, par exemple si la pale devient assez mince pour passer entre deux rayons du laser, on répète la commande de vitesse précédente $u(t) = u(t-1)$. Ceci implique qu'une fois que le véhicule passe la fin de la pale, il continuera à voler dans le vide. La détection de fin de pale se fait donc aisément en comptant le nombre de lectures vides dans un certain lapse de temps avec un seuil à ajuster en prenant en compte que des lectures vides peuvent survenir pendant le suivit de la pale.
 
@@ -418,9 +418,35 @@ Nous profitons de la présence de la caméra stereo ZED simulée pour tester le 
 
 \subsubsection{Résultats du suivit par laser}
 
+La mission d'inspection entièrement par laser se déroule avec succès dans une grande variété de scénarios. Dans cette section nous présentons et analysons l'un des vols effectués sur une éolienne avec pour seule information \textit{a priori} que l'une des pales a été placée vers le haut. Dans la Figure \ref{fig:sim_tower_total} on peut observer la trajectoire entière exécutée par l'UAV avec les différentes phases séparées par couleur. Outre une petite discontinuité dans la trajectoire de la pale 3, la majorité du vol s'exécute de façon lisse.
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=\linewidth]{images/sim_tower_ascent}
+  \caption{Trajectoire suivie pour la montée de la tour.}
+  \label{fig:sim_tower_ascent}
+\end{figure}
+
+Dans la Figure \ref{fig:sim_tower_ascent} nous pouvons voir la décomposition de la trajectoire suivie pour monter la tour. L'UAV commence légèrement décentré par rapport à la tour et tente immédiatement de se centrer. La vitesse commandée en $z$ est constante et on voit que l'altitude augmente de façon lisse. Par contre on peut voir que la trajectoire en $x$ et en $y$ est légèrement saccadée. En $x$ la raison est une combinaison de gains PID légèrements trop aggressifs et du fait que le diamètre de la tour change au fur et à mesure qu'elle monte. En $y$ le problème provient plutôt de la faible résolution du scanner laser. Avec seulement 8 points, la bordure de la tour se retrouve entre deux rayons du laser, les différentes bosses dans la courbe $vy$ sont les instants où l'un des rayons adjacent au centre frappe la tour. À cet instant le terme d'erreur devient non nul et le robot bouge latéralement.
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[trim=30 20 30 0, clip, width=\linewidth]{images/sim_suivit_pale}
+  \caption{Trajectoire pour le suivit de la pale 1.}
+  \label{fig:sim_suivit_pale}
+\end{figure}
+
+La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de vitesses pour le suivit de la pale 1. Nous voyons que les vitesses en $z$ semblent saccadées mais ceci est encore dût au petit nombre de rayons du scanner laser. Chaque petit pic est en fait un instant où un rayon supplémentaire du laser parvient à toucher la surface de la pale et influencer le calcul de son centre. Vers la fin de la courbe $vx$ nous pouvons observer une oscillation entre la commande $0$, $+5$ et $-5$ mètres par secondes. Ceci est dû au fait que la fin de la pale est assez petite pour passer entre deux rayons du scanner laser, combiné au mouvement de tangage du véhicule pour avancer et reculer le laser parvient momentanément à toucher la pale. En réalité ceci ne devrait pas être un problème car le LeddarVu8 ne souffre pas des angles morts entre ses rayons. Malgré cela, le robot poursuit son chemin jusquà ce que la fin de la pale soit officiellement détecté par le compteur de lectures vides.
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.6\linewidth]{images/sim_tower_total}
+  \caption{Trajectoire complète d'inspection.}
+  \label{fig:sim_tower_total}
+\end{figure}
 
 \subsection{Résultats de tests sur le terrain}
 \label{subsec:results_field}
+Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses. 
 
 \begin{figure}[htp]
   \centering
