@@ -356,12 +356,15 @@ Pour l'implémentation la majorité de l'effort de développement a été dédi�
 
 La simulation est donc développée en prévision d'un quadricoptère md4-1000 de Microdrones équipé de deux lidar LeddarVu8 de LeddarTech, une camera stereo Zed de ZedLabs et un ordinateur de bord Nvidia TX2. Les lidars Vu8 ont été sélectionnés avec un angle de vu de $48^{\circ}$ et ont la propriété particulière d'émettre des segments au lieu de faisceaux collimatés de la même manière que les lidars traditionnels. Par conséquent il devient improbable en pratique qu'une pale d'éolienne puisse se perdre entre deux rayons du lidar.
 
-Le md4-1000 possède une interface de communication mdSI$^{2}$ (\textit{System Integrator Interface}) permettant de recevoir la télémétrie du robot et de lui envoyer des commandes de vitesse dans le repère $BT$. L'entièreté du logiciel a été développé à l'aide de l'interlogiciel
+%Le md4-1000 possède une interface de communication mdSI$^{2}$ (\textit{System Integrator Interface}) permettant de recevoir la télémétrie du robot et de lui envoyer des commandes de vitesse dans le repère $BT$.
+L'entièreté du logiciel a été développé à l'aide de l'interlogiciel
 Robot Operating System\footnote{http://www.ros.org/} (ROS) incluant les pilotes pour les divers capteurs et la communication par UART au md4-1000. Le traitement d'images repose sur la librairie OpenCV \citep{itseez2015} et la machine à état faisant la gestion de la mission, présentée dans l'annexe \ref{annexe:state_machine}, a été écrite à l'aide de la librairie Boost \textit{Meta State Machine} \citep{Schling2011}.
 
 \subsection{Résultats en simulation}
 \label{subsec:results_simu}
-La simulation se base sur celle pour véhicules multi-rotors développée par \citep{Furrer2016} dans l'environnement Gazebo\footnote{http://gazebosim.org}. Le contrôleur est basé sur celui de \citep{lee2010}, puisque celui-ci prend des commandes de position, vitesse et d'accélération additive d'un coup, nous pouvons simuler l'interface du md4-1000 en inscrivant la position et une accélération additive nulle dans la commande.
+La simulation se base sur celle pour véhicules multi-rotors nommée RotorS développée par \citep{Furrer2016} dans l'environnement Gazebo\footnote{http://gazebosim.org}. Puisque le micrologiciel effectuant le contrôle de vol dans les véhicule de Microdrones demeurent un secret industriel la simulation a été développé au moyen de véhicules déjà présents dans RotorS.
+%Le contrôleur est donc basé sur celui de \citep{lee2010}, puisque celui-ci prend des commandes de position, vitesse et d'accélération additive d'un coup, nous pouvons simuler l'interface du md4-1000 en inscrivant la position et une accélération additive nulle dans la commande.
+Le but n'est donc pas de réaliser une simulation précise de la physique du véhicule et se concentre plutôt sur la simulation des capteurs et des comportements autonomes de haut niveau.
 
 \begin{figure}[htp]
   \centering
@@ -427,7 +430,6 @@ La mission d'inspection entièrement par laser se déroule avec succès dans une
 \end{figure}
 
 Dans la Figure \ref{fig:sim_tower_ascent} nous pouvons voir la décomposition de la trajectoire suivie pour monter la tour. L'UAV commence légèrement décentré par rapport à la tour et tente immédiatement de se centrer. La vitesse commandée en $z$ est constante et on voit que l'altitude augmente de façon lisse. Par contre on peut voir que la trajectoire en $x$ et en $y$ est légèrement saccadée. En $x$ la raison est une combinaison de gains PID légèrements trop aggressifs et du fait que le diamètre de la tour change au fur et à mesure qu'elle monte. En $y$ le problème provient plutôt de la faible résolution du scanner laser. Avec seulement 8 points, la bordure de la tour se retrouve entre deux rayons du laser, les différentes bosses dans la courbe $vy$ sont les instants où l'un des rayons adjacent au centre frappe la tour. À cet instant le terme d'erreur devient non nul et le robot bouge latéralement.
-
 \begin{figure}[htp]
   \centering
   \includegraphics[trim=30 20 30 0, clip, width=\linewidth]{images/sim_suivit_pale}
@@ -437,16 +439,18 @@ Dans la Figure \ref{fig:sim_tower_ascent} nous pouvons voir la décomposition de
 
 La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de vitesses pour le suivit de la pale 1. Nous voyons que les vitesses en $z$ semblent saccadées mais ceci est encore dût au petit nombre de rayons du scanner laser. Chaque petit pic est en fait un instant où un rayon supplémentaire du laser parvient à toucher la surface de la pale et influencer le calcul de son centre. Vers la fin de la courbe $vx$ nous pouvons observer une oscillation entre la commande $0$, $+5$ et $-5$ mètres par secondes. Ceci est dû au fait que la fin de la pale est assez petite pour passer entre deux rayons du scanner laser, combiné au mouvement de tangage du véhicule pour avancer et reculer le laser parvient momentanément à toucher la pale. En réalité ceci ne devrait pas être un problème car le LeddarVu8 ne souffre pas des angles morts entre ses rayons. Malgré cela, le robot poursuit son chemin jusquà ce que la fin de la pale soit officiellement détecté par le compteur de lectures vides.
 
-\begin{figure}[htp]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.6\linewidth]{images/sim_tower_total}
   \caption{Trajectoire complète d'inspection.}
   \label{fig:sim_tower_total}
 \end{figure}
 
+
+\clearpage
 \subsection{Résultats de tests sur le terrain}
 \label{subsec:results_field}
-Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses. 
+Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses.
 
 \begin{figure}[htp]
   \centering
@@ -464,5 +468,15 @@ Suivant les spécifications initiales, l'intégration des capteurs s'est faite s
   \label{fig:field_vehicle}
 \end{figure}
 
+Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AUVIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
 
-\section{Discussion des résultats et perspectives pour le futur}
+Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la hauteur de la tour est de $100$ mètres et le diamètre du rotor est de $92.5$ mètres.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[trim=150 100 150 100,clip,width=\linewidth]{images/test_eolienne.jpg}
+  \caption{Le md4-1000 en vol inspectant l'une des pales.}
+  \label{fig:test_eolienne}
+\end{figure}
+
+\section{Discussion des résultats et travaux futurs}

@@ -192,6 +192,7 @@ legend( 'Montée de la tour', ...
         'retour au rotor');
         
 %% Blade plot
+close all;
 start = find(pose.rosbag_recv_time >  1317.40100000000, 1);
 finish = find(pose.rosbag_recv_time > 1352.86500000000, 1);
 
