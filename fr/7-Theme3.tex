@@ -117,48 +117,49 @@ Pour les convolutions sur les bords de l'image nous répétons la valeur du pixe
 \label{fig:detection_pretraitement}
 \end{figure}
 
-\subsubsection{Étape 2: Détection de contours} La détection de contours se fait au moyen de l'algorithme de \citep{Canny1986} qui à son tour se fait en une série de 4 étapes:
+\subsubsection{Étape 2: Détection de contours} 
+La détection de contours se fait au moyen de l'algorithme de \citep{Canny1986} et résultat de la procédure est visible dans la Figure \ref{fig:canny}.
 
-\begin{enumerate}
-  \item Un filtre Gaussien par convolution est appliqué pour atténuer le bruit. Pour générer un masque Gaussien $H$ en deux dimensions il suffit de suivre l'équation:
-  \begin{align}
-    H_{ij}= \frac{1}{2\pi\sigma^2}\exp \left(-\frac{(i-(k+1))^2+(j-(k+1))^2}{2\sigma^2} \right) ; 1 \leq i, j \leq (2k + 1)
-  \end{align}
-  où $k$ est la taille du masque, $\sigma$ est l'écart type de la distribution et $i$ et $j$ sont les indexes de rangée et de colonne respectivement. Pour $k = 5$ et $\sigma = 1.4$ nous avons
-  \begin{align}
-    I_{\text{floue}} = \frac{1}{159} \begin{bmatrix}
-      2 & 4 & 5 & 4 & 2\\
-      4 & 9 & 12 & 9 & 4\\
-      5 & 12 & 15 & 12 & 5\\
-      4 & 9 & 12 & 9 & 4\\
-      2 & 4 & 5 & 4 & 2
-    \end{bmatrix} * I_{\text{originale}}
-  \end{align}
-  \item Pour chaque pixel le gradient $G$ et l'angle du gradient $\Theta$ est calculé à partir des quantitées $G_x$ le gradient horizontal et $G_y$ le gradient vertical suivant les équations:
-  \begin{align}
-    G_x =  \begin{bmatrix} -1 & 0 & 1 \\
-    -2 & 0 & 2 \\
-    -1 & 0 & 1
-  \end{bmatrix} * I_{\text{floue}}
-  \end{align}
-  \begin{align}
-    G_y = \begin{bmatrix}
-    -1 & -2 & -1\\
-    0 & 0 & 0 \\
-    1 & 2 & 1
-  \end{bmatrix} * I_{\text{floue}}
-  \end{align}
-  \begin{align}
-    G = \sqrt{G_x^2 + G_y^2}
-  \end{align}
-  \begin{align}
-    \Theta = \atantwo(G_y^2, G_x^2)
-  \end{align}
-  \item Une suppression des non-maxima est appliquée. Pour un pixel de l'image gradient $G_{ij}$ nous comparons la valeurs aux deux pixels adjacents dans les directions $\pm\Theta$, si la valeur de $G_{ij}$ est plus grande que les deux autres, il est gardé, sinon il est mit à $0$.
-  \item Un double seuil, l'un haut $T_h$ et l'autre bas $T_b$, est appliqué par hystérésis pour atténuer les pixels de contours trop faibles. Un pixel $G_{ij}$ plus fort que $T_h$ est marqué comme un pixel au contour fort. Les pixels plus faibles que $T_b$ sont supprimés (mise à $0$). Les pixels entre les deux sont gardés seulement s'ils sont adjacents à un pixel fort. Canny suggère que le ratio $T_b$ à $T_h$ soit entre $1:2$ et $1:3$.
-\end{enumerate}
-
-Le résultat de la procédure de Canny est visible dans la Figure \ref{fig:canny}.
+% qui à son tour se fait en une série de 4 étapes:
+% 
+% \begin{enumerate}
+%   \item Un filtre Gaussien par convolution est appliqué pour atténuer le bruit. Pour générer un masque Gaussien $H$ en deux dimensions il suffit de suivre l'équation:
+%   \begin{align}
+%     H_{ij}= \frac{1}{2\pi\sigma^2}\exp \left(-\frac{(i-(k+1))^2+(j-(k+1))^2}{2\sigma^2} \right) ; 1 \leq i, j \leq (2k + 1)
+%   \end{align}
+%   où $k$ est la taille du masque, $\sigma$ est l'écart type de la distribution et $i$ et $j$ sont les indexes de rangée et de colonne respectivement. Pour $k = 5$ et $\sigma = 1.4$ nous avons
+%   \begin{align}
+%     I_{\text{floue}} = \frac{1}{159} \begin{bmatrix}
+%       2 & 4 & 5 & 4 & 2\\
+%       4 & 9 & 12 & 9 & 4\\
+%       5 & 12 & 15 & 12 & 5\\
+%       4 & 9 & 12 & 9 & 4\\
+%       2 & 4 & 5 & 4 & 2
+%     \end{bmatrix} * I_{\text{originale}}
+%   \end{align}
+%   \item Pour chaque pixel le gradient $G$ et l'angle du gradient $\Theta$ est calculé à partir des quantitées $G_x$ le gradient horizontal et $G_y$ le gradient vertical suivant les équations:
+%   \begin{align}
+%     G_x =  \begin{bmatrix} -1 & 0 & 1 \\
+%     -2 & 0 & 2 \\
+%     -1 & 0 & 1
+%   \end{bmatrix} * I_{\text{floue}}
+%   \end{align}
+%   \begin{align}
+%     G_y = \begin{bmatrix}
+%     -1 & -2 & -1\\
+%     0 & 0 & 0 \\
+%     1 & 2 & 1
+%   \end{bmatrix} * I_{\text{floue}}
+%   \end{align}
+%   \begin{align}
+%     G = \sqrt{G_x^2 + G_y^2}
+%   \end{align}
+%   \begin{align}
+%     \Theta = \atantwo(G_y^2, G_x^2)
+%   \end{align}
+%   \item Une suppression des non-maxima est appliquée. Pour un pixel de l'image gradient $G_{ij}$ nous comparons la valeurs aux deux pixels adjacents dans les directions $\pm\Theta$, si la valeur de $G_{ij}$ est plus grande que les deux autres, il est gardé, sinon il est mit à $0$.
+%   \item Un double seuil, l'un haut $T_h$ et l'autre bas $T_b$, est appliqué par hystérésis pour atténuer les pixels de contours trop faibles. Un pixel $G_{ij}$ plus fort que $T_h$ est marqué comme un pixel au contour fort. Les pixels plus faibles que $T_b$ sont supprimés (mise à $0$). Les pixels entre les deux sont gardés seulement s'ils sont adjacents à un pixel fort. Canny suggère que le ratio $T_b$ à $T_h$ soit entre $1:2$ et $1:3$.
+% \end{enumerate}
 
 \begin{figure}[htp]
   \centering
@@ -167,9 +168,7 @@ Le résultat de la procédure de Canny est visible dans la Figure \ref{fig:canny
   \label{fig:canny}
 \end{figure}
 
-Outre la méthode de Canny, il existe des méthodes modernes plus performantes que celle de Canny, par exemple \citep{Xie2015} proposent un réseau de neuronnes entièrement convolutionel capable de détecter beaucoup mieux les contours, et ce, sans avoir à manuellement ajuster des paramètres.
-
-\incomplete  Expliquer que ça marchait trop bien?
+Outre la méthode de Canny, il existe des méthodes modernes plus performantes que celle de Canny, par exemple \citep{Xie2015} proposent un réseau de neuronnes entièrement convolutionel capable de détecter beaucoup mieux les contours, et ce, sans avoir à manuellement ajuster des paramètres. Par contre dans nos tests, la haute précision de la méthode retournait trop de données et il devenait difficile de passer aux prochaines étapes de la détection.
 
 \subsubsection{Étape 3: Détection de lignes}
 
@@ -306,7 +305,9 @@ Pour contrer le bruit de mesure et s'assurer que la détection est valide, le v�
 
 Une fois devant le rotor le véhicule utilise l'information sur l'angle des pales acquise au préalable (visuellement ou par entrée utilisateur) pour savoir dans quelle direction se diriger. Il est important à cette étape de garder une grande distance de sécurité ($d_{grand} = 8$m ou plus) du rotor puisque celui-ci, constitué de multiples lignes électriques hautes tension et d'une grande quantité de métal, peut causer de l'interférence magnétique avec le magnétomètre de l'UAV qui peut potentiellement résulter en une perte de l'orientation. Cette distance peut être diminuée à $d_{petit} = 4$m lors du suivit une fois que le véhicule commence à s'éloigner du rotor.
 
-Dans l'étape de suivit des pales, le principe est similaire à la montée de la tour, le robot cherche à suivre la pale à une vitesse constante tout en restant à une distance désiré de la pale. Nous présentons trois approches possibles, la première dans la Section \ref{subsec:pcl_blade} par nuage de point applicable à des scanner lasers 3D ou un capteur par vision active, la deuxième dans la Section \ref{subsec:laser_blade} usant que de scanner laser 2D et la troisième dans la Section \ref{subsec:visual_blade} fonctionnant que visuellement. Suivant la machine à états de la mission, une fois la fin de la pale détectée, le robot revient aux coordonnées GPS où le rotor a été détecté initialement. Puisque les pales d'une éolienne sont droites ou courbent vers l'avant, une trajectoire en ligne droite entre la fin de la pale et le devant du rotor est garantie d'être libre d'obstacles.
+Dans l'étape de suivit des pales, le principe est similaire à la montée de la tour, le robot cherche à suivre la pale à une vitesse constante tout en restant à une distance désiré de la pale. Nous présentons deux approches possibles, la première dans la Section \ref{subsec:pcl_blade} par nuage de point applicable à des scanner lasers 3D ou un capteur par vision active, la deuxième dans la Section \ref{subsec:laser_blade} usant que de scanner laser 2D.
+%et la troisième dans la Section \ref{subsec:visual_blade} fonctionnant que visuellement. 
+Suivant la machine à états de la mission, une fois la fin de la pale détectée, le robot revient aux coordonnées GPS où le rotor a été détecté initialement. Puisque les pales d'une éolienne sont droites ou courbent vers l'avant, une trajectoire en ligne droite entre la fin de la pale et le devant du rotor est garantie d'être libre d'obstacles.
 
 \subsection{Suivit par nuage de points}
 \label{subsec:pcl_blade}
@@ -342,13 +343,12 @@ e(t) = \begin{bmatrix}e_x(t) \\ e_y(t) \\ e_z(t)\end{bmatrix} =
 \]
 Dans le cas où une erreur de capteur survient, par exemple si la pale devient assez mince pour passer entre deux rayons du laser, on répète la commande de vitesse précédente $u(t) = u(t-1)$. Ceci implique qu'une fois que le véhicule passe la fin de la pale, il continuera à voler dans le vide. La détection de fin de pale se fait donc aisément en comptant le nombre de lectures vides dans un certain lapse de temps avec un seuil à ajuster en prenant en compte que des lectures vides peuvent survenir pendant le suivit de la pale.
 
-
-\subsection{Suivit visuel pur}
-\label{subsec:visual_blade}
-
-\color{red}
-XXX drop this section?
-\color{black}
+% \subsection{Suivit visuel pur}
+% \label{subsec:visual_blade}
+% 
+% \color{red}
+% XXX drop this section?
+% \color{black}
 
 \section{Implémentation}
 
@@ -458,7 +458,7 @@ La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de
   \label{fig:test_eolienne}
 \end{figure}
 
-Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses.
+Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses au niveau de la vision stereo. Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AuvIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
 
 \begin{figure}[htp]
   \centering
@@ -475,8 +475,6 @@ Suivant les spécifications initiales, l'intégration des capteurs s'est faite s
   \caption{Véhicule md4-1000 avec les capteurs et l'ordinateur de bord intégré. (A) Caméra ZED et les télémètres lasers LeddarVu8. (B) La charge utile installé sur le robot (sans la ZED), avec la Nvidia TX2 visible.}
   \label{fig:field_vehicle}
 \end{figure}
-
-Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AuvIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
 
 Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la hauteur de la tour est de $100$ mètres et le diamètre du rotor est de $92.5$ mètres. La Figure \ref{fig:test_eolienne} nous donne un ordre de grandeur de la structure par rapport à l'UAV.
 
@@ -529,5 +527,8 @@ La caméra stereo s'avère à avoir une performance extrêmement variable à tra
   \label{fig:field_stereo_fail}
 \end{figure}
 
+\color{red}
+En ce qui concerne l'approche par laser il n'a pas été possible de tester le système sur le terrain en raison de différentes circonstances (ils ont pas mit le frein alors l'éolienne bougeait, le gars en allemagne a fait une erreure dans le driver du laser etc...)
+\color{black}
 
 \section{Discussion des résultats et travaux futurs}
