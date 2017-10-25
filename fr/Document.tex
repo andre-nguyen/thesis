@@ -18,6 +18,7 @@
 %% Charge le module d'affichage graphique.
 \usepackage{graphicx}
 \usepackage{epstopdf}  % Permet d'utiliser des .eps avec pdfLaTeX.
+\usepackage{svg}
 %%
 %% Recherche des images dans les répertoires.
 \graphicspath{{./images/}{./dia/}{./gnuplot/}}
@@ -30,6 +31,7 @@
 %%
 %% Autres packages.
 \usepackage{amsmath,color,soulutf8,longtable,colortbl,setspace,ifthen,xspace,url,pdflscape,bm}
+\def\code#1{\texttt{#1}}
 
 \newenvironment{sbmatrix}[1]
  {\def\mysubscript{#1}\mathop\bgroup\begin{bmatrix}}

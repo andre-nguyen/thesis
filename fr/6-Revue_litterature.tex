@@ -122,7 +122,12 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \end{equation}
 Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
 
-\subsection{}
+Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV plusieurs auteurs ont proposé des nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadiptriques. 
+
+\subsection{Vision stereo}
+\color{red}
+Ajouter la théorie sur la géométrie épipolaire pour la résolution de profondeur par caméra stereo.
+\color{black}
 
 \subsection{Détection de lignes}
 
