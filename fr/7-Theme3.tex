@@ -352,7 +352,9 @@ XXX drop this section?
 
 \section{Implémentation}
 
-Pour l'implémentation la majorité de l'effort de développement a été dédié à l'approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables, dépendent moins de paramètres à ajuster manuellement et sont peut coûteuses en termes de matériel comparé à une approche par scanner laser 3D. Le suivit par nuage de point de la section \ref{subsec:pcl_blade} a aussi été implémenté séparement pour nour permettre de vérifier la possibilité d'utiliser une caméra stereo au lieu des lasers plus dispendieux. Nous prouverons plus tard tant en simulation que sur le terrain qu'une approche par camera stereo n'est pas viable pour ce problème. De plus, nous implémentons aussi la méthode de Stokkeland modifée décrite à la section \ref{subsec:approche_loin} pour la détection du rotor mais en vu des mauvais résultats obtenus nous n'avons pas poursuivi l'implémentation du contrôleur correspondant.
+Pour l'implémentation la majorité de l'effort de développement a été dédié à l'approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables, dépendent moins de paramètres à ajuster manuellement et sont peut coûteuses en termes de matériel comparé à une approche par scanner laser 3D. Le suivit par nuage de point de la section \ref{subsec:pcl_blade} a aussi été implémenté séparement pour nour permettre de vérifier la possibilité d'utiliser un capteur de profondeur. Cependant, nous posons l'hypothèse que cette méthode ne fonctionnerait pas avec une caméra stereo dût à la surface sans texture de l'éolienne ni avec un capteur fonctionnant par \textit{Time of Flight} de par leur portée limitée.
+%Nous prouverons plus tard tant en simulation que sur le terrain qu'une approche par camera stereo n'est pas viable pour ce problème. 
+De plus, nous implémentons aussi la méthode de Stokkeland modifée décrite à la section \ref{subsec:approche_loin} pour la détection du rotor mais en vu des mauvais résultats obtenus nous n'avons pas poursuivi l'implémentation du contrôleur correspondant.
 
 La simulation est donc développée en prévision d'un quadricoptère md4-1000 de Microdrones équipé de deux lidar LeddarVu8 de LeddarTech, une camera stereo Zed de ZedLabs et un ordinateur de bord Nvidia TX2. Les lidars Vu8 ont été sélectionnés avec un angle de vu de $48^{\circ}$ et ont la propriété particulière d'émettre des segments au lieu de faisceaux collimatés de la même manière que les lidars traditionnels. Par conséquent il devient improbable en pratique qu'une pale d'éolienne puisse se perdre entre deux rayons du lidar.
 
@@ -374,7 +376,7 @@ Le but n'est donc pas de réaliser une simulation précise de la physique du vé
   \label{fig:sim_vehicle_closeup}
 \end{figure}
 
-Plusieurs environnements ont étés implémentés incluant un monde simulant un parc éolien avec plusieurs éoliennes alignées (Figure \ref{fig:sim_worlds} (B)) et un monde avec une seule éolienne avec une montage au loin (Figure \ref{fig:sim_worlds} (A)). La simulation suit le pire cas possible d'un parc éolien respectant les consignes du Département de l'Environnement du Royaume-Uni demandant un minimum de trois diamètres de rotor d'espacement entre chaque éolienne \citep{DOE2009}.
+Plusieurs environnements ont étés implémentés incluant un monde simulant un parc éolien avec plusieurs éoliennes alignées (Figure \ref{fig:sim_worlds} (B)) et un monde avec une seule éolienne avec une montage au loin (Figure \ref{fig:sim_worlds} (A)). La simulation suit le pire cas possible d'un parc éolien respectant les consignes du Département de l'Environnement du Royaume-Uni demandant un minimum de trois diamètres de rotor d'espacement entre chaque éolienne \citep{DOE2009}. Il faut noter que suite à des discussions avec des travailleurs de l'industrie, l'un des défauts de la simulation est que les pales des éoliennes sont normalement inclinées vers l'arrière de tel sorte qu'elles sont parallèles au sens du vent. Ceci permet au rotor de rester stationnaire lors des inspections.
 
 \begin{figure}[htp]
   \centering
@@ -413,7 +415,7 @@ Suite à beaucoup d'expérimentation, il devient difficile d'apprécier cette m�
 
 Nous profitons de la présence de la caméra stereo ZED simulée pour tester le fonctionnement de la résolution de la profondeur sur la surface de l'éolienne. Nous pouvons observer dans la Figure \ref{fig:stereo_fail} que la surface blanche de l'éolienne ne comporte pas assez de texture pour bien calculer la résolution de blocs. Résultat innatendu, le calcul de profondeur fonctionne parfois près de la bordure de l'objet où la transition entre la pale blanche et l'arrière plan donne une caractéristique pouvant être mis en correspondance dans l'image de droite. Par contre, lorsque la pale est horizontale, elle devient quasi-invisible du fait que la bordure est parallèle à la géométrie épipolaire. Ce problème est bien connu par les chercheurs utilisant la vision stéréoscopique pour le calcul de profondeur, certains tel que \citep{meier2017real} ont récemment proposé une solution possible à l'aide de caméras stereo orthogonales, cependant la résolution de ce problème sort du cadre de ce projet.
 
-\begin{figure}[htp]
+\begin{figure}[htb]
   \includegraphics[width=\linewidth]{images/stereo_failure.jpg}
   \caption{Échec de la résolution de profondeur par correspondance de blocs.}
   \label{fig:stereo_fail}
@@ -422,7 +424,7 @@ Nous profitons de la présence de la caméra stereo ZED simulée pour tester le 
 \subsubsection{Résultats du suivit par laser}
 
 La mission d'inspection entièrement par laser se déroule avec succès dans une grande variété de scénarios. Dans cette section nous présentons et analysons l'un des vols effectués sur une éolienne avec pour seule information \textit{a priori} que l'une des pales a été placée vers le haut. Dans la Figure \ref{fig:sim_tower_total} on peut observer la trajectoire entière exécutée par l'UAV avec les différentes phases séparées par couleur. Outre une petite discontinuité dans la trajectoire de la pale 3, la majorité du vol s'exécute de façon lisse.
-\begin{figure}[htp]
+\begin{figure}[!htb]
   \centering
   \includegraphics[width=\linewidth]{images/sim_tower_ascent}
   \caption{Trajectoire suivie pour la montée de la tour.}
@@ -438,18 +440,24 @@ Dans la Figure \ref{fig:sim_tower_ascent} nous pouvons voir la décomposition de
 \end{figure}
 
 La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de vitesses pour le suivit de la pale 1. Nous voyons que les vitesses en $z$ semblent saccadées mais ceci est encore dût au petit nombre de rayons du scanner laser. Chaque petit pic est en fait un instant où un rayon supplémentaire du laser parvient à toucher la surface de la pale et influencer le calcul de son centre. Vers la fin de la courbe $vx$ nous pouvons observer une oscillation entre la commande $0$, $+5$ et $-5$ mètres par secondes. Ceci est dû au fait que la fin de la pale est assez petite pour passer entre deux rayons du scanner laser, combiné au mouvement de tangage du véhicule pour avancer et reculer le laser parvient momentanément à toucher la pale. En réalité ceci ne devrait pas être un problème car le LeddarVu8 ne souffre pas des angles morts entre ses rayons. Malgré cela, le robot poursuit son chemin jusquà ce que la fin de la pale soit officiellement détecté par le compteur de lectures vides.
-
-\begin{figure}[ht]
+\begin{figure}[htb]
   \centering
-  \includegraphics[width=0.6\linewidth]{images/sim_tower_total}
+  \includegraphics[trim=30 10 10 50,clip,width=0.5\linewidth]{images/sim_tower_total}
   \caption{Trajectoire complète d'inspection.}
   \label{fig:sim_tower_total}
 \end{figure}
 
-
 \clearpage
 \subsection{Résultats de tests sur le terrain}
 \label{subsec:results_field}
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[trim=180 200 180 180,clip,width=\linewidth]{images/test_eolienne.jpg}
+  \caption{Le md4-1000 en vol inspectant l'une des pales.}
+  \label{fig:test_eolienne}
+\end{figure}
+
 Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 pris en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses.
 
 \begin{figure}[htp]
@@ -468,15 +476,58 @@ Suivant les spécifications initiales, l'intégration des capteurs s'est faite s
   \label{fig:field_vehicle}
 \end{figure}
 
-Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AUVIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
+Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AuvIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
 
-Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la hauteur de la tour est de $100$ mètres et le diamètre du rotor est de $92.5$ mètres.
+Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la hauteur de la tour est de $100$ mètres et le diamètre du rotor est de $92.5$ mètres. La Figure \ref{fig:test_eolienne} nous donne un ordre de grandeur de la structure par rapport à l'UAV.
 
-\begin{figure}[ht]
+% En collaboration avec le personnel de Microdrones, une procédure d'inspection a été développée pour assurer une mission sécuritaire.
+% 
+% \begin{enumerate}
+%   \item La nacelle est tournée en aval du vent, c'est-à-dire que le vent arrive de l'arrière de l'éolienne. Ceci a pour effet que si jamais le signal GPS est perdu ou que l'interférence magnétique cause une perte du contrôle de position, l'UAV s'éloignera de la structure. 
+%   \item Les pales sont tournées parallèles au vent pour les empêcher de tourner.
+%   \item Un système de télémétrie relai au pilote la distance moyenne des objets détectés par les lasers.
+%   \item Un observateur se place près de la tour pour prévenir le pilote de dangers de collision. 
+% \end{enumerate}
+
+La caméra stereo s'avère à avoir une performance extrêmement variable à travers le vol tel que l'on peut voir dans la Figure \ref{fig:field_stereo_fail}. Il est difficile de corréler exactement les charactéristiques de la scène au succès ou à l'échec de la résolution de profondeur. Dans certains cas une pale diagonale est invisible alors que dans le dernier exemple elle est parfaitement visible. On voit aussi que le ciel clair est parfois résolu par erreur. Par conséquent, nous prouvons notre hypothèse initiale et en concluons qu'une caméra stereo est inutilisable dans le contexte de l'inspection d'éoliennes.
+
+\begin{figure}[htp]
   \centering
-  \includegraphics[trim=150 100 150 100,clip,width=\linewidth]{images/test_eolienne.jpg}
-  \caption{Le md4-1000 en vol inspectant l'une des pales.}
-  \label{fig:test_eolienne}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_fail_rgb.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_fail_pcl.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_fail_rgb2.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_fail_pcl2.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_success_rgb.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_success_pcl.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_success_rgb2.png}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/field_stereo_success_pcl2.png}
+  \end{minipage}
+  \caption{Exemples de succès et d'échecs de perception de distance. À gauche les images RGB de la caméra de gauche et à droite les images de profondeur ramenées sur la caméra de gauche.}
+  \label{fig:field_stereo_fail}
 \end{figure}
+
 
 \section{Discussion des résultats et travaux futurs}
