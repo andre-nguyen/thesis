@@ -73,13 +73,7 @@ La méthode de détection du rotor se divise en 6 étapes et repose majoritairem
  Y \leftarrow 0.299 R + 0.587 G + 0.114 B
  \label{eq:rgb2gray}
 \end{align}
-où $Y$ est le niveau de gris du pixel entre $0$ et $255$ ce qui donne comme résultat l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (C), nous avons
-\begin{align}
-  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
-  H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
-  \label{eq:egalisation_histogramme}
-\end{align}
-Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
+où $Y$ est le niveau de gris du pixel entre $0$ et $255$ ce qui donne comme résultat l'image de la Figure \ref{fig:detection_pretraitement} (B). Pour éliminer la présence de bruit et atténuer les textures à haute fréquence pouvant donner lieu à une sur détection de lignes lors de la transformée de Hough, nous appliquons un filtre moyenneur 3x3 par convolution. Pour l'image floutée $F$ nous avons donc
 \begin{align}
   F = \Bigg(\frac{1}{9}
     \begin{bmatrix}
@@ -90,38 +84,45 @@ Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche. 
   \Bigg) * H
   \label{eq:boxfilter}
 \end{align}
-Pour les convolutions sur les bords de l'image nous répétons la valeur du pixel du bord pour les données manquantes dans l'opération de convolution.
+avec le résultat visible à la Figure \ref{fig:detection_pretraitement} (C) Pour les convolutions sur les bords de l'image nous répétons la valeur du pixel du bord pour les données manquantes dans l'opération de convolution. Pour augmenter le contraste et corriger les erreures d'exposition de la caméra, une égalisation d'histogramme est appliquée. Pour l'image originale $I$ et l'image égalisée $H$ que l'on peut voir dans la Figure \ref{fig:detection_pretraitement} (D), nous avons
+\begin{align}
+  p_n &= \frac{\text{\# de pixels d'intensité } n }{\text{\# de pixels total}}, \ \ n = 0, \ldots, 255 \\
+  H_{i,j} &= \text{floor}(255 \sum_{n=0}^{I_{i,j}} p_n)
+  \label{eq:egalisation_histogramme}
+\end{align}
+Où floor est l'opérateur arondissant à la baisse à l'entier le plus proche.
 \begin{figure}[htp]
 \centering
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.49\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/placeholder.png}
+  \includegraphics[width=\linewidth]{images/preprocess_original.png}
   (A)
 \end{minipage}
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.49\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/placeholder.png}
+  \includegraphics[width=\linewidth]{images/preprocess_gray.png}
   (B)
 \end{minipage}
-\begin{minipage}{0.4\textwidth}
+\vskip 1em
+\begin{minipage}{0.49\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/placeholder.png}
+  \includegraphics[width=\linewidth]{images/preprocess_blur.png}
   (C)
 \end{minipage}
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.49\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{images/placeholder.png}
+  \includegraphics[width=\linewidth]{images/preprocess_histogram.png}
   (D)
 \end{minipage}
-\caption{(A) Image originale (B) Image en tons de gris (C) Image avec égalisation d'histogramme (D) Image floutée par un filtre moyenneur}
+\caption{(A) Image originale (B) Image en tons de gris (C) Image floutée par un filtre moyenneur (D) Image avec égalisation d'histogramme}
 \label{fig:detection_pretraitement}
 \end{figure}
 
-\subsubsection{Étape 2: Détection de contours} 
+\subsubsection{Étape 2: Détection de contours}
 La détection de contours se fait au moyen de l'algorithme de \citep{Canny1986} et résultat de la procédure est visible dans la Figure \ref{fig:canny}.
 
 % qui à son tour se fait en une série de 4 étapes:
-% 
+%
 % \begin{enumerate}
 %   \item Un filtre Gaussien par convolution est appliqué pour atténuer le bruit. Pour générer un masque Gaussien $H$ en deux dimensions il suffit de suivre l'équation:
 %   \begin{align}
@@ -163,8 +164,8 @@ La détection de contours se fait au moyen de l'algorithme de \citep{Canny1986} 
 
 \begin{figure}[htp]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/placeholder.png}
-  \caption{Résultat de l'application du filtre de Canny avec $T_b = 100$ et $T_h = 300$}
+  \includegraphics[width=0.6\linewidth]{images/canny.png}
+  \caption{Résultat de l'application du filtre de Canny avec $T_b = 27$ et $T_h = 81$}
   \label{fig:canny}
 \end{figure}
 
@@ -172,7 +173,7 @@ Outre la méthode de Canny, il existe des méthodes modernes plus performantes q
 
 \subsubsection{Étape 3: Détection de lignes}
 
-Une fois les contours trouvés, nous pouvons les utiliser pour détecter des segments de droite dans l'image. Dans le cas où des parties du véhicule sont visibles dans l'image, il suffit d'appliquer un masque avant de débuter cette étape. Pour trouver les segments, nous appliquons la transformée de Hough probabiliste pour détecter des segments de droites dans l'image de contours.
+Une fois les contours trouvés, nous pouvons les utiliser pour détecter des segments de droite dans l'image. Dans le cas où des parties du véhicule sont visibles dans l'image, il suffit d'appliquer un masque avant de débuter cette étape. Pour trouver les segments, nous appliquons la transformée de Hough probabiliste \citep{Matas2000} pour détecter des segments de droites dans l'image de contours.
 
 \subsubsection{Étape 4: Recherche de la tour}
 \label{subsubsec:approach4}
@@ -192,6 +193,17 @@ Une fois les groupes formés, Stokkeland utilise une stratégie de vote pour él
 \subsubsection{Étape 6: Recherche du rotor et filtrage}
 
 L'étape 5 nous a donc fournis 3 groupes de segments représentant chacuns les pales de l'éolienne. Le centre do rotor peut donc être calculé en moyennant chaque groupe puis en prenant la moyenne de l'intersection des prolongements de chaque segment.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/turbine_detect_result.png}
+  \caption{Résultat d'une détection réussis à la fin de la procédure.}
+  \label{fig:detect_result_step6}
+\end{figure}
+
+Dans la Figure \ref{fig:detect_result_step6} nous pouvons observer les étapes $3$ à $6$ en opération. Toutes les lignes sont le résultat de la transformée de Hough appliqué à l'image des bordures suite à l'application de l'algorithme de Canny. Au bas de l'image, les lignes mauves sont les candidats à être des lignes de la tour. Elles se font rejettées cas elle ne s'étendent pas assez haut dans l'image. Le grand cercle vert est celui tracé au plus haut point de la tour dans lequel les segments de pales sont recherchées. Les segments roses sont les candidats de pales rejettés par l'algorithme de partitionnage DBSCAN et la procédure de vote.
+%C'est ici que nous voyons l'amélioration de l'algorithme par rapport à Stokkeland où malgré la grande quantité de segments provenant de l'arrière plan, les pales sont quand même bien choisies.
+Les pales finales sont indiquées par les lignes bleus, bleu foncé et vert pâle. Finalement, avec l'application des étapes $5$ et $6$ on peut voir que l'intersection des pales croise bien sur le centre du rotor.
 
 Le point détecté est ensuite entré dans un filtre de Kalman linéaire permettant ainsi de garder un estimé de la position du rotor dans l'image lorsque la détection échoue. Le vecteur d'état $\boldsymbol{x}_k$ contient la position et la vitesse de déplacement en coordonnées image du centre du rotor. La matrice de transition $\boldsymbol{F}_k$ contient les termes $\gamma_x, \gamma_y \in [0, 1]$ faisant décroitre la vitesse exponentiellement avec le temps. Ceci empêche l'estimé de diverger à l'infini quand aucune mesure n'entre dans le filtre pendant de longues périodes de temps.
 \begin{align}
@@ -229,7 +241,6 @@ Dans cette méthode le véhicule est placé à proximité de la tour de telle so
 \end{enumerate}
 
 Le principe opérationel est simple et illustré dans la Figure \ref{fig:approach}, le scanner laser horizontal est utilisé pour centrer l'UAV devant la tour et garder une distance de sécurité alors que le scanner vertical est utilisé pour détecter le rotor. Pour ce faire il faut tout d'abord projetter le vecteur de distances à un nuage de points 3D au moyen de l'équation \ref{eq:scan2cloud} où $r_i$ est une distance, $\theta_i$ est l'angle correspondant à la mesure $i$ et $n$ est le nombre de mesures retournées par le laser.
-
 \begin{align}
   {p_{L}}_i = \begin{bmatrix}
     {{p_L}_i}_x \\
@@ -238,16 +249,13 @@ Le principe opérationel est simple et illustré dans la Figure \ref{fig:approac
   \end{bmatrix} = \begin{bmatrix}r_i \cos \theta_i \\ r_i \sin \theta_i \\ 0 \end{bmatrix} & \text{ où } i=1,\ldots,n
     \label{eq:scan2cloud}
 \end{align}
-
 \begin{figure}[htp]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/placeholder.png}
+  \includegraphics[width=0.8\linewidth]{images/principe_operation.jpg}
   \caption{Principe d'opération de l'approche du rotor par laser.}
   \label{fig:approach}
 \end{figure}
-
 L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $T_{LH}^B$, $T_{LV}^B$ ainsi que la rotation $R_B^{BT}$ sont connues, il suffit de transformer chaque $p_L$ au repère ${BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
-
 \begin{align}
   \begin{bmatrix}{p_{BT}}_i \\ 1\end{bmatrix} = \begin{bmatrix}
     R_B^{BT} & 0 \\
@@ -306,7 +314,7 @@ Pour contrer le bruit de mesure et s'assurer que la détection est valide, le v�
 Une fois devant le rotor le véhicule utilise l'information sur l'angle des pales acquise au préalable (visuellement ou par entrée utilisateur) pour savoir dans quelle direction se diriger. Il est important à cette étape de garder une grande distance de sécurité ($d_{grand} = 8$m ou plus) du rotor puisque celui-ci, constitué de multiples lignes électriques hautes tension et d'une grande quantité de métal, peut causer de l'interférence magnétique avec le magnétomètre de l'UAV qui peut potentiellement résulter en une perte de l'orientation. Cette distance peut être diminuée à $d_{petit} = 4$m lors du suivit une fois que le véhicule commence à s'éloigner du rotor.
 
 Dans l'étape de suivit des pales, le principe est similaire à la montée de la tour, le robot cherche à suivre la pale à une vitesse constante tout en restant à une distance désiré de la pale. Nous présentons deux approches possibles, la première dans la Section \ref{subsec:pcl_blade} par nuage de point applicable à des scanner lasers 3D ou un capteur par vision active, la deuxième dans la Section \ref{subsec:laser_blade} usant que de scanner laser 2D.
-%et la troisième dans la Section \ref{subsec:visual_blade} fonctionnant que visuellement. 
+%et la troisième dans la Section \ref{subsec:visual_blade} fonctionnant que visuellement.
 Suivant la machine à états de la mission, une fois la fin de la pale détectée, le robot revient aux coordonnées GPS où le rotor a été détecté initialement. Puisque les pales d'une éolienne sont droites ou courbent vers l'avant, une trajectoire en ligne droite entre la fin de la pale et le devant du rotor est garantie d'être libre d'obstacles.
 
 \subsection{Suivit par nuage de points}
@@ -316,12 +324,12 @@ Dans cette méthode nous reprenons l'algorithme proposé dans le Chapitre \ref{s
 
 \begin{figure}[htp]
   \centering
-  \includegraphics[width=0.45\linewidth]{images/placeholder.png}
+  \includegraphics[width=0.7\linewidth]{images/suivit_nuage_points.png}
   \caption{Exemple de suivit de pale par nuage de points.}
   \label{fig:pcl_blade_follow}
 \end{figure}
 
-La fin de la pale est détecté de la même façon qu'un mur à angle aigü est détecté dans la section \color{red}XXX\color{black}. À mesure que le véhicule avance vers la fin de la pale, le nuage de points $\mathcal{S}$ devient de plus en plus petit, ainsi il devient possible de détecter la fin une fois que $\mathcal{S}$ passe un certain seuil.
+La fin de la pale est détecté de la même façon qu'un mur à angle aigü est détecté dans la section \color{red}XXX\color{black}. À mesure que le véhicule avance vers la fin de la pale, le nuage de points $\mathcal{S}$ devient de plus en plus petit, ainsi il devient possible de détecter la fin une fois que $\mathcal{S}$ passe un certain seuil. Dans la Figure \ref{fig:pcl_blade_follow} les points blancs sont le nuage de point perçu par l'UAV alors que les points jaunes représentent la tranche sélectionnée $\mathcal{S}$. La boule verte est la commande de position envoyée à l'UAV, perpendiculaire à $\mathcal{S}$.
 
 \subsection{Suivit par scanner laser 2D}
 \label{subsec:laser_blade}
@@ -345,7 +353,7 @@ Dans le cas où une erreur de capteur survient, par exemple si la pale devient a
 
 % \subsection{Suivit visuel pur}
 % \label{subsec:visual_blade}
-% 
+%
 % \color{red}
 % XXX drop this section?
 % \color{black}
@@ -354,14 +362,14 @@ Dans le cas où une erreur de capteur survient, par exemple si la pale devient a
 \section{Implémentation}
 
 Pour l'implémentation la majorité de l'effort de développement a été dédié à l'approche purement par scanner laser suivant les sections \ref{subsec:laser_tower} et \ref{subsec:laser_blade} puisqu'elles s'avèrent à être les plus fiables, dépendent moins de paramètres à ajuster manuellement et sont peut coûteuses en termes de matériel comparé à une approche par scanner laser 3D. Le suivit par nuage de point de la section \ref{subsec:pcl_blade} a aussi été implémenté séparement pour nour permettre de vérifier la possibilité d'utiliser un capteur de profondeur. Cependant, nous posons l'hypothèse que cette méthode ne fonctionnerait pas avec une caméra stereo dût à la surface sans texture de l'éolienne ni avec un capteur fonctionnant par \textit{Time of Flight} de par leur portée limitée.
-%Nous prouverons plus tard tant en simulation que sur le terrain qu'une approche par camera stereo n'est pas viable pour ce problème. 
+%Nous prouverons plus tard tant en simulation que sur le terrain qu'une approche par camera stereo n'est pas viable pour ce problème.
 De plus, nous implémentons aussi la méthode de Stokkeland modifée décrite à la section \ref{subsec:approche_loin} pour la détection du rotor mais en vu des mauvais résultats obtenus nous n'avons pas poursuivi l'implémentation du contrôleur correspondant.
 
 La simulation est donc développée en prévision d'un quadricoptère md4-1000 de Microdrones équipé de deux lidar LeddarVu8 de LeddarTech, une camera stereo Zed de ZedLabs et un ordinateur de bord Nvidia TX2. Les lidars Vu8 ont été sélectionnés avec un angle de vu de $48^{\circ}$ et ont la propriété particulière d'émettre des segments au lieu de faisceaux collimatés de la même manière que les lidars traditionnels. Par conséquent il devient improbable en pratique qu'une pale d'éolienne puisse se perdre entre deux rayons du lidar.
 
 %Le md4-1000 possède une interface de communication mdSI$^{2}$ (\textit{System Integrator Interface}) permettant de recevoir la télémétrie du robot et de lui envoyer des commandes de vitesse dans le repère $BT$.
 L'entièreté du logiciel a été développé en C++ à l'aide de l'interlogiciel
-Robot Operating System\footnote{http://www.ros.org/} (ROS) incluant les pilotes pour les divers capteurs et la communication par UART au md4-1000. Le traitement d'images repose sur la librairie OpenCV \citep{itseez2015} et la machine à états faisant la gestion de la mission, présentée dans l'annexe \ref{annexe:state_machine}, a été écrite à l'aide de la librairie Boost \textit{Meta State Machine} \citep{Schling2011}. En tout temps la machine, que l'on nomme \code{Commander} garde un pointeur vers un objet implémentant l'interface \code{ControllerInterface}. Ces contrôleurs sont instanciés et détruits dynamiquement à chaque changement d'état, nous permettant ainsi d'avoir accès à une grande quantité de contrôleurs spécifiques tout en gardant l'utilisation de la mémoire vive à un minimum. Le \code{Commander} calcule les commandes de vitesse à une fréquence de $50$Hz, la même que la fréquence maximale de l'odométrie. Quand une mise à jour d'odométrie ou des lidars est reçue elle est mise dans un tampon en attente du prochain cycle de calcul. 
+Robot Operating System\footnote{http://www.ros.org/} (ROS) incluant les pilotes pour les divers capteurs et la communication par UART au md4-1000. Le traitement d'images repose sur la librairie OpenCV \citep{itseez2015} et la machine à états faisant la gestion de la mission, présentée dans l'annexe \ref{annexe:state_machine}, a été écrite à l'aide de la librairie Boost \textit{Meta State Machine} \citep{Schling2011}. En tout temps la machine, que l'on nomme \code{Commander} garde un pointeur vers un objet implémentant l'interface \code{ControllerInterface}. Ces contrôleurs sont instanciés et détruits dynamiquement à chaque changement d'état, nous permettant ainsi d'avoir accès à une grande quantité de contrôleurs spécifiques tout en gardant l'utilisation de la mémoire vive à un minimum. Le \code{Commander} calcule les commandes de vitesse à une fréquence de $50$Hz, la même que la fréquence maximale de l'odométrie. Quand une mise à jour d'odométrie ou des lidars est reçue elle est mise dans un tampon en attente du prochain cycle de calcul.
 
 \begin{figure}[htbp]
   \centering
@@ -370,7 +378,7 @@ Robot Operating System\footnote{http://www.ros.org/} (ROS) incluant les pilotes 
   \label{fig:uml_controller}
 \end{figure}
 
-La Figure \ref{fig:uml_controller} présente les contrôleurs utilisés dans le logiciel. Nous avons en particulier le \code{PositionController} pour la phase de retour au rotor, le \code{LidarBladeFollower} pour le suivit de pale et le \code{TowerAscentController} pour la montée de la tour. le \code{DirectionController} n'est utilisé que pendant de courts instants de contrôle en boucle ouverte par exemple la manoeuvre pour éviter la zone d'interférence magnétique devant la nacelle. 
+La Figure \ref{fig:uml_controller} présente les contrôleurs utilisés dans le logiciel. Nous avons en particulier le \code{PositionController} pour la phase de retour au rotor, le \code{LidarBladeFollower} pour le suivit de pale et le \code{TowerAscentController} pour la montée de la tour. le \code{DirectionController} n'est utilisé que pendant de courts instants de contrôle en boucle ouverte par exemple la manoeuvre pour éviter la zone d'interférence magnétique devant la nacelle.
 
 \subsection{Résultats en simulation}
 \label{subsec:results_simu}
@@ -489,12 +497,12 @@ Suivant les spécifications initiales, l'intégration des capteurs s'est faite s
 Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la hauteur de la tour est de $100$ mètres et le diamètre du rotor est de $92.5$ mètres. La Figure \ref{fig:test_eolienne} nous donne un ordre de grandeur de la structure par rapport à l'UAV.
 
 % En collaboration avec le personnel de Microdrones, une procédure d'inspection a été développée pour assurer une mission sécuritaire.
-% 
+%
 % \begin{enumerate}
-%   \item La nacelle est tournée en aval du vent, c'est-à-dire que le vent arrive de l'arrière de l'éolienne. Ceci a pour effet que si jamais le signal GPS est perdu ou que l'interférence magnétique cause une perte du contrôle de position, l'UAV s'éloignera de la structure. 
+%   \item La nacelle est tournée en aval du vent, c'est-à-dire que le vent arrive de l'arrière de l'éolienne. Ceci a pour effet que si jamais le signal GPS est perdu ou que l'interférence magnétique cause une perte du contrôle de position, l'UAV s'éloignera de la structure.
 %   \item Les pales sont tournées parallèles au vent pour les empêcher de tourner.
 %   \item Un système de télémétrie relai au pilote la distance moyenne des objets détectés par les lasers.
-%   \item Un observateur se place près de la tour pour prévenir le pilote de dangers de collision. 
+%   \item Un observateur se place près de la tour pour prévenir le pilote de dangers de collision.
 % \end{enumerate}
 
 La caméra stereo s'avère à avoir une performance extrêmement variable à travers le vol tel que l'on peut voir dans la Figure \ref{fig:field_stereo_fail}. Il est difficile de corréler exactement les charactéristiques de la scène au succès ou à l'échec de la résolution de profondeur. Dans certains cas une pale diagonale est invisible alors que dans le dernier exemple elle est parfaitement visible. On voit aussi que le ciel clair est parfois résolu par erreur. Par conséquent, nous prouvons notre hypothèse initiale et en concluons qu'une caméra stereo est inutilisable dans le contexte de l'inspection d'éoliennes.
@@ -523,7 +531,7 @@ En ce qui concerne l'approche par laser il n'a pas été possible de tester le s
 
 Bien que nous n'avons pas pu valider notre approche sur le terrain, les résultats en simulation demeurent prometteurs et l'inspection d'éoliennes reste un projet important à poursuivre dans le futur. Par contre, suite à nos tests de vol manuels sur le terrain nous réalisons maintenant que la méthode d'inspection bénificierait de plusieurs changements.
 
-Tout d'abord, pour qu'un UAV entre $1$ et $25$ kg utilisé à des fins non-récréatives soit exempt du besoin d'un Certificat d'Opération Aériennes Spécialisées (COAS) par Transport Canada, il doit demeurer en dessous d'une altitude de $300$ pieds ($91$ mètres) \citep{transportscanada2016}. Puisque les grandes éoliennes ont leur nacelle à une altitude de $100$ mètres ou plus, ceci implique que chaque fois qu'un inspecteur voudrait aller travailler il faudrait appliquer pour un COAS à l'avance ce qui peut prendre beaucoup de temps à être approuvé. Sans quoi, l'UAV n'aurait pas le droit d'inspecter les pales autres que celles pointant vers le bas. 
+Tout d'abord, pour qu'un UAV entre $1$ et $25$ kg utilisé à des fins non-récréatives soit exempt du besoin d'un Certificat d'Opération Aériennes Spécialisées (COAS) par Transport Canada, il doit demeurer en dessous d'une altitude de $300$ pieds ($91$ mètres) \citep{transportscanada2016}. Puisque les grandes éoliennes ont leur nacelle à une altitude de $100$ mètres ou plus, ceci implique que chaque fois qu'un inspecteur voudrait aller travailler il faudrait appliquer pour un COAS à l'avance ce qui peut prendre beaucoup de temps à être approuvé. Sans quoi, l'UAV n'aurait pas le droit d'inspecter les pales autres que celles pointant vers le bas.
 
 Il reste néanmoins une alternative possible qui comporterait plusieurs avantages sur le système proposé à condition de remettre en question les modalités de la participation de l'inspecteur et du budget alloué. Le système pourrait faire une inspection en 3 dimensions d'une seule pale à la fois pointée vers le bas suivant une trajectoire présenté dans la Figure \ref{fig:alternative}. En commençant sur le côté de la pale l'UAV longerait la pale vers bas. Il pivoterait ensuite pour remoter le bord d'attaque avant de pivoter une dernière fois pour longer le côté droit. Ceci demanderait des capteurs différents et que l'inspecteur fasse tourner les pales entre chaque vol mais aurait l'avantage d'avoir de bien meilleures images puisque la caméra serait pointée perpendiculairement à la surface à inspecter.
 
@@ -536,4 +544,9 @@ Il reste néanmoins une alternative possible qui comporterait plusieurs avantage
 
 Pour en revenir à la méthode que nous proposons, l'UAV bénificierait grandement de l'utilisation de D-GPS ou de GPS-RTK à deux antennes. Le premier avantage serait que avec un positionnement plus précis il serait possible de se rapprocher beaucoup plus de la structure et obtenir de meilleures images. Les distances utilisées en simulation prennent en compte que la précision du positionnement du md4-100 est typiquement entre $\sigma = 1.0$ et $\sigma = 1.5$ mètres. De plus, avec les systèmes à deux receveurs, il n'y aurait plus d'inquiétudes à propos de la zone d'interférence magnétique devant la nacelle.
 
-Finalement, bien que ce soit rare, il arrive parfois que la mission échoue lorsque l'UAV perd de vue la pale qu'il est en train de suivre. La cause est habituellement une instabilité lorsque le dernier faisceau du lidar est près de la bordure de la pale. L'UAV tangue pour s'approcher ou reculer et le lidar perd et regagne de vue la pale. Ce mouvement peut se répéter jusqu'à ce que l'oscillation fasse perdre la pale complètement. Ce problème peut être palié en introduisant une meilleure gestion du cas où le lidar tombe en faute, une procédure de recherche lorsque la pale est perdue et une limite sur l'accélération à la sortie des contrôleurs.
+Bien que ce soit rare, il arrive parfois que la mission échoue lorsque l'UAV perd de vue la pale qu'il est en train de suivre. La cause est habituellement une instabilité lorsque le dernier faisceau du lidar est près de la bordure de la pale. L'UAV tangue pour s'approcher ou reculer et le lidar perd et regagne de vue la pale. Ce mouvement peut se répéter jusqu'à ce que l'oscillation fasse perdre la pale complètement. Ce problème peut être palié en introduisant une meilleure gestion du cas où le lidar tombe en faute, une procédure de recherche lorsque la pale est perdue et une limite sur l'accélération à la sortie des contrôleurs.
+
+En ce qui concerne les résultats du traitement visuel, il est difficile d'imaginer que ça vaille réellement la peine de poursuivre dans cette direction. Certaines possibilités pourraient être étudiées par exemple après une détection réussie, les descripteurs de caractéristiques tel que \textit{Oriented FAST and Rotated BRIEF} \citep{Rublee2011} pourraient êtres extraits et suivit par un algorithme de flux optique \citep{Lucas1981}. Ceci donnerait une deuxième mesure au filtre de Kalman potentiellement plus fiable. Une autre possibilité serait de remplacer la procédure de détection par un réseau de neuronnes entièrement convolutionnel qui calculerait conjointement la segmentation et l'orientation des pales.
+
+
+%Nous avions brièvement aussi étudié la possibilité d'utiliser un filtre à particule basé sur la couleur pour le suivit d'une objet basé sur \citep{truong2016object}, par contre puisque

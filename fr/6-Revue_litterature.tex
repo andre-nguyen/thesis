@@ -109,7 +109,7 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \begin{aligned}
   \hat{x}_c &= x_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + 2p_1 x_c y_c + p_2(r_c^2 + 2 x_c^2) \\
   \hat{y}_c &= y_c\left(\frac{1 + \kappa_1r_c^2 + \kappa_2r_c^4 + \kappa_3r_c^6}{1 + \kappa_4r_c^2 + \kappa_5r_c^4 + \kappa_6r_c^6}\right) + p_1 (r_c^2 + 2 y_c^2) + 2p_2 x_c y_c \\
-  r_c^2     &= x_c^2 + y_c^2  
+  r_c^2     &= x_c^2 + y_c^2
   \label{eq:rectification}
 \end{aligned}
 \end{equation}
@@ -122,7 +122,7 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \end{equation}
 Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
 
-Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV plusieurs auteurs ont proposé des nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadiptriques. 
+Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadioptriques. 
 
 \subsection{Vision stereo}
 \color{red}
