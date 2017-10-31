@@ -4,27 +4,39 @@
 
 Dans cette section nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures}.
 
+\color{red}
+Ajouter un breakdown des sections qui suivent.
+\color{black}
+
 \section{Description du problème}
 Une composante importante de tout système de SLAM est sa capacité de fermeture de boucle, c'est-à-dire d'être capable de reconnaître quand le robot retourne à un endroit déjà visité, particulièrement en l'absence de systèmes de positionenment absoluts. Ceci peut être fait localement sur un sous-ensemble local des observations courantes ou globalement sur toutes les observations faites jusqu'au présent. Ceci peut être réalisé d'une variété de façons dépendamment des capteurs utilisés par l'algorithme de SLAM. \citep{Hess2016} proposent Google Cartographer une approche hybride fonctionnant par scanner laser, où les nouveaux scans sont insérés et appariés par rapport à une sous-carte locale alors que la recherche de fermeture de boucle globale est exécutée en arrière plan par un algorithme de séparation et évaluation progressive (\textit{branch-and-bound}). En revanche RTAB-MAP \citep{Labbe2014} utilise une approche par sac-de-mots (\textit{bag-of-words}) appliquée à des descripteurs extraits d'une image couleur. Pour assurer une opération en temps réel les noeuds du graphe de pose, contenant aussi les mots visuels extraits à chaque endroit, sont séparés dans différentes mémoires: la mémoire court terme, la mémoire de travail et la mémoire long terme. Seuls les noeuds dans la mémoire de travail sont considérés pour la fermeture de boucle. Dans les deux cas de Google Cartographer et RTAB-MAP il est donc possible que la détection de la fermeture de boucle échoue si la pose estimée courante du robot a trop dérivé au point que les algorithmes ne cherchent plus à apparier l'environnement courant avec les éléments de la carte connue.
 
 Le but de la fermeture de boucle est de réduire les erreures de localisation en imposant certaines contraintes sur la carte en cours de construction. Cette minimisation d'erreure peut-être réalisée de plusieurs façons, notamment par optimisation de graphe de poses \citep{Carlone2016}, par compensation par faisceaux (\textit{Bundle Adjustment}) \citep{Mei2011} ou tel que proposé dans ORB-SLAM2 une combinaison des deux \citep{Mur-Artal2017}.
 
-C'est dans ce contexte que nous proposons une méthode de planification de trajectoire pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreures de localisation. Plus spécifiquement étant donné une structure de taille finie et un robot équipé d'un capteur de profondeur mobile, nous cherchons à optimiser le positionnement de ce capteur
+C'est dans ce contexte que nous proposons une méthode de planification de trajectoire pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreures de localisation. Pour ce faire, nous équipons un UGV
+
+
+Plus spécifiquement étant donné une structure de taille finie et un robot équipé d'un capteur de profondeur mobile, nous cherchons à optimiser le positionnement de ce capteur pour cartographier la structure tout en maximisant la performance du système de SLAM.
+
+L'inspection débute avec aucune information au préalable à propos de la structure. La caméra à bord du UGV nous permet de recevoir une série de nuages de points combinées à des images RGB pour le système de SLAM visuel. Le système de SLAM à son tour nous fourni une carte 3D de l'environnement ainsi que notre trajectoire à travers celle-ci. Pour ce projet nous faisons spécifiquement usage de RTAB-Map \citep{Labbe2014} car c'est un système de SLAM à source ouverte mais nous soulignons que tout autre système de SLAM pourrait être utilisé pourvu qu'il fournisse l'information énoncé précedemment et que la détection de fermeture de boucle soit possible. Au départ de l'algorithme, l'UGV a préalablement été positionné près de l'un des murs avec sa caméra pointée vers celui-ci.
+
+
 
 \begin{table}[htp]
   \centering
   \setlength{\tabcolsep}{12pt}
-  \begin{tabular}[htp]{|c|l|p{10cm}|}
+  \begin{tabular}[htp]{|c|l|p{11cm}|}
     \hline
     Symbole & Nom                   & Description\\\hline
-    $\mathsf{G}$     &  \textit{Global}      & Origine au point de départ du robot\\\hline
+    $\mathsf{G} \coloneqq \{\mathsf{O_G}, \mathbf{x} \} $     &  \textit{Global}      & Origine au point de départ du robot\\\hline
     $\mathsf{R}$     &  \textit{Robot}       & Repère centré sur le robot avec les axes avant-gauche-haut.\\\hline
     $\mathsf{C}$     &  \textit{Camera}      & Repère centré sur la caméra, la transformée est rigide par rapport à $R$ sauf pour l'angle de lacet.\\\hline
   \end{tabular}
   \setlength{\tabcolsep}{6pt}
-  \caption{Repères présents dans le système d'inspection d'éoliennes}
+  \caption{Repères présents dans le système d'inspections par UGV}
   \label{table:ugv_frames}
 \end{table}
+
 
 \section{Exploration du périmètre}
 

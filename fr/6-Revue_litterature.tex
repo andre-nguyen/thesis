@@ -20,9 +20,19 @@ De base, le filtre de Kalman (KF) est un algorithme récursif permettant de fair
 
 Les GNSS n'étant pas la seule façon de corriger l'erreure cumulative d'un INS, certains auteurs proposent des filtres de Kalman modulaires permettant de fusionner une quantité arbitraire de capteurs hétérogènes tels que des IMU, l'odométrie d'encodeurs de roues, l'odométrie visuelle, receveurs GNSS, etc. \citep{MooreEkf2014} pour estimer la position et l'orientation du robot. Pour le cas spécifique des UAV \citep{Lynen2013} proposent aussi une architecture modulaire pour un filtre de Kalman étendu itéré qui permet de faire une calibration inter-capteurs en-ligne pour estimer les délais temporels et les différences en d'échelle des mesures, chose importante dans le cas d'odométrie visuel monoculaire où l'échelle des mesures est arbitraire et peut dériver avec le temps.
 
-\section{\textit{Simultaneous Localization and Mapping}}\label{subsec:reconstruction}
+\section{\textit{Simultaneous Localization and Mapping} et reconstruction 3D}\label{subsec:reconstruction}
 
 En
+
+\section{Méthodes de représentation de l'environnement}\label{subsec:representations}
+
+\color{red}
+\begin{enumerate}
+  \item octomap
+  \item signed distance fields
+  \item \url{http://people.eecs.berkeley.edu/%7Edfk/Atom_Mapping.pdf}
+\end{enumerate}
+\color{black}
 
 \section{Génération de trajectoires et couverture de surfaces}\label{subsec:generation}
 
