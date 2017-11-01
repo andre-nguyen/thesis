@@ -13,14 +13,16 @@ Une composante importante de tout système de SLAM est sa capacité de fermeture
 
 Le but de la fermeture de boucle est de réduire les erreures de localisation en imposant certaines contraintes sur la carte en cours de construction. Cette minimisation d'erreure peut-être réalisée de plusieurs façons, notamment par optimisation de graphe de poses \citep{Carlone2016}, par compensation par faisceaux (\textit{Bundle Adjustment}) \citep{Mei2011} ou tel que proposé dans ORB-SLAM2 une combinaison des deux \citep{Mur-Artal2017}.
 
-C'est dans ce contexte que nous proposons une méthode de planification de trajectoire pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreures de localisation. Pour ce faire, nous équipons un UGV
+C'est dans ce contexte que nous proposons une méthode de planification de trajectoire pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreures de localisation. Pour ce faire, nous équipons un UGV d'un capteur de profondeur (une caméra) monté sur un joint à 1 degré de liberté en lacet ainsi que d'un scanner LIDAR permettant de détecter des obstacles dans un rayon de $180^\circ$ devant le véhicule.
 
 
-Plus spécifiquement étant donné une structure de taille finie et un robot équipé d'un capteur de profondeur mobile, nous cherchons à optimiser le positionnement de ce capteur pour cartographier la structure tout en maximisant la performance du système de SLAM.
+% Plus spécifiquement étant donné une structure de taille finie et un robot équipé d'un capteur de profondeur mobile, nous cherchons à optimiser le positionnement de ce capteur pour cartographier la structure tout en maximisant la performance du système de SLAM.
 
-L'inspection débute avec aucune information au préalable à propos de la structure. La caméra à bord du UGV nous permet de recevoir une série de nuages de points combinées à des images RGB pour le système de SLAM visuel. Le système de SLAM à son tour nous fourni une carte 3D de l'environnement ainsi que notre trajectoire à travers celle-ci. Pour ce projet nous faisons spécifiquement usage de RTAB-Map \citep{Labbe2014} car c'est un système de SLAM à source ouverte mais nous soulignons que tout autre système de SLAM pourrait être utilisé pourvu qu'il fournisse l'information énoncé précedemment et que la détection de fermeture de boucle soit possible. Au départ de l'algorithme, l'UGV a préalablement été positionné près de l'un des murs avec sa caméra pointée vers celui-ci.
+\subsection{Hypothèses et fonctionnement de l'inspection}
 
+L'inspection débute avec aucune information au préalable à propos de la structure. La caméra à bord du UGV nous permet de recevoir une série de nuages de points combinées à des images RGB pour le système de SLAM visuel. Le système de SLAM à son tour nous fourni une carte 3D de l'environnement ainsi que notre trajectoire à travers celle-ci. Pour ce projet nous faisons spécifiquement usage de RTAB-Map \citep{Labbe2014} car c'est un système de SLAM à source ouverte mais nous soulignons que tout autre système de SLAM pourrait être utilisé pourvu qu'il fournisse l'information énoncé précedemment et que la détection de fermeture de boucle soit possible. Au départ de l'algorithme, l'UGV pointe la caméra vers sa droite face à l'un des murs de la structure.
 
+Soit une distance de sécurité $D$ devant être maintenue par rapport à la structure, nous supposons que l'espace se situant à $2D$ de la structure est libre d'obstacles. Ceci nous permettera à la section \ref{sec:perimeter_exploration} de savoir que les surfaces détectées par le LIDAR sont des extensions de la structure sous inspection.
 
 \begin{table}[htp]
   \centering
@@ -38,7 +40,7 @@ L'inspection débute avec aucune information au préalable à propos de la struc
 \end{table}
 
 
-\section{Exploration du périmètre}
+\section{Exploration du périmètre} \label{sec:perimeter_exploration}
 
 
 
