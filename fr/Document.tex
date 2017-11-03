@@ -35,6 +35,9 @@
 \usepackage{mathtools}
 \usepackage[linesnumbered,lined,boxed,commentsnumbered,ruled,vlined,french]{algorithm2e}
 
+\newlength{\commentWidth}
+\setlength{\commentWidth}{7cm}
+\newcommand{\atcp}[1]{\tcp*[r]{\makebox[\commentWidth]{#1\hfill}}}
 \newenvironment{sbmatrix}[1]
  {\def\mysubscript{#1}\mathop\bgroup\begin{bmatrix}}
  {\end{bmatrix}\egroup_{\textstyle\mathstrut\mysubscript}}

@@ -2,7 +2,7 @@
 \Chapter{Inspection d'infrastructure par UGV}
 \label{sec:ugv}
 
-Dans cette section nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures}.
+Dans cette section nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures}. Le contenu diffère de l'article pour ajouter des explications à propos de certains sujets qui avaient été écourtés par manque d'espace et pour mettre plus d'emphase sur la partie d'implémentation de la méthode.
 
 \color{red}
 Ajouter un breakdown des sections qui suivent.
@@ -45,8 +45,8 @@ C'est dans ce contexte que nous proposons une méthode de planification de traje
 \begin{figure}[htp]
   \centering
   \includegraphics[width=0.3\linewidth]{images/placeholder.png}
-  \caption{aa}
-  \label{aa}
+  \caption{Visualisation des repères présents sur le système d'inspection par UGV.}
+  \label{fig:ugv_frames}
 \end{figure}
 
 L'inspection se fait en 2 phases, l'exploration du périmètre (EP) présentée dans la section \ref{sec:perimeter_exploration} suivit de l'exploration des cavités (EC) présentée dans la section \ref{sec:cavity_exploration}. Dans la première phase, l'UGV fait le tour de la structure en sautant les cavités pour fermer la boucle le plus tôt possible. Ensuite, une analyse de la carte 3D est effectuée pour trouver les \textit{frontier} indiquant des cavités non-explorées dans la structure. Une trajectoire est planifiée pour diriger le robot vers la cavité pour cartographier l'intérieur de la structure. L'inspection se termine quand toutes les cavités ont été inspectées.
@@ -63,7 +63,7 @@ L'algorithme \ref{alg:PE_next_goal} présente la méthode par laquelle nous calc
 \end{align}
 où $y^c_{max}$ et $y^c_{min}$ sont le maximum et le minimum des coordonnées $y^c$ de $\mathcal{P}$.
 
-La \ref{alg:slice:pca}\textsuperscript{ième} étape est de déterminer la normale $\vect{n}$ de la surface. \citep{Rusu2009} explique que par le passé ceci aurait été fait en résolvant un problème des moindres carrés pour ajuster le modèle d'un plan au nuage $\mathcal{S}$. On peut représenter le plan par un point $\vect{x}$ et un vecteur normal $\vect{n}$, et la distance d'un point $\vect{p}_i \in \mathcal{S}$ au plan est défini par $d_i = (\vect{p}_i - \vect{x} \cdot \vect{n})$. On choisi $\vect{x} = \vect{p}^c$ la moyenne des points de $\mathcal{S}$.
+La \ref{alg:slice:pca}\textsuperscript{ième} étape est de déterminer la normale $\vect{n}$ de la surface. \citep{Rusu2009} explique que par le passé ceci aurait été fait en résolvant un problème des moindres carrés pour ajuster le modèle d'un plan $\Pi$ au nuage $\mathcal{S}$. On peut représenter le plan par un point $\vect{x}$ et un vecteur normal $\vect{n}$, et la distance d'un point $\vect{p}_i \in \mathcal{S}$ au plan est défini par $d_i = (\vect{p}_i - \vect{x} \cdot \vect{n})$. On choisi $\vect{x} = \vect{p}^c$ la moyenne des points de $\mathcal{S}$.
 \begin{align}
   \vect{x} = \vect{p}^c = \frac{1}{k} \cdot \sum^{k}_{i=1} \vect{p}_i
 \end{align}
@@ -72,7 +72,7 @@ Suivant une formulation par moindres carrés on cherche donc à mettre les $d_i 
 \begin{align}
   \mathcal{C} = \frac{1}{k} \sum^{k}_{i=1} (\vect{p}_i - \vect{p}^c) \cdot (\vect{p}_i - \vect{p}^c)^\top, \mathcal{C} \cdot \vect{v}_j = \lambda_j \cdot \vect{v}_j, j \in \{0, 1, 2\}
 \end{align}
-Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in \mathbb{R}$. Les vecteurs propres $\vect{v}_j$ forment ainsi une base orthonormale correspondantes aux composantes principales de $\mathcal{S}$. En classant les valeurs propres par $0 \leq \lambda_3 \leq \lambda_2 \leq \lambda_1$, nous avons $\vect{v}_3$ le vecteur propre correspondant à la plus petite valeur propre $\lambda_3$ qui est donc une approximation de la normale $\pm \vect{n} \sim \vect{v}_{3}$ du plan mais avec un ambiguïté de signe.
+Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in \mathbb{R}$. Les vecteurs propres $\vect{v}_j$ forment ainsi une base orthonormale correspondantes aux composantes principales de $\mathcal{S}$. En classant les valeurs propres par $0 \leq \lambda_3 \leq \lambda_2 \leq \lambda_1$, nous avons $\vect{v}_3$ le vecteur propre correspondant à la plus petite valeur propre $\lambda_3$ qui est donc une approximation de la normale $\pm \vect{n} \sim \vect{v}_{3}$ du plan $\Pi$ mais avec un ambiguïté de signe.
 
 \begin{algorithm}[ht]
   \SetAlgoLined
@@ -80,7 +80,6 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
   \SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
   \SetKwInOut{Input}{entrée}\SetKwInOut{Output}{sortie}
   \Input{$\mathcal P$ Le nuage de point provenant de la caméra}
-  \Input{$\alpha$ La longueur de pas à parcourir à chaque itération}
   \Input{$D$ La distance à garder par rapport aux murs}
   \Output{${po}$ la position objectif de la caméra}
   \Output{$\vect{u}$ le vecteur d'orientation de la caméra}
@@ -89,19 +88,50 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
   $\mathcal S$  $\gets$ DécoupeAvant($\mathcal S$) \label{alg:slice:decoupe}   \\
   $\vect{p}^c$         $\gets$ Moyenne($\mathcal S$)         \\
   $[\vect{v}_1, \vect{v}_2, \vect{v}_3; \lambda_1, \lambda_2, \lambda_3] \gets$ AnalyseComposantesPrincipales($\mathcal S$) \label{alg:slice:pca}\\
-  $\vect{\tilde u} \gets \vect{v}_3 - (\vect{v}_3\cdot\vect{z}_{\fr c})\vect{v}_3 $ \tcc{Projection vers le plan $\vect{x_c}\vect{y_c}$} \\
+  $\vect{\tilde u} \gets \vect{v}_3 - (\vect{v}_3\cdot\vect{z}_{\fr c})\vect{v}_3 $ \tcp*[r]{Projection vers le plan $\vect{x_c}\vect{y_c}$} \\
   $\vect{u} \gets \vect{\tilde u} \; \text{sign}(\vect{\tilde u} \cdot \overrightarrow{O_{\fr c} \overline{p}^{\fr c}}); \vect{u} \gets \vect{u}/\|\vect{u}\|$ \label{alg:slice:sign} \\
   $\vect{r} \gets \vect{z}_{\fr c} \times \vect{u}$ \\
-  ${po} \gets p^c - D \vect{u} + \alpha \vect{r}$     \\
+  \tcp{Vérification de la largeur de $\mathcal{S}$}
+  \eIf{$y^c_{max} - y^c_{min} > w$­­­­}{
+    $\alpha = \frac{y^c_{max} - y^c_{min}}{6}$ \tcp*[r]{Calcul de la longueur de pas à prendre}\\
+    ${po} \gets p^c - D \vect{u} + \alpha \vect{r}$   \label{alg:slice:po} \\
+  }{
+    ${po} \gets p^c + D \vect{r}$
+  }
   \Return ${po}, \vect{u}$
 
   \caption{Calcul de la prochaine pose objectif au moyen du nuage de point courant de la caméra.}
   \label{alg:PE_next_goal}
 \end{algorithm}
 
-Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ sur lequel repose la caméra et pour résoudre l'ambiguïté de signe possible provenant de $\vect{v}_3$, $\vect{u}$ est pris pour pointer dans la direction du vecteur $\overrightarrow{O_{\fr c} \overline{p}^{\fr c}}$, c'est-à-dire de la caméra au centre de $\mathcal{S}$. L'algorithme retourne aussi la position objectif ${po}$ de la caméra dans $\mathsf{G}$
+Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ sur lequel repose la caméra et pour résoudre l'ambiguïté de signe possible provenant de $\vect{v}_3$, $\vect{u}$ est pris pour pointer dans la direction du vecteur $\overrightarrow{O_{\fr c} \overline{p}^{\fr c}}$, c'est-à-dire de la caméra au centre de $\mathcal{S}$. L'algorithme retourne aussi la position objectif ${po}$ de la caméra, calculé à partir de $-D\vect{u}$ pour garder la bonne distance au mur et $\alpha \vect{r}$ pour faire avancer le robot autour des coins de la structure. La Figure \ref{fig:ugv_goal_determination} permet de mieux visualiser cet effet, $\vect{r}$ repose sur le plan $\Pi$ et permet à la caméra de voir autour des coins pour passer au prochain mur à inspecter. Une limite à cette approche est que dans le cas de coins aiguës ou de murs particulièrements minces, la caméra ne pourra avancer assez pour voir la suite du mur. Nous pouvons détecter ce cas quand la largeur de $\mathcal{S}$ tombe en-dessous d'un certain seuil $w$, c'est à ce moment que ${po}$ est calculé par ${po} \gets p^c + D \vect{r}$, forçant ainsi l'UGV à tourner autour du coin.
+
+Finalement ${po}$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot  devient donc de bouger de façon à placer $O_c$ à ${po}$ et d'orienter la caméra selon $\vect{u}$.
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.3\linewidth]{images/placeholder.png}
+  \caption{Illustration du calcul de la prochaine position objectif.}
+  \label{fig:ugv_goal_determination}
+\end{figure}
 
 \subsection{Planification de trajectoire locale}
+
+Puisque notre robot est terrestre, la tâche de planification de trajectoire se simplifie en deux dimensions. Pour ce faire, le modèle 3D en construction est projetté sur une grille 2D pour établir une carte d'occupation. On prend un sous ensemble local de la carte de taille $2D \times 2D$ (nous rappellons que $D$ est la distance à la structure désirée) autour de la position de la caméra pour calculer une trajectoire par champ de potentiel \citep{Khatib1990, Choset2005}. Soit $k$ cellules occupées aux coordonnées $\{x_j\}^k_{j=1}$ nous avons la fonction de potentiel
+\begin{align}
+  N(x) &= \alpha \| x - g \|^2 + \sum^k_{j=1} I_j(x)d_j(x)
+\end{align}
+où $\alpha$ est un scalaire. $d_j$ est la fonction de répulsion définie par
+\begin{align}
+  d_j &= \frac{1}{\beta \| x - x_j \|}
+\end{align}
+où $\beta$ est un scalaire et $I_j(x)$ est le terme limitant la portée de $d_j$ par
+\begin{align}
+  I_j(x) =     \begin{cases}
+      1, & \text{si}\ \|x - x_j\| \leq D \\
+      0, & \text{autrement}
+    \end{cases}
+\end{align}
 
 \subsection{Replanification pour le saut de cavités}
 
