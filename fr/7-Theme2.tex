@@ -34,13 +34,20 @@ C'est dans ce contexte que nous proposons une méthode de planification de traje
     \hline
     Symbole & Nom                   & Description\\\hline
     $\mathsf{G} \coloneqq \{\mathsf{O_G}, \vect{x_g}, \vect{y_g}, \vect{z_g} \} $     &  \textit{Global}      & L'origine $\mathsf{O_G}$ se situant au point de départ du robot et les axes $\{\vect{x_g}, \vect{y_g}, \vect{z_g} \}$ alignés selon la pose initiale du robot.\\\hline
-    $\mathsf{R} \coloneqq \{\mathsf{O_G}, \vect{x_g}, \vect{y_g}, \vect{z_g} \} $     &  \textit{Robot}       & Repère centré sur le robot avec les axes avant-gauche-haut.\\\hline
-    $\mathsf{C}$     &  \textit{Camera}      & Repère centré sur la caméra, la transformée est rigide par rapport à $R$ sauf pour l'angle de lacet.\\\hline
+    $\mathsf{R} \coloneqq \{\mathsf{O_R}, \vect{x_r}, \vect{y_r}, \vect{z_r} \} $     &  \textit{Robot}       & Repère centré sur le robot avec les axes avant-gauche-haut.\\\hline
+    $\mathsf{C} \coloneqq \{\mathsf{O_C}, \vect{x_c}, \vect{y_c}, \vect{z_c} \}$     &  \textit{Camera}      & Repère centré sur la caméra, la transformée est rigide par rapport à $R$ sauf pour l'angle de lacet. \\\hline
   \end{tabular}
   \setlength{\tabcolsep}{6pt}
   \caption{Repères présents dans le système d'inspections par UGV}
   \label{table:ugv_frames}
 \end{table}
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.3\linewidth]{images/placeholder.png}
+  \caption{aa}
+  \label{aa}
+\end{figure}
 
 L'inspection se fait en 2 phases, l'exploration du périmètre (EP) présentée dans la section \ref{sec:perimeter_exploration} suivit de l'exploration des cavités (EC) présentée dans la section \ref{sec:cavity_exploration}. Dans la première phase, l'UGV fait le tour de la structure en sautant les cavités pour fermer la boucle le plus tôt possible. Ensuite, une analyse de la carte 3D est effectuée pour trouver les \textit{frontier} indiquant des cavités non-explorées dans la structure. Une trajectoire est planifiée pour diriger le robot vers la cavité pour cartographier l'intérieur de la structure. L'inspection se termine quand toutes les cavités ont été inspectées.
 
@@ -56,18 +63,16 @@ L'algorithme \ref{alg:PE_next_goal} présente la méthode par laquelle nous calc
 \end{align}
 où $y^c_{max}$ et $y^c_{min}$ sont le maximum et le minimum des coordonnées $y^c$ de $\mathcal{P}$.
 
-La \ref{alg:slice:pca}\textsuperscript{ième} étape est de déterminer la normale de la surface. \citep{Rusu2009} explique que par le passé ceci aurait été fait en résolvant un problème des moindres carrés pour ajuster le modèle d'un plan au nuage $\mathcal{S}$. On peut représenter le plan par un point $\vect{x}$ et un vecteur normal $\vect{\tilde n}$, et la distance d'un point $\vect{p}_i \in \mathcal{S}$ au plan est défini par $d_i = (\vect{p}_i - \vect{x} \cdot \vect{\tilde n})$. On choisi $\vect{x} = \vect{p}^c$ la moyenne des points de $\mathcal{S}$.
+La \ref{alg:slice:pca}\textsuperscript{ième} étape est de déterminer la normale $\vect{n}$ de la surface. \citep{Rusu2009} explique que par le passé ceci aurait été fait en résolvant un problème des moindres carrés pour ajuster le modèle d'un plan au nuage $\mathcal{S}$. On peut représenter le plan par un point $\vect{x}$ et un vecteur normal $\vect{n}$, et la distance d'un point $\vect{p}_i \in \mathcal{S}$ au plan est défini par $d_i = (\vect{p}_i - \vect{x} \cdot \vect{n})$. On choisi $\vect{x} = \vect{p}^c$ la moyenne des points de $\mathcal{S}$.
 \begin{align}
   \vect{x} = \vect{p}^c = \frac{1}{k} \cdot \sum^{k}_{i=1} \vect{p}_i
 \end{align}
-Suivant une formulation par moindres carrés on cherche donc à mettre les $d_i = 0$. La solution de $\vect{\tilde n}$ peut être trouvée par Analyse des Composantes Principales en calculant les vecteurs propres et les valeurs propres de la matrice de covariance $\mathcal{C} \in \mathbb{R}^{3\times 3}$ de $\mathcal{S}$.
+
+Suivant une formulation par moindres carrés on cherche donc à mettre les $d_i = 0$. La solution de $\vect{n}$ peut être trouvée par Analyse des Composantes Principales (ACP) en calculant les vecteurs propres et les valeurs propres de la matrice de covariance $\mathcal{C} \in \mathbb{R}^{3\times 3}$ de $\mathcal{S}$.
 \begin{align}
   \mathcal{C} = \frac{1}{k} \sum^{k}_{i=1} (\vect{p}_i - \vect{p}^c) \cdot (\vect{p}_i - \vect{p}^c)^\top, \mathcal{C} \cdot \vect{v}_j = \lambda_j \cdot \vect{v}_j, j \in \{0, 1, 2\}
 \end{align}
-Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in \mathbb{R}$. Les vecteurs propres $\vect{v}_j$ forment ainsi une base orthonormale correspondantes aux composantes principales de $\mathcal{S}$. En classant les valeurs propres par $0 \leq \lambda_3 \leq \lambda_2 \leq \lambda_1$, nous avons $\vect{v}_3$ le vecteur propre correspondant à la plus petite valeur propre $\lambda_3$ est donc une approximation de la normale de la surface mais avec un ambiguïté de signe.
-
-
-faire une analyse des composantes principales du nuage $\mathcal{S}$ pour obtenir les vecteurs propres $[\vect{v}_1, \vect{v}_2, \vect{v}_3]$ et leurs valeurs propres associées en ordre décroissants.
+Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in \mathbb{R}$. Les vecteurs propres $\vect{v}_j$ forment ainsi une base orthonormale correspondantes aux composantes principales de $\mathcal{S}$. En classant les valeurs propres par $0 \leq \lambda_3 \leq \lambda_2 \leq \lambda_1$, nous avons $\vect{v}_3$ le vecteur propre correspondant à la plus petite valeur propre $\lambda_3$ qui est donc une approximation de la normale $\pm \vect{n} \sim \vect{v}_{3}$ du plan mais avec un ambiguïté de signe.
 
 \begin{algorithm}[ht]
   \SetAlgoLined
@@ -77,22 +82,24 @@ faire une analyse des composantes principales du nuage $\mathcal{S}$ pour obteni
   \Input{$\mathcal P$ Le nuage de point provenant de la caméra}
   \Input{$\alpha$ La longueur de pas à parcourir à chaque itération}
   \Input{$D$ La distance à garder par rapport aux murs}
-  \Output{${po}$ la position objectif}
-  \Output{$\vect{n}$ le vecteur d'orientation de la caméra}
+  \Output{${po}$ la position objectif de la caméra}
+  \Output{$\vect{u}$ le vecteur d'orientation de la caméra}
 
   $\mathcal S$  $\gets$ FiltrageDuSol($\mathcal P$)   \\
   $\mathcal S$  $\gets$ DécoupeAvant($\mathcal S$) \label{alg:slice:decoupe}   \\
   $\vect{p}^c$         $\gets$ Moyenne($\mathcal S$)         \\
   $[\vect{v}_1, \vect{v}_2, \vect{v}_3; \lambda_1, \lambda_2, \lambda_3] \gets$ AnalyseComposantesPrincipales($\mathcal S$) \label{alg:slice:pca}\\
-  $\vect{\tilde n} \gets \vect{v}_3 - (\vect{v}_3\cdot\vect{z}_{\fr c})\vect{v}_3 $ \tcc{Projection vers le plan $\vect{x_c}\vect{y_c}$} \\
-  $\vect{n} \gets \vect{\tilde n} \; \text{sign}(\vect{\tilde n} \cdot \overrightarrow{O_{\fr c} \overline{p}^{\fr c}}); \vect{n} \gets \vect{n}/\|\vect{n}\|$ \label{alg:slice:test} \\
-  $\vect{r} \gets \vect{z}_{\fr c} \times \vect{n}$ \\
-  ${po} \gets p^c - D \vect{n} + \alpha \vect{r}$     \\
-  \Return ${po}, \vect{n}$
+  $\vect{\tilde u} \gets \vect{v}_3 - (\vect{v}_3\cdot\vect{z}_{\fr c})\vect{v}_3 $ \tcc{Projection vers le plan $\vect{x_c}\vect{y_c}$} \\
+  $\vect{u} \gets \vect{\tilde u} \; \text{sign}(\vect{\tilde u} \cdot \overrightarrow{O_{\fr c} \overline{p}^{\fr c}}); \vect{u} \gets \vect{u}/\|\vect{u}\|$ \label{alg:slice:sign} \\
+  $\vect{r} \gets \vect{z}_{\fr c} \times \vect{u}$ \\
+  ${po} \gets p^c - D \vect{u} + \alpha \vect{r}$     \\
+  \Return ${po}, \vect{u}$
 
   \caption{Calcul de la prochaine pose objectif au moyen du nuage de point courant de la caméra.}
   \label{alg:PE_next_goal}
 \end{algorithm}
+
+Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ sur lequel repose la caméra et pour résoudre l'ambiguïté de signe possible provenant de $\vect{v}_3$, $\vect{u}$ est pris pour pointer dans la direction du vecteur $\overrightarrow{O_{\fr c} \overline{p}^{\fr c}}$, c'est-à-dire de la caméra au centre de $\mathcal{S}$. L'algorithme retourne aussi la position objectif ${po}$ de la caméra dans $\mathsf{G}$
 
 \subsection{Planification de trajectoire locale}
 
