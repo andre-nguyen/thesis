@@ -144,6 +144,7 @@ En d'autres mots, considérons $\mathcal M_D = \left\lbrace x : J_{x} \neq \empt
 En somme, les équation et algorithmes ci-dessus permettent au robot d'incrémentalement parcourir la surface de la structure en gardant un point de vue orthogonal aux murs.
 
 \subsection{Saut de cavités}
+\label{subsec:ugv_cavity_skip}
 
 Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que le robot s'apprête à tourner autour du coin pour entrer dans la cavité, le détecteur d'obstacles déclenche en voyant le mur arrière. D'une part, nous voulons éviter d'entrer dans la cavité et d'autre part nous voulons empêcher le robot de s'approcher à moins de $D$ de distance d'un mur qui se retrouverait hors de son champ de vision. C'est pourquoi lorsque l'obstacle est détecté, le robot s'arrête et tourne le capteur de profondeur dans la direction de la détection. L'algorithme \ref{alg:PE_next_goal} est réexécuté avec le nouveau nuage de points $S$ pris en avant du robot et la trajectoire d'inspection se poursuit vers la gauche.
 
@@ -159,14 +160,36 @@ Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que l
 	\label{subfig:ugv_interference}
 }
 \caption{ 
-a) }
+Exemple de détection d'obstacle et de saut de cavité. a) Le robot (transparent) tente de tourner autour du coin mais détecte un mur vers l'avant. La trajectoire est replanifiée pour continuer vers la gauche sans entrer dans la cavité.}
 \label{fig:ugv_exploration}
 \end{figure}
 
-
 \subsection{Fin de l'exploration de périmètre}
 
-\section{Exploration des cavités} \label{sec:cavity_exploration}
+La phase EP se termine lorsqu'une fermeture de boucle globale est détectée par le module de SLAM. Ceci peut-être difficile si la trajectoire a accumulée trop d'erreur ou si l'environnement ne comporte pas de caractéristiques uniques permettant au système de SLAM de définitivement détecter le retour à un endroit connu. C'est pourquoi nous recommendons l'ajout d'un object unique à la position de départ du robot pour assurer une bonne fermeture de boucle. Dans nos tests, ceci consistait en une pancarte colorée placée sur la surface de la structure tel que dans la Figure \ref{fig:ugv_pancarte}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/ugv_unique.jpg}
+  \caption{Exemple d'objet unique à placer au point de départ pour assurer une fermeture de boucle.}
+  \label{fig:ugv_pancarte}
+\end{figure}
+
+\section{Finition du modèle} \label{sec:cavity_exploration}
+
+Au terme de la phase EP le modèle de la structure produit par le module de SLAM demeure incomplet pour deux raisons possibles. La première est dût à des occlusions présentes dans les régions explorées provenant de la structure elle même par sa forme irrégulière ou par un échec du capteur de profondeur. La deuxième provient des régions non-explorées qui ont été ignorées par la phase EP par la maneuvre expliquée à la section \ref{subsec:ugv_cavity_skip}. Dans cette section, nous traitons du deuxième cas et nous présentons une méthode permettant de détecter les régions qui restent à explorer et de complèter le modèle.
+
+\subsection{Détection des cavités}
+
+À mesure que la robot cartographie la structure, la séquence de nuages de points se fait assembler dans un grand modèle contenant tous les nuages que le module de SLAM considère utile à intégrer. Suite à la fermeture de boucle, nous avons un estimé optimal de toutes les poses du robot à partir desquels chaque nuage de point a été capté. Grâce à cette information, il est possible de d'effectuer un traçage de rayon dans une OctoMap pour nous donner une représentation 3D de l'environnement qui inclu l'espace vide, occupé et inconnu.
+
+
+En parallèle, ces points sont projettés dans une OctoMap \citep{Hornung2013} nous donnant ainsi accès à une carte discrète 3D de l'environnement. Puisque les points 
+
+\subsection{Exploration des cavités}
+
+
+
 
 \section{Résultats} \label{sec:ugv_results}
 
