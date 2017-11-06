@@ -181,10 +181,10 @@ Au terme de la phase EP le modèle de la structure produit par le module de SLAM
 
 \subsection{Détection des cavités}
 
-À mesure que la robot cartographie la structure, la séquence de nuages de points se fait assembler dans un grand modèle contenant tous les nuages que le module de SLAM considère utile à intégrer. Suite à la fermeture de boucle, nous avons un estimé optimal de toutes les poses du robot à partir desquels chaque nuage de point a été capté. Grâce à cette information, il est possible de d'effectuer un traçage de rayon dans une OctoMap pour nous donner une représentation 3D de l'environnement qui inclu l'espace vide, occupé et inconnu.
+À mesure que la robot cartographie la structure, la séquence de nuages de points se fait assembler dans un grand modèle contenant tous les nuages que le module de SLAM considère utile à intégrer. Suite à la fermeture de boucle, nous avons un estimé optimal de toutes les poses du robot à partir desquels chaque nuage de point a été capté. Grâce à cette information, il est possible de d'effectuer un traçage de rayon dans une OctoMap \citep{Hornung2013} pour nous donner une représentation 3D de l'environnement qui inclu l'espace vide, occupé et inconnu.
 
+Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cellule adjacente à une cellule de l'espace inconnu. Grâce à notre OctoMap il est donc possible de calculer l'ensemble de tous les voxels frontier. 
 
-En parallèle, ces points sont projettés dans une OctoMap \citep{Hornung2013} nous donnant ainsi accès à une carte discrète 3D de l'environnement. Puisque les points 
 
 \subsection{Exploration des cavités}
 
