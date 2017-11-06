@@ -2,7 +2,7 @@
 \Chapter{Inspection d'infrastructure par UGV}
 \label{sec:ugv}
 
-Dans cette section nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures}. Le contenu diffère de l'article pour ajouter des explications à propos de certains sujets qui avaient été écourtés par manque d'espace et pour mettre plus d'emphase sur la partie d'implémentation de la méthode.
+Dans cette section nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures}. Le contenu diffère de l'article pour ajouter des explications à propos de certains sujets qui avaient été écourtés par manque d'espace et pour mettre plus d'emphase sur la partie d'implémentation de la méthode. Certaines figures produites en simulation ont aussi été remplacées par leur équivalents en photo réalisées lors des expériences
 
 \color{red}
 Ajouter un breakdown des sections qui suivent.
@@ -94,11 +94,11 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
   \tcp{Vérification de la largeur de $\mathcal{S}$}
   \eIf{$y^c_{max} - y^c_{min} > w$­­­­}{
     $\alpha = \frac{y^c_{max} - y^c_{min}}{6}$ \tcp*[r]{Calcul de la longueur de pas à prendre}\\
-    ${po} \gets p^c - D \vect{u} + \alpha \vect{r}$   \label{alg:slice:po} \\
+    ${po^c} \gets p^c - D \vect{u} + \alpha \vect{r}$   \label{alg:slice:po} \\
   }{
-    ${po} \gets p^c + D \vect{r}$
+    ${po^c} \gets p^c + D \vect{r}$
   }
-  \Return ${po}, \vect{u}$
+  \Return ${po^c}, \vect{u}$
 
   \caption{Calcul de la prochaine pose objectif au moyen du nuage de point courant de la caméra.}
   \label{alg:PE_next_goal}
@@ -106,7 +106,7 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
 
 Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ sur lequel repose la caméra et pour résoudre l'ambiguïté de signe possible provenant de $\vect{v}_3$, $\vect{u}$ est pris pour pointer dans la direction du vecteur $\overrightarrow{O_{\fr c} \overline{p}^{\fr c}}$, c'est-à-dire de la caméra au centre de $\mathcal{S}$. L'algorithme retourne aussi la position objectif ${po}$ de la caméra, calculé à partir de $-D\vect{u}$ pour garder la bonne distance au mur et $\alpha \vect{r}$ pour faire avancer le robot autour des coins de la structure. La Figure \ref{fig:ugv_goal_determination} permet de mieux visualiser cet effet, $\vect{r}$ repose sur le plan $\Pi$ et permet à la caméra de voir autour des coins pour passer au prochain mur à inspecter. Une limite à cette approche est que dans le cas de coins aiguës ou de murs particulièrements minces, la caméra ne pourra avancer assez pour voir la suite du mur. Nous pouvons détecter ce cas quand la largeur de $\mathcal{S}$ tombe en-dessous d'un certain seuil $w$, c'est à ce moment que ${po}$ est calculé par ${po} \gets p^c + D \vect{r}$, forçant ainsi l'UGV à tourner autour du coin.
 
-Finalement ${po}$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot  devient donc de bouger de façon à placer $O_c$ à ${po}$ et d'orienter la caméra selon $\vect{u}$.
+Finalement ${po^c}$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot devient donc de bouger de façon à placer $O_c$ à ${po^g}$ et d'orienter la caméra selon $\vect{u}$.
 
 \begin{figure}[htp]
   \centering
@@ -119,7 +119,7 @@ Finalement ${po}$ est transformé dans le repère $\mathsf{G}$ pour fins de navi
 
 Puisque notre robot est terrestre, la tâche de planification de trajectoire se simplifie en deux dimensions. Pour ce faire, le modèle 3D en construction est projetté sur une grille 2D pour établir une carte d'occupation. On prend un sous ensemble local de la carte de taille $2D \times 2D$ (nous rappellons que $D$ est la distance à la structure désirée) autour de la position de la caméra pour calculer une trajectoire par champ de potentiel \citep{Khatib1990, Choset2005}. Soit $k$ cellules occupées aux coordonnées $\{x_j\}^k_{j=1}$ nous avons la fonction de potentiel
 \begin{align}
-  N(x) &= \alpha \| x - g \|^2 + \sum^k_{j=1} I_j(x)d_j(x)
+  N(x) &= \alpha \| x - {po}^g \|^2 + \sum^k_{j=1} I_j(x)d_j(x)
 \end{align}
 où $\alpha$ est un scalaire. $d_j$ est la fonction de répulsion définie par
 \begin{align}
@@ -132,8 +132,37 @@ où $\beta$ est un scalaire et $I_j(x)$ est le terme limitant la portée de $d_j
       0, & \text{autrement}
     \end{cases}
 \end{align}
+Pour guider le robot à sa destination, il suffit de suivre le gradient négatif du champ de potentiel en envoyant des commandes de vitesses à l'UGV $\dot x = -\nabla N(x)$.
+\begin{align}
+  - \nabla N(x) = 2 \alpha ({po}^g - x) + \sum_{i \in J_x}\frac{1}{\beta \| x - x_i\|^3}(x - x_i)
+  \label{eq:ugv_potential_field_gradient}
+\end{align}
+où $J_x = \{ j : I_j(x) = 1\}$ l'ensemble des cellules occupées de la carte dans un voisinage $D$ de $x$.
 
-\subsection{Replanification pour le saut de cavités}
+En d'autres mots, considérons $\mathcal M_D = \left\lbrace x : J_{x} \neq \emptyset \right\rbrace $ la région à l'intérieur d'une distance $D$ de la structure, pour une petite valeur de $\beta$ le terme de répulsion dans l'équation \ref{eq:ugv_potential_field_gradient} repousse le véhicule. Quand l'UGV se situe en dehors de $\mathcal M_D$ le premier terme de l'équation \ref{eq:ugv_potential_field_gradient} devient dominant et attire le véhicule vers $po^g$. Nous arrêtons de suivre le gradient une fois que l'UGV se retrouve dans un certain rayon d'acceptation de la position objectif, après quoi nous recommençons l'algorithme \ref{alg:PE_next_goal}.
+
+En somme, les équation et algorithmes ci-dessus permettent au robot d'incrémentalement parcourir la surface de la structure en gardant un point de vue orthogonal aux murs.
+
+\subsection{Saut de cavités}
+
+Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que le robot s'apprête à tourner autour du coin pour entrer dans la cavité, le détecteur d'obstacles déclenche en voyant le mur arrière. D'une part, nous voulons éviter d'entrer dans la cavité et d'autre part nous voulons empêcher le robot de s'approcher à moins de $D$ de distance d'un mur qui se retrouverait hors de son champ de vision. C'est pourquoi lorsque l'obstacle est détecté, le robot s'arrête et tourne le capteur de profondeur dans la direction de la détection. L'algorithme \ref{alg:PE_next_goal} est réexécuté avec le nouveau nuage de points $S$ pris en avant du robot et la trajectoire d'inspection se poursuit vers la gauche.
+
+\begin{figure}[ht]
+\centering
+\subfloat[ ]{
+	\includegraphics[width=0.45\linewidth]{images/Lookahead}
+	\label{subfig:ugv_gazebo}
+}
+\hfil
+\subfloat[]{
+	\includegraphics[width=0.45\linewidth]{images/ugv_interference.jpg}
+	\label{subfig:ugv_interference}
+}
+\caption{ 
+a) }
+\label{fig:ugv_exploration}
+\end{figure}
+
 
 \subsection{Fin de l'exploration de périmètre}
 
