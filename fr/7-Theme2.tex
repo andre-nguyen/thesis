@@ -81,7 +81,7 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
   \SetKwInOut{Input}{entrée}\SetKwInOut{Output}{sortie}
   \Input{$\mathcal P$ Le nuage de point provenant de la caméra}
   \Input{$D$ La distance à garder par rapport aux murs}
-  \Output{${po}$ la position objectif de la caméra}
+  \Output{${po}^c$ la position objectif de la caméra dans le repère $\mathsf{C}$}
   \Output{$\vect{u}$ le vecteur d'orientation de la caméra}
 
   $\mathcal S$  $\gets$ FiltrageDuSol($\mathcal P$)   \\
@@ -94,11 +94,11 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
   \tcp{Vérification de la largeur de $\mathcal{S}$}
   \eIf{$y^c_{max} - y^c_{min} > w$­­­­}{
     $\alpha = \frac{y^c_{max} - y^c_{min}}{6}$ \tcp*[r]{Calcul de la longueur de pas à prendre}\\
-    ${po} \gets p^c - D \vect{u} + \alpha \vect{r}$   \label{alg:slice:po} \\
+    ${po}^c \gets p^c - D \vect{u} + \alpha \vect{r}$   \label{alg:slice:po} \\
   }{
-    ${po} \gets p^c + D \vect{r}$
+    ${po}^c \gets p^c + D \vect{r}$
   }
-  \Return ${po}, \vect{u}$
+  \Return ${po}^c, \vect{u}$
 
   \caption{Calcul de la prochaine pose objectif au moyen du nuage de point courant de la caméra.}
   \label{alg:PE_next_goal}
@@ -106,7 +106,7 @@ Où \mathcal{C} est semi-défini positive et les valeurs propres $\lambda_j \in 
 
 Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ sur lequel repose la caméra et pour résoudre l'ambiguïté de signe possible provenant de $\vect{v}_3$, $\vect{u}$ est pris pour pointer dans la direction du vecteur $\overrightarrow{O_{\fr c} \overline{p}^{\fr c}}$, c'est-à-dire de la caméra au centre de $\mathcal{S}$. L'algorithme retourne aussi la position objectif ${po}$ de la caméra, calculé à partir de $-D\vect{u}$ pour garder la bonne distance au mur et $\alpha \vect{r}$ pour faire avancer le robot autour des coins de la structure. La Figure \ref{fig:ugv_goal_determination} permet de mieux visualiser cet effet, $\vect{r}$ repose sur le plan $\Pi$ et permet à la caméra de voir autour des coins pour passer au prochain mur à inspecter. Une limite à cette approche est que dans le cas de coins aiguës ou de murs particulièrements minces, la caméra ne pourra avancer assez pour voir la suite du mur. Nous pouvons détecter ce cas quand la largeur de $\mathcal{S}$ tombe en-dessous d'un certain seuil $w$, c'est à ce moment que ${po}$ est calculé par ${po} \gets p^c + D \vect{r}$, forçant ainsi l'UGV à tourner autour du coin.
 
-Finalement ${po}$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot  devient donc de bouger de façon à placer $O_c$ à ${po}$ et d'orienter la caméra selon $\vect{u}$.
+Finalement ${po}^c$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot  devient donc de bouger de façon à placer $O_c$ à ${po}^g$ et d'orienter la caméra selon $\vect{u}$.
 
 \begin{figure}[htp]
   \centering
@@ -117,21 +117,29 @@ Finalement ${po}$ est transformé dans le repère $\mathsf{G}$ pour fins de navi
 
 \subsection{Planification de trajectoire locale}
 
-Puisque notre robot est terrestre, la tâche de planification de trajectoire se simplifie en deux dimensions. Pour ce faire, le modèle 3D en construction est projetté sur une grille 2D pour établir une carte d'occupation. On prend un sous ensemble local de la carte de taille $2D \times 2D$ (nous rappellons que $D$ est la distance à la structure désirée) autour de la position de la caméra pour calculer une trajectoire par champ de potentiel \citep{Khatib1990, Choset2005}. Soit $k$ cellules occupées aux coordonnées $\{x_j\}^k_{j=1}$ nous avons la fonction de potentiel
+Puisque notre robot est terrestre, la tâche de planification de trajectoire se simplifie en deux dimensions. Pour ce faire, le modèle 3D en construction est projetté sur une grille 2D pour établir une carte d'occupation. On prend un sous ensemble local de la carte de taille $2D \times 2D$ (nous rappellons que $D$ est la distance à la structure désirée) autour de la position de la caméra pour calculer une trajectoire par champ de potentiel \citep{Khatib1990, Choset2005}.
+
+Soit $k$ cellules occupées aux coordonnées $\{x_j\}^k_{j=1}$ nous avons la fonction de potentiel
 \begin{align}
-  N(x) &= \alpha \| x - g \|^2 + \sum^k_{j=1} I_j(x)d_j(x)
+  N(x) &= \alpha \| x - {po}^g \|^2 + \sum^k_{j=1} I_j(x)d_j(x)
 \end{align}
-où $\alpha$ est un scalaire. $d_j$ est la fonction de répulsion définie par
+où $\alpha > 0$. $d_j$ est la contribution au potentiel de répulsion fourni par la $j^{\text{ième}}$ cellule occupée.
 \begin{align}
   d_j &= \frac{1}{\beta \| x - x_j \|}
 \end{align}
-où $\beta$ est un scalaire et $I_j(x)$ est le terme limitant la portée de $d_j$ par
+où $\beta > 0$ et $I_j(x)$ est le terme limitant la portée de $d_j$ par
 \begin{align}
   I_j(x) =     \begin{cases}
       1, & \text{si}\ \|x - x_j\| \leq D \\
       0, & \text{autrement}
     \end{cases}
 \end{align}
+Pour se rendre à la position objectif, is suffit de suivre le gradient négatif du champ de potentiel.
+\begin{align}
+  - \nabla N(x) = 2\alpha({po}^g-x) + \sum_{i \in J_x} \frac{1}{\beta \| x - x_i \|^3} (x - x_i)
+\end{align}
+où $J_x$ est l'ensemble des cellules occupées dans un voisinage $D$ de $x$, c'est-à-dire $J_x = \{j : I_j(x) = 1\}$. Considérons maintenant l'espace $\mathcal M_D = \left\lbrace x : J_{x} \neq \emptyset \right\rbrace $, la région à une distance $D$ de la structure.  
+
 
 \subsection{Replanification pour le saut de cavités}
 
