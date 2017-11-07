@@ -150,7 +150,7 @@ Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que l
 
 \begin{figure}[ht]
 \centering
-\subfloat[ ]{
+\subfloat[]{
 	\includegraphics[width=0.45\linewidth]{images/Lookahead}
 	\label{subfig:ugv_gazebo}
 }
@@ -159,7 +159,7 @@ Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que l
 	\includegraphics[width=0.45\linewidth]{images/ugv_interference.jpg}
 	\label{subfig:ugv_interference}
 }
-\caption{ 
+\caption{
 Exemple de détection d'obstacle et de saut de cavité. a) Le robot (transparent) tente de tourner autour du coin mais détecte un mur vers l'avant. La trajectoire est replanifiée pour continuer vers la gauche sans entrer dans la cavité.}
 \label{fig:ugv_exploration}
 \end{figure}
@@ -183,8 +183,26 @@ Au terme de la phase EP le modèle de la structure produit par le module de SLAM
 
 À mesure que la robot cartographie la structure, la séquence de nuages de points se fait assembler dans un grand modèle contenant tous les nuages que le module de SLAM considère utile à intégrer. Suite à la fermeture de boucle, nous avons un estimé optimal de toutes les poses du robot à partir desquels chaque nuage de point a été capté. Grâce à cette information, il est possible de d'effectuer un traçage de rayon dans une OctoMap \citep{Hornung2013} pour nous donner une représentation 3D de l'environnement qui inclu l'espace vide, occupé et inconnu.
 
-Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cellule adjacente à une cellule de l'espace inconnu. Grâce à notre OctoMap il est donc possible de calculer l'ensemble de tous les voxels frontier. 
+Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cellule vide adjacente à une cellule de l'espace inconnu. Grâce à notre OctoMap il est donc possible de calculer l'ensemble de tous les voxels frontier. Une particularité de l'utilisation d'une caméra de profondeur lors de l'inspection est que l'espace connu prend la forme d'un tronc de pyramide correspondant au champ de vision de la lentille. Ceci a pour effet, tel que l'on peut voir dans la figure \ref{subfig:ugv_frontier} que la carte finale inclut une grande quantité de voxels frontier correspondant aux hauts et aux bas des troncs de vue utilisés pour construire la carte.
 
+\begin{figure}[ht]
+  \centering
+  \subfloat[]{
+  	\includegraphics[width=0.45\linewidth]{images/frontier_candidates}
+  	\label{subfig:ugv_frontier}
+  }
+  \hfil
+  \subfloat[]{
+  	\includegraphics[width=0.45\linewidth]{images/frontier_voxels}
+  	\label{subfig:ugv_entrance}
+  }
+  \caption{
+    Analyse de la OctoMap avant le début de la phase d'exploration de cavités.
+    a) En jaune les voxels frontier et en bleu les voxels faisant partie de la structure.
+    b) En rouge les voxels frontier identifiant une entrée de cavité.
+  }
+  \label{fig:ugv_frontier}
+\end{figure}
 
 \subsection{Exploration des cavités}
 
