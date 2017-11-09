@@ -108,10 +108,20 @@ Le vecteur normal $\vect{v}_3$ est projetté sur le plan $\vect{x}_c\vect{y}_c$ 
 
 Finalement ${po^c}$ est transformé dans le repère $\mathsf{G}$ pour fins de navigation. Le but du robot devient donc de bouger de façon à placer $O_c$ à ${po^g}$ et d'orienter la caméra selon $\vect{u}$.
 
-\begin{figure}[htp]
+\begin{figure}[ht]
   \centering
-  \includegraphics[width=0.3\linewidth]{images/placeholder.png}
-  \caption{Illustration du calcul de la prochaine position objectif.}
+  \subfloat[]{
+  	\includegraphics[width=0.45\linewidth]{images/nbv}
+  	\label{subfig:ugv_nbv}
+  }
+  \hfil
+  \subfloat[]{
+  	\includegraphics[width=0.45\linewidth]{images/nbv_acute}
+  	\label{subfig:ugv_acute_angle}
+  }
+  \caption{
+    Illustration du calcul de la prochaine pose objectif a) dans le cas normal b) dans le cas d'un coin à angle aiguë.
+  }
   \label{fig:ugv_goal_determination}
 \end{figure}
 
@@ -140,6 +150,13 @@ Pour guider le robot à sa destination, il suffit de suivre le gradient négatif
 où $J_x = \{ j : I_j(x) = 1\}$ l'ensemble des cellules occupées de la carte dans un voisinage $D$ de $x$.
 
 En d'autres mots, considérons $\mathcal M_D = \left\lbrace x : J_{x} \neq \emptyset \right\rbrace $ la région à l'intérieur d'une distance $D$ de la structure, pour une petite valeur de $\beta$ le terme de répulsion dans l'équation \ref{eq:ugv_potential_field_gradient} repousse le véhicule. Quand l'UGV se situe en dehors de $\mathcal M_D$ le premier terme de l'équation \ref{eq:ugv_potential_field_gradient} devient dominant et attire le véhicule vers $po^g$. Nous arrêtons de suivre le gradient une fois que l'UGV se retrouve dans un certain rayon d'acceptation de la position objectif, après quoi nous recommençons l'algorithme \ref{alg:PE_next_goal}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\linewidth]{images/champ_de_potentiel.eps}
+  \caption{Exemple de visualisation du champ de potentiel. Les carrés jaunes représentent un mur et les vecteurs représentent la direction du gradient. }
+  \label{fig:potential_field}
+\end{figure}
 
 En somme, les équation et algorithmes ci-dessus permettent au robot d'incrémentalement parcourir la surface de la structure en gardant un point de vue orthogonal aux murs.
 
@@ -177,7 +194,7 @@ La phase EP se termine lorsqu'une fermeture de boucle globale est détectée par
 
 \section{Finition du modèle} \label{sec:cavity_exploration}
 
-Au terme de la phase EP le modèle de la structure produit par le module de SLAM demeure incomplet pour deux raisons possibles. La première est dût à des occlusions présentes dans les régions explorées provenant de la structure elle même par sa forme irrégulière ou par un échec du capteur de profondeur. La deuxième provient des régions non-explorées qui ont été ignorées par la phase EP par la maneuvre expliquée à la section \ref{subsec:ugv_cavity_skip}. Dans cette section, nous traitons du deuxième cas et nous présentons une méthode permettant de détecter les régions qui restent à explorer et de complèter le modèle.
+Au terme de la phase EP le modèle de la structure produit par le module de SLAM demeure incomplet pour deux raisons possibles. La première est dût à des occlusions présentes dans les régions explorées provenant de la structure elle même par sa forme irrégulière ou par un échec du capteur de profondeur. La deuxième provient des régions non-explorées qui ont été ignorées par la phase EP par la maneuvre expliquée à la section \ref{subsec:ugv_cavity_skip}. Dans cette section, nous profitons du deuxième cas pour détecter les régions qui restent à explorer nous permettant ainsi de complèter le modèle.
 
 \subsection{Détection des cavités}
 
@@ -204,11 +221,64 @@ Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cell
   \label{fig:ugv_frontier}
 \end{figure}
 
+\begin{algorithm}[ht]
+  \SetAlgoLined
+  \SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+  \SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+  \SetKwInOut{Input}{entrée}\SetKwInOut{Output}{sortie}
+
+  \Input{$\mathcal S$ Les nuages de points sauvegardés par le système de SLAM}
+  \Input{$\mathcal G$ Le graphe des poses optimisés de la carte et les nuages de points associés}
+  \Output{$\mathcal F$ L'ensemble des voxel frontier}
+
+  Get map from rtabmap\\
+    \Indp\\
+    \ForEach{$p \in \mathcal S$}{
+      Transform $p^c$ to $p^g$\\
+      Filter ground and ceiling from $p^g$\\
+      Insert and raycast into octomap\\
+      Also assemble into large cloud
+    }\\
+    \Indm
+  cloudmap_cb\\
+    \Indp
+    remove ground plane\\
+    constrain bounding box of octomap using full map\\
+    reconstruct convex hull\\
+    \Indm
+  determine frontiers\\
+    \Indp
+    \ForEach{leaf in octomap}{
+      \If{empty}{
+        add leaf to frontier candidates
+      }
+    }\\
+    crop out candidates outside of hull\\
+    \ForEach{candidate in frontier candidates}{
+      $\vec{n}_i = $ estimate normal of candidate through PCA using voxels in a radius around\\
+      \If{$| {\vec{n}_i}_z^g | < \alpha$}{
+        Reject voxel if it is too close to the structure
+      }\\
+    }\\
+    \Indm
+
+  \caption{Recherche voxel frontier indiquant une entrée de cavité possible de la OctoMap.}
+  \label{alg:CE_detection}
+\end{algorithm}
+
+Suivant l'algorithme \ref{alg:CE_detection} nous pouvons filtrer les voxels frontier selon la normale de la surface composée des voxels dans un certain voisinage $k$ du voxel considéré. Si $| n_z^g | < \alpha$ pour une certaine tolérance $\alpha$ le voxel est gardé. Une deuxième passe est réalisée pour enlever les frontier trop proches de la structure, ceci permet d'éliminer les défauts provenant d'occlusions ou d'échec de perception. Le seuil $d_0$ utilisé peut-être choisi par une fraction de la distance de sécurité, par exemple $d_0 = 0.1D$. Le résultat final de l'algorithme \ref{alg:CE_detection} appliqué à l'OctoMap présentée dans la Figure \ref{subfig:ugv_frontier} est visible dans la Figure \ref{subfig:ugv_entrance}.
+
+Nous avons maintenant un ensemble de voxel faisant possiblement partie des entrées de cavités dans la structure. Ces voxel sont partitionnés par leur distance euclidienne selon un algorithme de remplissage par diffusion. Les partitions dont la surface est en dessous d'un certain seuil sont supprimés. Ce seuil peut-être déterminé intuitivement par exemple en fonction de $D$ et de la largeur du robot. Nous pourrions par exemple supprimer toute entrée ne donnant pas assez d'espace au robot pour man{\oe}uvrer. À la fin de cette procédure, chaque partition représente une entrée de cavité.
+
 \subsection{Exploration des cavités}
 
+Une fois les entrées de cavités trouvées, il est possible de commencer la phase d'exploration des cavités (EC). Pour ce faire, chaque cavité est explorée de façon similaire à la phase EP, c'est-à-dire par suivit de mur en gardant la caméra orthogonale à la surface mais cette fois-ci à une distance $\Delta \in [\delta, D]$ où $\delta$ est la distance de perception minimale. Nous verrons plus tard comment choisir $\Delta$ mais avant nous devons examiner la façon de choisir un point de vue (PDV) de départ pour débuter la phase EC.
 
+En ordonnant les poses du graphe $\mathcal G$ provenant du système de SLAM par horodatage, pour chaque entrée nous choisissons la première pose qui possède une vue non-obstruée au centroïde des voxels composants l'entrée. Cette liste de poses objectifs sont à leur tour ordonnées par horodatage et explorées en ordre. Comme nous pouvons observer dans la Figure \ref{subfig:ugv_entrance}, la détection d'entrée calculera typiquement deux entrées par cavité, parfois plus. Pour éviter la redondance dans la phase EC, si le centroïde d'une entrée entre en vue pendant lors de l'exploration, l'entrée est enlevée de la liste.
 
+La phase EC requiert une méthode de navigation légèrement différente de la phase EP. Premièrement, la détection d'obstacle se fait maintenant que vers l'avant à une distance $\Delta$ du robot pour éviter de déclencher un virage prématuré. Nous modifions donc la ligne \ref{alg:slice:po} de l'algorithme \ref{alg:PE_next_goal} à ${po^c} \gets p^c - \Delta \vect{u} + \alpha \vect{r}$ et de même nous modifions la fonction du champ de potentiel pour générer des trajectoire à une distance $\Delta$ des murs. Nous pouvons détecter la fin de l'exploration d'une cavité lorsqu'une nouvelle fermeture de boucle est détectée, car les images prises à la sortie d'une cavité correspondrons à des endroits déjà visités par le module de SLAM.
 
 \section{Résultats} \label{sec:ugv_results}
+
 
 \section{Conclusion et travail futur}
