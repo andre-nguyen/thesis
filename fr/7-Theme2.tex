@@ -51,6 +51,13 @@ C'est dans ce contexte que nous proposons une méthode de planification de traje
 
 L'inspection se fait en 2 phases, l'exploration du périmètre (EP) présentée dans la section \ref{sec:perimeter_exploration} suivit de l'exploration des cavités (EC) présentée dans la section \ref{sec:cavity_exploration}. Dans la première phase, l'UGV fait le tour de la structure en sautant les cavités pour fermer la boucle le plus tôt possible. Ensuite, une analyse de la carte 3D est effectuée pour trouver les \textit{frontier} indiquant des cavités non-explorées dans la structure. Une trajectoire est planifiée pour diriger le robot vers la cavité pour cartographier l'intérieur de la structure. L'inspection se termine quand toutes les cavités ont été inspectées.
 
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.6\linewidth]{images/ugv_goal}
+  \caption{Illustration du but de l'algorithme. La premiètre trajectoire en noir indique l'exploration du périmètre qui saute les cavités pour revenir au point de départ le plus tôt possible et fermer la boucle. Les trajectoires rouges de la phase d'exploration de cavités viennent par après une fois que suffisamment de contraintes ont étés mises sur la carte.}
+  \label{fig:ugv_overview}
+\end{figure}
+
 \section{Exploration du périmètre} \label{sec:perimeter_exploration}
 
 Suivant les hypothèses de la section \ref{sec:ugv_hypothesis} le problème d'inspection se simplifie au parcours de la partie de la structure située entre les plans $z^g = 0$ et $z^g = H_{max}$. Pour ce faire la phase EP débute avec le robot près de l'un des murs de la structure. Le robot parcours le périmèetre dans le sens horaire gardant toujours une partie visible de la structure dans son champ de vision vers sa droite. À chaque itération de l'algorithme, l'UGV détermine la prochaine pose objectif auquel se rendre pour placer la caméra à une distance $D$ perpendiculairement à la surface de la structure, maximisant ainsi al qualité des détails perçus et la densité des points captés.
