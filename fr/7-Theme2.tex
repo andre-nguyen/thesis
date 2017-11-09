@@ -53,7 +53,7 @@ L'inspection se fait en 2 phases, l'exploration du périmètre (EP) présentée 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.6\linewidth]{images/ugv_goal}
+  \includegraphics[width=0.5\linewidth]{images/ugv_goal}
   \caption{Illustration du but de l'algorithme. La premiètre trajectoire en noir indique l'exploration du périmètre qui saute les cavités pour revenir au point de départ le plus tôt possible et fermer la boucle. Les trajectoires rouges de la phase d'exploration de cavités viennent par après une fois que suffisamment de contraintes ont étés mises sur la carte.}
   \label{fig:ugv_overview}
 \end{figure}
@@ -127,7 +127,7 @@ Finalement ${po^c}$ est transformé dans le repère $\mathsf{G}$ pour fins de na
   	\label{subfig:ugv_acute_angle}
   }
   \caption{
-    Illustration du calcul de la prochaine pose objectif a) dans le cas normal b) dans le cas d'un coin à angle aiguë.
+    Illustration du calcul de la prochaine pose objectif autour d'un coin a) dans le cas normal b) dans le cas d'un coin à angle aiguë.
   }
   \label{fig:ugv_goal_determination}
 \end{figure}
@@ -234,40 +234,40 @@ Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cell
   \SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
   \SetKwInOut{Input}{entrée}\SetKwInOut{Output}{sortie}
 
-  \Input{$\mathcal S$ Les nuages de points sauvegardés par le système de SLAM}
   \Input{$\mathcal G$ Le graphe des poses optimisés de la carte et les nuages de points associés}
   \Output{$\mathcal F$ L'ensemble des voxel frontier}
 
-  Get map from rtabmap\\
-    \Indp\\
-    \ForEach{$p \in \mathcal S$}{
-      Transform $p^c$ to $p^g$\\
-      Filter ground and ceiling from $p^g$\\
-      Insert and raycast into octomap\\
-      Also assemble into large cloud
-    }\\
-    \Indm
-  cloudmap_cb\\
-    \Indp
-    remove ground plane\\
-    constrain bounding box of octomap using full map\\
-    reconstruct convex hull\\
-    \Indm
-  determine frontiers\\
-    \Indp
-    \ForEach{leaf in octomap}{
-      \If{empty}{
-        add leaf to frontier candidates
+  \ForEach{$nuage^c$, $pose^g$ $\in \mathcal G$}{
+    %Transform $p^c$ to $p^g$\\
+    $nuage^g \gets T^g_c {nuage}^c$\\
+    $nuage^g \gets $ SeuillageDuSol($nuage^g$)\\
+    $nuage^g \gets $ SeuillageDuPlafond($nuage^g$)\\
+    Insertion et traçage de rayon de $nuage^g$ dans l'OctoMap\\
+  }\\
+  
+  %cloudmap_cb\\
+  %  \Indp
+  %  remove ground plane\\
+  %  constrain bounding box of octomap using full map\\
+  %  reconstruct convex hull\\
+  %  \Indm
+  %determine frontiers\\
+  %  \Indp
+    \ForEach{voxel $\in$ OctoMap}{
+      \If{voxel.estVide() $\&\&$ 6-connexité inclut au moins un voxel d'espace inconnu}{
+        Ajouter le voxels à l'ensemble des candidats frontiers $\mathcal C$
       }
     }\\
-    crop out candidates outside of hull\\
-    \ForEach{candidate in frontier candidates}{
-      $\vec{n}_i = $ estimate normal of candidate through PCA using voxels in a radius around\\
-      \If{$| {\vec{n}_i}_z^g | < \alpha$}{
-        Reject voxel if it is too close to the structure
+    %crop out candidates outside of hull\\
+    \ForEach{c $\in \mathcal C$}{
+      $v \coloneqq $ L'ensemble des voxels dans un voisinage $k$ de $c$\\
+      $\vec{n}_i^g \gets $ ACP($v$) \tcp*[r]{Estimation de la normale par ACP}\\
+      \If{$| {\vec{n}_i}_z^g | > \alpha \ \&\& $ voisinage $d_0$ de $c$ n'est pas occupé }{
+        Ajouter $c$ à $\mathcal F$\\
       }\\
     }\\
-    \Indm
+  %  \Indm
+  \Return $\mathcal F$
 
   \caption{Recherche voxel frontier indiquant une entrée de cavité possible de la OctoMap.}
   \label{alg:CE_detection}
@@ -279,13 +279,27 @@ Nous avons maintenant un ensemble de voxel faisant possiblement partie des entr�
 
 \subsection{Exploration des cavités}
 
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/CE_start}
+  \caption{Début de la phase EC avec les points de vus associés à chaque entrée détectée.}
+  \label{ugv:debut_ec}
+\end{figure}
+
 Une fois les entrées de cavités trouvées, il est possible de commencer la phase d'exploration des cavités (EC). Pour ce faire, chaque cavité est explorée de façon similaire à la phase EP, c'est-à-dire par suivit de mur en gardant la caméra orthogonale à la surface mais cette fois-ci à une distance $\Delta \in [\delta, D]$ où $\delta$ est la distance de perception minimale. Nous verrons plus tard comment choisir $\Delta$ mais avant nous devons examiner la façon de choisir un point de vue (PDV) de départ pour débuter la phase EC.
 
-En ordonnant les poses du graphe $\mathcal G$ provenant du système de SLAM par horodatage, pour chaque entrée nous choisissons la première pose qui possède une vue non-obstruée au centroïde des voxels composants l'entrée. Cette liste de poses objectifs sont à leur tour ordonnées par horodatage et explorées en ordre. Comme nous pouvons observer dans la Figure \ref{subfig:ugv_entrance}, la détection d'entrée calculera typiquement deux entrées par cavité, parfois plus. Pour éviter la redondance dans la phase EC, si le centroïde d'une entrée entre en vue pendant lors de l'exploration, l'entrée est enlevée de la liste.
+En ordonnant les poses du graphe $\mathcal G$ provenant du système de SLAM par horodatage, pour chaque entrée nous choisissons la première pose qui possède une vue non-obstruée au centroïde des voxels composants l'entrée. Cette liste de poses objectifs sont à leur tour ordonnées par horodatage et explorées en ordre. Comme nous pouvons observer dans la Figure \ref{ugv:debut_ec}, la détection d'entrée calculera typiquement deux entrées par cavité, parfois plus. Ceci provient du fait que une grande cavité aura des voxel frontier de par et d'autre de l'entrée tel que l'on peut voir dans la Figure \ref{subfig:ugv_entrance}.  Pour éviter la redondance dans la phase EC, si le centroïde d'une entrée entre en vue pendant lors de l'exploration, l'entrée est enlevée de la liste.
 
 La phase EC requiert une méthode de navigation légèrement différente de la phase EP. Premièrement, la détection d'obstacle se fait maintenant que vers l'avant à une distance $\Delta$ du robot pour éviter de déclencher un virage prématuré. Nous modifions donc la ligne \ref{alg:slice:po} de l'algorithme \ref{alg:PE_next_goal} à ${po^c} \gets p^c - \Delta \vect{u} + \alpha \vect{r}$ et de même nous modifions la fonction du champ de potentiel pour générer des trajectoire à une distance $\Delta$ des murs. Nous pouvons détecter la fin de l'exploration d'une cavité lorsqu'une nouvelle fermeture de boucle est détectée, car les images prises à la sortie d'une cavité correspondrons à des endroits déjà visités par le module de SLAM.
 
 \section{Résultats} \label{sec:ugv_results}
+
+\subsection{Résultats en simulation}
+
+Le système a été implémenté 
+
+\subsection{Résultats expérimentaux}
+
 
 
 \section{Conclusion et travail futur}
