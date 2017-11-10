@@ -244,7 +244,7 @@ Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cell
     $nuage^g \gets $ SeuillageDuPlafond($nuage^g$)\\
     Insertion et traçage de rayon de $nuage^g$ dans l'OctoMap\\
   }\\
-  
+
   %cloudmap_cb\\
   %  \Indp
   %  remove ground plane\\
@@ -296,7 +296,42 @@ La phase EC requiert une méthode de navigation légèrement différente de la p
 
 \subsection{Résultats en simulation}
 
-Le système a été implémenté 
+Le système a été implémenté en simulation par un mélange de C++ et de Python à l'aide de l'interlogiciel Robot Operating System\footnote{http://www.ros.org/} (ROS). Les opération sur les nuages de points ont étés implémentés grâce à la Point Cloud Library (PCL) de \citep{Rusu2011}. Le système de SLAM utilisé est RTAB-Map \citep{Labbe2014} mais nous rappelons que tout autre système de SLAM 3D basé sur des graphes de pose est utilisable. L'implémentation de nos algorithmes de mouvement incluant le choix de la prochaine pose et le calcul du champ de potentiel a été fait dans la pile de navigation ROS \citep{Mader2010} que nous avons modifié.
+
+Le véhicule modélisé consiste en un Husky A200 de Clearpath sur lequel un bras manipulater UR5 de Universal Robotics est installé. Bien que le UR5 possède 6 degrés de liberté, nous contraignons son mouvement à 1 seul joint pour respecter la prémise du problème expliqué dans la section \ref{sec:ugv_problem_description}. L'organe terminal du manipulateur est remplacé par un capteur de profondeur générique aux paramètres de profondeur configurables et la simulation se déroule dans l'environnement Gazebo. Pour fins d'illustration, l'environnement d'essai est composé d'une structure formés de petits murets droits. La structure illustrée dans les figure précédentes est dénommée ciaprès \guillemotleft Petit $\Gamma$\guillemotright et le modèle \guillemotleft Grand $\Gamma$\guillemotright est de la même forme mais aux dimensions deux fois plus grandes. \color{red}Notre algorithme est aussi comparé à l'agorithme classique du Frontier-Based Exploration (FBE) proposé par \citep{Yamauchi1997} dans un scénario d'inspection de l'extérieur d'une maison.\color{black}
+
+\subsubsection{Variation de la taille de structure et de plage de profondeur}
+
+Les capteurs de profondeurs ont la possibilité de configurer la limite de perception de profondeur ce qui, en plus de la taille de la structure, modifie la trajectoire suivit par l'UGV. Dans toutes les figures, le robot commence sa mission à droite de la structure et bouge initialement vers le bas. Dans la Figure \ref{subfig:small gamma husky 4.5} nous pouvons observer le comportement attendu en temps normal de l'algorithme. L'UGV fait un tour de structure pour fermer la boucle pour ensuitre entrer dans la cavité. L'inspection se termine lorsque l'UGV ressort de la cavité. Dans la Figure \ref{subfig:small gamma husky 12} la perception est augmenté à 12 mètres. Ici, on fait plutôt qu'un seul tour de la structure car, quand l'UGV tente de tourner le premier coin, il arrive à percevoir l'intérieur de la cavité. La phase de détection de cavité retourne donc rien et la mission se termine. Dans la Figure \ref{subfig:large gamma husky 4.5} le mur de gauche est assez éloigné pour que le détecteur d'obstacles ne se déclenche. Ainsi, l'UGV entre dans la cavité dès la première passe et la mission se termine après un seul tour de la structure. Finalement, la Figure \ref{subfig:large a husky 4.5} démontre un scénario contenant plusieurs cavités et nous pouvons voir que l'algorithme réussis encore à cartographier la structure. Une première passe est réalisée en sautant les cavités et lors de la deuxième passe l'UGV s'arrête en haut à gauche après être sorti de la deuxième cavité.
+
+
+
+\begin{figure}[p]
+  \centering
+  \subfloat[Modèle: Petit $\Gamma$, Profondeur Max.: $4.5m$]{
+      \includegraphics[width=0.4\linewidth]{images/SmallGamma_Husky_4_5}
+  	\label{subfig:small gamma husky 4.5}
+  }
+  \hfil
+  \subfloat[Modèle: Petit $\Gamma$, Profondeur Max.: $12m$]{
+  	\includegraphics[width=0.4\linewidth]{images/SmallGamma_Husky_12}
+  	\label{subfig:small gamma husky 12}
+  }
+  \hfil
+  \subfloat[Modèle: Grand $\Gamma$, Profondeur Max.: $4.5m$]{
+  	\includegraphics[width=0.4\linewidth]{images/LargeGamma_Husky_4_5}
+  	\label{subfig:large gamma husky 4.5}
+  }
+  \hfil
+  \subfloat[Modèle: Grand {\large a}, Profondeur Max.: $4.5m$]{
+  	\includegraphics[width=0.4\linewidth]{images/LargeA_Husky_4_5}
+  	\label{subfig:large a husky 4.5}
+  }
+  \caption{
+  Projection du modèle reconstruit sur le plan $\vect{x}_{\fr g}\vect{y}_{\fr g}$ en noir et la trajectoire exécutée par le robot en suivant nos algorithmes en bleu.
+  }
+  \label{fig:relative size}
+\end{figure}
 
 \subsection{Résultats expérimentaux}
 
