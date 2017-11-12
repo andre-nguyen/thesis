@@ -296,15 +296,40 @@ La phase EC requiert une méthode de navigation légèrement différente de la p
 
 \subsection{Résultats en simulation}
 
-Le système a été implémenté en simulation par un mélange de C++ et de Python à l'aide de l'interlogiciel Robot Operating System\footnote{http://www.ros.org/} (ROS). Les opération sur les nuages de points ont étés implémentés grâce à la Point Cloud Library (PCL) de \citep{Rusu2011}. Le système de SLAM utilisé est RTAB-Map \citep{Labbe2014} mais nous rappelons que tout autre système de SLAM 3D basé sur des graphes de pose est utilisable. L'implémentation de nos algorithmes de mouvement incluant le choix de la prochaine pose et le calcul du champ de potentiel a été fait dans la pile de navigation ROS \citep{Mader2010} que nous avons modifié.
+Le système a été implémenté en simulation par un mélange de C++ et de Python à l'aide de l'interlogiciel Robot Operating System\footnote{http://www.ros.org/} (ROS). Les opération sur les nuages de points ont étés implémentés grâce à la Point Cloud Library (PCL) de \citep{Rusu2011}. Le système de SLAM utilisé est RTAB-Map \citep{Labbe2014} mais nous rappelons que tout autre système de SLAM 3D basé sur des graphes de pose est utilisable. L'une des particularités de RTAB-Map est qu'il supporte en entrée une source d'odométrie arbitraire, nous optons donc pour l'utilisation de l'odométrie provenant des roues du Husky. L'implémentation de nos algorithmes de mouvement incluant le choix de la prochaine pose et le calcul du champ de potentiel a été fait dans la pile de navigation ROS \citep{Mader2010} que nous avons modifié.
 
-Le véhicule modélisé consiste en un Husky A200 de Clearpath sur lequel un bras manipulater UR5 de Universal Robotics est installé. Bien que le UR5 possède 6 degrés de liberté, nous contraignons son mouvement à 1 seul joint pour respecter la prémise du problème expliqué dans la section \ref{sec:ugv_problem_description}. L'organe terminal du manipulateur est remplacé par un capteur de profondeur générique aux paramètres de profondeur configurables et la simulation se déroule dans l'environnement Gazebo. Pour fins d'illustration, l'environnement d'essai est composé d'une structure formés de petits murets droits. La structure illustrée dans les figure précédentes est dénommée ciaprès \guillemotleft Petit $\Gamma$\guillemotright et le modèle \guillemotleft Grand $\Gamma$\guillemotright est de la même forme mais aux dimensions deux fois plus grandes. \color{red}Notre algorithme est aussi comparé à l'agorithme classique du Frontier-Based Exploration (FBE) proposé par \citep{Yamauchi1997} dans un scénario d'inspection de l'extérieur d'une maison.\color{black}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/ugv_gazebo_husky.jpg}
+  \caption{L'UGV ClearPath Husky avec un modèle de Microsoft Kinect v1 à l'extrémité d'un manipulateur UR5 et un lidar balayeur vers l'avant.}
+  \label{fig:ugv_gazebo_husky}
+\end{figure}
 
-\subsubsection{Variation de la taille de structure et de plage de profondeur}
+Le véhicule modélisé est présenté dans la Figure \ref{fig:ugv_gazebo_husky} et consiste en un Husky A200 de Clearpath sur lequel un bras manipulater UR5 de Universal Robotics est installé. Bien que le UR5 possède 6 degrés de liberté, nous contraignons son mouvement à 1 seul joint pour respecter la prémise du problème expliqué dans la section \ref{sec:ugv_problem_description}. L'organe terminal du manipulateur est remplacé par un capteur de profondeur générique aux paramètres de profondeur configurables et la simulation se déroule dans l'environnement Gazebo. Pour fins d'illustration, l'environnement d'essai est composé d'une structure formés de petits murets droits. La structure illustrée dans les figure précédentes est dénommée ciaprès \guillemotleft Petit $\Gamma$\guillemotright et le modèle \guillemotleft Grand $\Gamma$\guillemotright est de la même forme mais aux dimensions deux fois plus grandes. Notre algorithme est aussi comparé à l'agorithme classique l'exploration par frontier proposé par \citep{Yamauchi1997} dans un scénario d'inspection de l'extérieur d'une maison et du modèle Petit $\Gamma$.
 
-Les capteurs de profondeurs ont la possibilité de configurer la limite de perception de profondeur ce qui, en plus de la taille de la structure, modifie la trajectoire suivit par l'UGV. Dans toutes les figures, le robot commence sa mission à droite de la structure et bouge initialement vers le bas. Dans la Figure \ref{subfig:small gamma husky 4.5} nous pouvons observer le comportement attendu en temps normal de l'algorithme. L'UGV fait un tour de structure pour fermer la boucle pour ensuitre entrer dans la cavité. L'inspection se termine lorsque l'UGV ressort de la cavité. Dans la Figure \ref{subfig:small gamma husky 12} la perception est augmenté à 12 mètres. Ici, on fait plutôt qu'un seul tour de la structure car, quand l'UGV tente de tourner le premier coin, il arrive à percevoir l'intérieur de la cavité. La phase de détection de cavité retourne donc rien et la mission se termine. Dans la Figure \ref{subfig:large gamma husky 4.5} le mur de gauche est assez éloigné pour que le détecteur d'obstacles ne se déclenche. Ainsi, l'UGV entre dans la cavité dès la première passe et la mission se termine après un seul tour de la structure. Finalement, la Figure \ref{subfig:large a husky 4.5} démontre un scénario contenant plusieurs cavités et nous pouvons voir que l'algorithme réussis encore à cartographier la structure. Une première passe est réalisée en sautant les cavités et lors de la deuxième passe l'UGV s'arrête en haut à gauche après être sorti de la deuxième cavité.
+\subsubsection{Variation de la taille de structure et de plage de détection profondeur}
 
+Les capteurs de profondeurs ont la possibilité de configurer la limite de perception de profondeur ce qui, en plus de la taille de la structure, modifie la trajectoire suivit par l'UGV. Dans toutes les figures, le robot commence sa mission à droite de la structure et bouge initialement vers le bas. Dans la Figure \ref{subfig:small gamma husky 4.5} nous pouvons observer le comportement attendu en temps normal de l'algorithme. L'UGV fait un tour de structure pour fermer la boucle pour ensuitre entrer dans la cavité. L'inspection se termine lorsque l'UGV ressort de la cavité. Dans la Figure \ref{subfig:small gamma husky 12} la perception est augmenté à 12 mètres. Ici, on fait plutôt qu'un seul tour de la structure car, quand l'UGV tente de tourner le premier coin, il arrive à percevoir l'intérieur de la cavité. La phase de détection de cavité retourne donc rien et la mission se termine. Dans la Figure \ref{subfig:large gamma husky 4.5} le mur de gauche est assez éloigné pour que le détecteur d'obstacles ne se déclenche. Ainsi, l'UGV entre dans la cavité dès la première passe et la mission se termine après un seul tour de la structure. Finalement, la Figure \ref{subfig:large a husky 4.5} démontre un scénario contenant plusieurs cavités et nous pouvons voir que l'algorithme réussis encore à cartographier la structure. Une première passe est réalisée en sautant les cavités et lors de la deuxième passe l'UGV s'arrête en haut à gauche après être sorti de la deuxième cavité. Le Tableau \ref{tbl: simulation results} présente quelques statistiques sur la longueur de trajectoire finale dans les différents scénarios décrits.
 
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\begin{table}[ht]
+\renewcommand{\arraystretch}{1.3}
+\caption{Résultats de simulation pour différentes tailles de la structure et }
+\label{tbl: simulation results}
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Modèle & \specialcell{Taille du \\périmètre (m)} & \specialcell{Profondeur de\\ la caméra (m)} & \specialcell{Longueur de la \\trajectoire (m)} \\
+\hline
+Petit $\Gamma$  & $42$ & $4.5$ & $72.08$  \\
+Petit $\Gamma$  & $42$ & $12.0$ & $53.79$ \\
+Grand $\Gamma$  & $84$ & $4.5$ & $106.23$ \\
+Grand \large{a} & $94$ & $4.5$ & $179.65$ \\
+\hline
+\end{tabular}
+\end{table}
 
 \begin{figure}[p]
   \centering
@@ -333,8 +358,88 @@ Les capteurs de profondeurs ont la possibilité de configurer la limite de perce
   \label{fig:relative size}
 \end{figure}
 
+\subsubsection{Comparaison à l'exploration par frontier}
+
+Nous comparons notre algorithme à une implémentation de l'exploration par frontier\footnote{\url{http://wiki.ros.org/frontier_exploration}} (EF). L'algorithme prend en entrée les données d'un lidar balayeur 2D pour construire une carte d'occupation sur laquelle les frontier sont calculés. De plus, les bornes d'un polygone 2D délimitant la région à inspecter doit être fourni. L'inspection se termine lorsque aucun frontier n'est trouvé à l'intérieur du polygone. Il existe trois différences majeures entre la solution que nous proposons et l'EF: 1) nous ne requérons pas d'information \textit{a priori} à propos des limites de la région à inspecter; 2) l'EF ne tente pas de se tenir à une distance fixe de la structure pour maximiser la portion de la surface cartographiée; 3) La trajectoire de l'EF est parfois difficile à prévoire comparativement à une stratégie de suivit de mur, ce qui est important d'un point de vu de convivialité. De plus, l'EF peut être affectée par le bruit des capteurs qui cause de légères différences dans la carte d'occupation produite ce qui cause ensuite une génération de trajectoire différente à chaque exécution de l'algorithme. En revanche, notre algorithme produit une trajectoire similaire à chaque exécution. De plus l'EF ne prends pas en compte une distance de sécurité $D$ par rapport à la structure ce qui cause parfois le calcul d'une position objectif très proche de la structure. Ceci est problématique car, en plus de nuire au capteur de profondeur, l'UGV tend à rester coincé ou en oscillation sur place.
+
+\begin{figure}[p]
+  \centering
+\subfloat[Notre algorithme]{
+	\includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_4_5_model}
+	\label{subfig:small gamma husky 4.5 model}
+}
+\hfil
+\subfloat[Exploration par frontier]{
+	\includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_4_5_FBE_model}
+	\label{subfig:small gamma husky 4.5 FBE model}
+}
+\hfil
+\subfloat[Exploration par frontier]{
+	\includegraphics[width=0.8\linewidth]{images/House_FBE_Model}
+	\label{subfig:house husky 4.5 FBE model}
+}
+\hfil
+\subfloat[Petit $\Gamma$, Exploration par frontier]{
+	\includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_FBE_4_5}
+	\label{subfig:small gamma husky 4.5 FBE}
+}
+\hfil
+\subfloat[Maison, Exploration par frontier]{
+	\includegraphics[width=0.3\linewidth]{images/House_Husky_FBE_4_5}
+	\label{subfig:house husky 4.5 FBE}
+}
+\hfil
+\caption{ Comparasion entre les résultats de notre algorithme par rapport à l'exploration par frontier avec un capteur de profondeur avec une portée de $4.5$m. On peut voir en (a) par rapport à (B) que l'EF n'assure pas une couverture complète de la surface visible du modèle.
+}
+\label{fig:simulation FBE}
+\end{figure}
+
+À fin de comparer la couverture du modèle, nous utilisons le logiciel CloudCompare pour calculer la projection du modèle reconstruit, $\mathcal C$ est aligné au modèle de référence discrétisé $\mathcal C_R$. Pour les deux modèles Petit $\Gamma$ et celui de la maison, la discrétisation se fait avec un distance minimale de $0.1$m entre chaque point et seulement sur la portion allant jusqu'à la hauteur maximale perceptible $H_{max}$. Pour l'alignement de $\mathcal C$  à $\mathcal C_R$ une procédure de \textit{iterative closest point} (ICP) \citep{Rusinkiewicz2001} a été utilisée. Ensuite, pour chaque point de $\mathcal C$ on recherche le point de référence le plus proche dans $\mathcal C_R$. Dans le cas qu'un point de $\mathcal C_R$ est associé à plusieurs points de $\mathcal C$, nous enlevons les points dupliqués pour obtenir l'ensemble de points uniques les plus proches de la structure. Le nombre de points dans cet ensemble devient notre métrique par laquelle nous estimons la couverture du modèle. Finalement, nous calculons aussi l'erreur moyenne qui correspond à la distance moyenne entre les points de l'ensemble unique et ceux du modèle.
+
+Le Tableau \ref{tbl: simulation results 3} montre la différence entre notre stratégie et l'EF avec une caméra de profondeur limitée à $4.5$m. En somme, notre algorithme réussis systématiquement à obtenir une couverture plus élevée en plus d'une trajectoire plus courte. De plus, nous notons que la trajectoire lisse gardant toujours en vue la structure permet d'obtenir une erreure de reconstruction plus petite. De plus, la Figure \ref{fig:simulation FBE} démontre qualitativement l'amélioration en termes des couverture de notre algorithme et les lacunes au niveau de la reconstruction de l'EF.
+
+\begin{table}[!ht]
+\renewcommand{\arraystretch}{1.3}
+\caption{Comparaison entre notre algorithme et l'EF}
+\label{tbl: simulation results 3}
+\centering
+\begin{tabular}{|c|c|c|c|}
+\cline{3-4}
+\multicolumn{2}{c|}{} & Notre algorithme & EF \\
+\hline
+{Petit $\Gamma$} & Trajectoire (m)            & $72.08$  & $49.78$  \\\cline{2-4}
+								& \specialcell{\# de points uniques les plus proches \\ (maximum de 6116)} & $6,063$          & $5,398$          \\\cline{2-4}
+								& Erreure moyenne (m)             & $0.05$ & $0.12$\\\cline{2-4}
+\hline
+{Maison} & Trajectoire (m) & $59.89$ & $47.55$ \\\cline{2-4}
+					   & \specialcell{\# de points uniques les plus proches \\ (maximum de 10 889)} & $9,182$ & $7,402$ \\\cline{2-4}
+					   &  Erreure moyenne (m)             & $0.05$ & $0.12$\\\cline{2-4}
+\hline
+\end{tabular}
+\end{table}
+
+
 \subsection{Résultats expérimentaux}
 
+L'implémentation sur un vrai robot a été réalisé sous des conditions similaires à simulation où un Husky est équipé d'un bras robotique Kinova Mico au bout duquel un capteur de profondeur Microsoft Kinect v2 est attaché. En guise de détecteur d'obstacle, un scanner lidar SICK LMS511 est installé à l'avant. Contrairement à nos simulations nous effectuons nos tests dans un environnement intérieur dépourvu de signal GPS. C'est pourquoi ici l'odométrie provient de la fusion de seulement l'odométrie des roues et de la centrale inertielle dans l'EKF de \citep{MooreEkf2014}. L'entièreté des calculs se déroulent sur un ordinateur à base d'un processeur Intel i5 sans l'aide d'un GPU. La structure à inspecter imite le modèle Petit $\Gamma$ avec les dimensions de $8.2\text{m} \times 4\text{m}$. Pour assurer une fermeture de boucle
 
+\begin{figure}[thb]
+\centerline{
+	\subfloat{
+		\includegraphics[width=0.43\linewidth]{images/husky_annotated.pdf}
+        \label{fig:husky_exp_sensors}
+    }%
+    \subfloat{
+		\includegraphics[width=0.57\linewidth]{images/structure.pdf}
+        \label{fig:husky_exp_structure}
+	}
+}
+	\centering
+    \caption{
+    Left: the Husky robot used in our experiments with the robotic arm, depth sensor and laser range scanner.
+    All other sensors seen are not used.
+    Right: the indoor structure being inspected.}
+    \label{fig:husky_exp}
+\end{figure}
 
 \section{Conclusion et travail futur}
