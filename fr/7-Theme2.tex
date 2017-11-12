@@ -421,25 +421,53 @@ Le Tableau \ref{tbl: simulation results 3} montre la différence entre notre str
 
 \subsection{Résultats expérimentaux}
 
-L'implémentation sur un vrai robot a été réalisé sous des conditions similaires à simulation où un Husky est équipé d'un bras robotique Kinova Mico au bout duquel un capteur de profondeur Microsoft Kinect v2 est attaché. En guise de détecteur d'obstacle, un scanner lidar SICK LMS511 est installé à l'avant. Contrairement à nos simulations nous effectuons nos tests dans un environnement intérieur dépourvu de signal GPS. C'est pourquoi ici l'odométrie provient de la fusion de seulement l'odométrie des roues et de la centrale inertielle dans l'EKF de \citep{MooreEkf2014}. L'entièreté des calculs se déroulent sur un ordinateur à base d'un processeur Intel i5 sans l'aide d'un GPU. La structure à inspecter imite le modèle Petit $\Gamma$ avec les dimensions de $8.2\text{m} \times 4\text{m}$. Pour assurer une fermeture de boucle
+L'implémentation sur un vrai robot a été réalisé sous des conditions similaires à simulation où un Husky est équipé d'un bras robotique Kinova Mico au bout duquel un capteur de profondeur Microsoft Kinect v2 est attaché. En guise de détecteur d'obstacle, un scanner lidar SICK LMS511 est installé à l'avant. Contrairement à nos simulations nous effectuons nos tests dans un environnement intérieur dépourvu de signal GPS. C'est pourquoi ici l'odométrie provient de la fusion de seulement l'odométrie des roues et de la centrale inertielle dans l'EKF de \citep{MooreEkf2014}. Cette odométrie est ensuite envoyée à RTAB-Map \citep{Labbe2014} pour fins de localisation et de cartographie. L'entièreté des calculs se déroulent sur un ordinateur à base d'un processeur Intel i5 sans l'aide d'un GPU. La structure à inspecter imite le modèle Petit $\Gamma$ avec les dimensions de $8.2\text{m} \times 4\text{m}$. Pour assurer une fermeture de boucle, nous plaçons une pancarte colorée à l'endroit de départ du UGV visible dans les Figures \ref{fig:husky_exp_structure} et \ref{subfig:loop_closure_success}. Nous voyons clairement la différence entre la situation \ref{subfig:fail_loop_closure} où la mise en correspondance écouche et la situation en \ref{subfig:loop_closure_success} où les caractéristiques uniques de notre pancarte aide le sistème de SLAM.
 
-\begin{figure}[thb]
+Puisque l'espace dans notre aire de test était limitée, nous réduisons la portée de notre détecteur d'obstacles à $1.8$m et à un cone de $10^\circ$  en avant du Husky. La profondeur de la caméra a été limitée à $4.0$m et nous configurons la distance au mur $D=1.5$m. De plus puisque nous savons que l'UGV ne bouge pas en $\vect{z}^g$ et que nous supposons que le terrain est plat, nous contraignons RTAB-Map à $3$ degrés de liberté ($\vect{x}^g$, $\vect{y}^g$ et l'angle de lacet).
+
+\begin{figure}[htb]
 \centerline{
-	\subfloat{
+	\subfloat[]{
 		\includegraphics[width=0.43\linewidth]{images/husky_annotated.pdf}
         \label{fig:husky_exp_sensors}
     }%
-    \subfloat{
+    \subfloat[]{
 		\includegraphics[width=0.57\linewidth]{images/structure.pdf}
         \label{fig:husky_exp_structure}
 	}
 }
 	\centering
     \caption{
-    Left: the Husky robot used in our experiments with the robotic arm, depth sensor and laser range scanner.
-    All other sensors seen are not used.
-    Right: the indoor structure being inspected.}
+    (a) Le robot Husky utilisé dans nos expériences avec le bras articulé, le capteur de profondeur et le scanner lidar. Les autres capteurs non-identifiés ne sont pas utilisés dans lors de l'expérience.
+    (b) La structure intérieur sous inspection.}
     \label{fig:husky_exp}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \subfloat[]{
+  	\includegraphics[width=0.8\linewidth]{images/loop_closure_vslam.jpg}
+  	\label{subfig:loop_closure_success}
+  }
+  \hfil
+  \subfloat[]{
+  	\includegraphics[width=0.8\linewidth]{images/loop_closure_fail}
+  	\label{subfig:fail_loop_closure}
+  }
+  \caption{
+    Tentatives de fermetures de boucle du système de SLAM RTAB-Map. Les lignes cyan représentes des
+    (a) Succès de la fermeture de boucle. (b) Tentative échouée de fermeture de boucle.
+  }
+  \label{fig:visual_loop_closure}
+\end{figure}
+
+Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_angled_view} et reflètre presque le comportent prédit dans la simulation.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/exp_angled_view}
+  \caption{Résultat expérimental, en cyan la trajectoire, en gris la carte d'occupation et d'obstacles créée par l'assemblage des scans du lidar et en couleur la reconstruction du modèle par nuage de points.}
+  \label{fig:exp_angled_view}
 \end{figure}
 
 \section{Conclusion et travail futur}
