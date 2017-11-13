@@ -209,7 +209,7 @@ Au terme de la phase EP le modèle de la structure produit par le module de SLAM
 
 Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cellule vide adjacente à une cellule de l'espace inconnu. Grâce à notre OctoMap il est donc possible de calculer l'ensemble de tous les voxels frontier. Une particularité de l'utilisation d'une caméra de profondeur lors de l'inspection est que l'espace connu prend la forme d'un tronc de pyramide correspondant au champ de vision de la lentille. Ceci a pour effet, tel que l'on peut voir dans la figure \ref{subfig:ugv_frontier} que la carte finale inclut une grande quantité de voxels frontier correspondant aux hauts et aux bas des troncs de vue utilisés pour construire la carte.
 
-\begin{figure}[ht]
+\begin{figure}[!h]
   \centering
   \subfloat[]{
   	\includegraphics[width=0.45\linewidth]{images/frontier_candidates}
@@ -228,7 +228,7 @@ Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cell
   \label{fig:ugv_frontier}
 \end{figure}
 
-\begin{algorithm}[ht]
+\begin{algorithm}[!ht]
   \SetAlgoLined
   \SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
   \SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
@@ -269,7 +269,7 @@ Suivant la définition posée par \citep{Yamauchi1997}, un frontier est une cell
   %  \Indm
   \Return $\mathcal F$
 
-  \caption{Recherche voxel frontier indiquant une entrée de cavité possible de la OctoMap.}
+  \caption{Recherche de voxel frontier indiquant une entrée de cavité possible dans la OctoMap.}
   \label{alg:CE_detection}
 \end{algorithm}
 
@@ -455,19 +455,36 @@ Puisque l'espace dans notre aire de test était limitée, nous réduisons la por
   	\label{subfig:fail_loop_closure}
   }
   \caption{
-    Tentatives de fermetures de boucle du système de SLAM RTAB-Map. Les lignes cyan représentes des
-    (a) Succès de la fermeture de boucle. (b) Tentative échouée de fermeture de boucle.
+    Tentatives de fermetures de boucle du système de SLAM RTAB-Map. Les lignes cyan représentes des mises en correspondances de caractéristiques entre l'image de référence (gauche) et l'image courante (droite).
+    (a) Succès de la fermeture de boucle avec plusieurs mises en correspondances. (b) Tentative échouée de fermeture de boucle avec qu'une seule mise en correspondance.
   }
   \label{fig:visual_loop_closure}
 \end{figure}
 
-Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_angled_view} et reflètre presque le comportent prédit dans la simulation.
+Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_angled_view} et reflètre presque le comportent prédit dans la simulation. Rappellons nous que pour une cavité, l'algorithme de détection d'entrée retournera typiquement deux entrées de part et d'autre de l'ouverture dans la structure. En temps normal, la deuxième entrée sera enlevée de la liste des candidats lorsque son centroïde entrera en vue de la caméra de profondeur à la sortie de la cavité. Il semblerait que lors de l'expérience, la détection du centroïde a échouée car l'UGV s'est retrouvé entre la structure et le centroïde à détecter. Ceci cause l'UGV à effectuer un deuxième tour autour de la structure avant de s'arrêter près de l'entrée. Nous voyons donc que si une partie de l'algorithme échoue, dans le pire cas le robot effectue simplement un deuxème tour.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=0.5\linewidth]{images/exp_angled_view}
   \caption{Résultat expérimental, en cyan la trajectoire, en gris la carte d'occupation et d'obstacles créée par l'assemblage des scans du lidar et en couleur la reconstruction du modèle par nuage de points.}
   \label{fig:exp_angled_view}
+\end{figure}
+
+\subsubsection{Performance à l'exécution}
+
+ Le robot réussit à faire l'exploration du périmètre en sautant la cavité interne, le tout en temps réel malgré l'exécution du SLAM 3D et des différents algorithmes d'estimation d'odométrie et de planification de trajectoire. La partie la plus lente de l'algorithme reste la construction et l'analyse de la OctoMap pour la détection des cavités qui peut prendre plusieurs secondes de temps. Bien que la représentation multi-résolution d'une OcTree nous permet d'accélérer les requêtes à la carte, un problème existe néanmoins dans l'insertion des points et le traçage des rayons associés se fait séquentiellement sans l'utilisation de fils d'exécution en parallèle. Ceci pourrait être règlé en changeant la représentation utilisée de OctoMap à quelque chose de plus efficace et parallélisable tel que la SkiMap récemment proposé par \citep{Gregorio2017}.
+
+\subsection{Sources de bruit et différences entre la simulation et l'expérience réelle}
+
+En effectuant nos expériences nous notons plusieurs différences entre notre environnement de simulation et la réalité. La première que nous remarquons est la quantité de bruit dans les capteurs. Dans notre environnement Gazebo, la caméra de profondeur est simulée avec un bruit Gaussien sur les mesures de distances et chaque pixel de l'image de profondeur est en fait simulé par les mêmes mécanisme de simulation de laser. En réalité les capteurs fonctionnant par temps de vol possèdent des caractéristiques de bruit légèrement différentes entres autres de bruit poivre et sel et du bruit de chatoiement (de petites taches dans l'image). Cette dernière est particulièrement importante car elle peut facilement faire échouer le calcul de la prochaine pose objectif tel que présenté dans la Figure \ref{fig:speckle_fail}.
+
+En traitement d'images le bruit poivre et sel serait normalement éliminé par un filtre médian mais puisque nous voulons utiliser les images de profondeur pour la reconstruction et la navigation de notre robot, nous voulons préserver autant que possible les détails original des données. Le bruit poivre et sel est donc éliminé simplement par seuillage en imposant une limite supérieure et inférieure sur les distances perçues. Pour cette même raison, nous n'appliquons pas de filtre bilatéral sur l'image de profondeur pour éliminer le bruit de chatoiement car ce filtre pourrait lisser les contours de certains obstacles. À la place, nous appliquons un filtre déchatoiement qui cherche des composantes connectées et qui impose ensuite une taille minimale sur les composantes. Ceci est fait directement sur l'image de profondeur avant la projection à un nuage de points. Pour calibrer les paramètres du filtre, nous plaçons l'UGV à l'endroit où le plus de bruit est détecté et nous augmentons progressivement la taille maximale des taches à enlever jusqu'à ce que l'image de profondeur soit libre de bruit. Il faut aussi calibrer 
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{images/speckle.png}
+  \caption{Échec du suivit de la structure par la présence de bruit de chatoiement. Les cubes rouges sont en fait du bruit qui ont étés considérés comme une partie de la structure alors qu'en réalité elles n'existent pas.}
+  \label{fig:speckle_fail}
 \end{figure}
 
 \section{Conclusion et travail futur}
