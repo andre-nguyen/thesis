@@ -26,9 +26,19 @@ En
 
 \section{Méthodes de représentation de l'environnement}\label{subsec:representations}
 
+Pour faire naviguer un robot mobile dans un environnement inconnu il est impératif d'avoir une représentation de l'environnement dans laquelle la planification de trajectoire et la vérification de collision est possible. L'important est d'utiliser la représentation appropriée correspondante aux mouvements possibles du robot. Pour la navigation en 3D le cadriciel OctoMap de \cite{Hornung2013} est particulièrement populaire de par son code à source ouverte, sa représentation probabiliste de l'environnement connu et inconnu et son efficacité en termes de mémoire. Une OctoMap représente l'espace volumique par une Octree, subdivisant ainsi récursivement l'espace par un arbre d'octants. Chaque niveau de l'arbre représente une résolution différente de l'espace tel que l'on peut voir dans la Figure \ref{fig:octree}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/octree.jpg}
+  \caption[Représentation graphique d'une Octree]{L'octree est une structure en arbre souvent utilisé pour partitionner un espace tri-dimentionel.}
+  \label{fig:octree}
+\end{figure}
+
+La structure de l'OctoMap la rend particulièrement efficace comparativement à une séparation naïve en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte.
+
 \color{red}
 \begin{enumerate}
-  \item octomap
   \item signed distance fields
   \item \url{http://people.eecs.berkeley.edu/%7Edfk/Atom_Mapping.pdf}
 \end{enumerate}
@@ -132,12 +142,24 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \end{equation}
 Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
 
-Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadioptriques.
+Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \cite{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \cite{Claus2005} adapté aux lentilles grand-angle et catadioptriques.
 
 \subsection{Vision stereo}
-\color{red}
-Ajouter la théorie sur la géométrie épipolaire pour la résolution de profondeur par caméra stereo.
-\color{black}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/bumblebee2.jpg}
+  \caption[Exemple de caméra stereo]{Exemple de caméra stereo PointGrey Bumblebee2}
+  \label{fig:stereo_camera}
+\end{figure}
+
+La vision stereo est un sujet qui est étudié depuis longtemps pour diverses utilisations tel que la cueillette d'objets par bras manipulateur \citep{Hernandez2017}, l'effacement d'arrière-plan \citep{Kanade1996Stereo} et la navigation de robots \citep{Fraundorfer2012}. Sans aller dans les détails de la géométrie épipolaire permettant de trianguler un point dans l'espace, l'idée générale derrière la vision stereo est de comparer les images de deux caméras pour calculer la distance entre deux points correspondants. Cette distance, que l'on nomme la disparité, est directement liée à la position 3D du point dans le monde selon la relation
+\begin{align}
+  d = f \frac{B}{Z}
+\end{align}
+où $d$ est la disparité, $f$ est la longueur focale en pixels, $B$ est la distance entre les deux caméras et $Z$ est la profondeur du point. Diverses méthodes existent pour mettre en correspondance les points (ou plus souvent des blocks de plusieurs pixels) entre les deux images. Nous avons par exemple les algorithmes locaux cherchant le plus petit coût de correspondance suivant une métrique tel que la différence absolue ou la somme des différences au carré calculée sur l'intensité des pixels d'un bloc \citep{Szeliski2011}. Ces coûts locaux peuvent aussi être optimisés globalement par \textit{belief propagation} pour obtenir une image de disparité cohérente \citep{Klaus2006}. L'approche utilisée dans la librairie de traitement d'images OpenCV est en fait une approximation de l'optimisation globale où la programmation dynamique est utilisé pour optimiser une fonction d'énergie \citep{Hirschmuller2008}.
+
+Cependant, peu importe l'algorithme utilisé, il sera toujours important d'avoir de la texture dans l'image, sans quoi il existera une incertitude sur la correspondance des blocs et le calcul de disparité échouera. Outre les filtres lisseurs tentant de remplir les trous dans une image de disparité où la recherche de correspondance aurait échoué, les avancées récentes dans le domaine tendent vers l'utilisation de l'apprentissage machine pour prédire l'image de disparité en entier \citep{Kendall_2017_ICCV}. \cite{meier2017real} proposent une solution plus classique où l'échec de correspondance est prédit et corrigé au moyen d'une caméra stereo secondaire placée orthogonalement à la caméra principale.
 
 \subsection{Détection de lignes}
 
