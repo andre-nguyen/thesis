@@ -196,7 +196,6 @@ year = {2014}
 }
 
 @article{Stokkeland2015,
-abstract = {An autonomous machine vision module for Unmanned Aerial Vehicle (UAV) navigation for inspection of wind turbines is presented. The system estimates the relative position and distance between the UAV and the wind turbine, as well as the position of its blades, in order to support the initial phase of autonomous inspection before the UAV start to move along the blades to acquire pictures. The key algorithms used are Hough transform for detection of the wind turbine tower, hub and blades, as well as the Kalman filter for tracking. Experimental data acquired by a UAV at a wind park is used to evaluate the accuracy and robustness of recognition and navigation. It is found that under the tested conditions, the method gives sufficient accuracy for the task and can execute in real time on a single board computer in the UAV.},
 author = {Stokkeland, Martin and Klausen, Kristian and Johansen, Tor A.},
 doi = {10.1109/ICUAS.2015.7152389},
 file = {:home/inflatablequad/Downloads/07152389.pdf:pdf},
@@ -308,7 +307,6 @@ author={{Occupational Safety and Health Administration}},
 year="2017"}
 
 @phdthesis{Heggem2017,
-abstract = {This report addresses autonomous inspection of wind blades using a UAV by proposing to use computer vision combined with structured light to accurately segment and detect the wind blade edges. It will be proven that this method is invariant to both rotation and scale, while it is computationally efficient for use on real-time applications. The blade edges will be de- tected according to the segmented area of the blade, and identified as Hough transformed lines to easily develop a manouvering scheme which intends to follow the blade edges from root to tip, while maximizing the view of the blade without loosing view of the respective edges. It will also be shown that the method detects the blade tip, regardless of rotation and scale. Furthermore, the structured light will be utilized to efficiently compute feature point matches from a stereo vision system. These matches will be used to conduct 3D reconstruction of the re- spective feature points using 2D triangulation. This will enable transformation of coordinates between the image frame and camera frame, including a real-time estimate of the distance be- tween the blade and drone. Additionally, all relevant source code mentioned in this report may be found under MIT license at the authors personal github repository, reachable at following web address. • https://github.com/hansehe/Wind-Blade-Inspection},
 author = {Heggem, Hans Erik},
 file = {:home/inflatablequad/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Heggem - 2017 - Autonomous Wind Blade Inspection.pdf:pdf},
 mendeley-groups = {Thesis/WindTurbines},
@@ -661,7 +659,7 @@ month={},}
 
 @INPROCEEDINGS{Gregorio2017,
 author={D. De Gregorio and L. Di Stefano},
-booktitle={2017 IEEE International Conference on Robotics and Automation (ICRA)}, 
+booktitle={2017 IEEE International Conference on Robotics and Automation (ICRA)},
 title={SkiMap: An efficient mapping framework for robot navigation},
 year={2017},
 volume={},
@@ -671,3 +669,60 @@ keywords={control engineering computing;data structures;mobile robots;octrees;pa
 doi={10.1109/ICRA.2017.7989299},
 ISSN={},
 month={May},}
+
+@article{Duda:1972,
+ author = {Duda, Richard O. and Hart, Peter E.},
+ title = {Use of the Hough Transformation to Detect Lines and Curves in Pictures},
+ journal = {Commun. ACM},
+ issue_date = {Jan. 1972},
+ volume = {15},
+ number = {1},
+ month = jan,
+ year = {1972},
+ issn = {0001-0782},
+ pages = {11--15},
+ numpages = {5},
+ url = {http://doi.acm.org/10.1145/361237.361242},
+ doi = {10.1145/361237.361242},
+ acmid = {361242},
+ publisher = {ACM},
+ address = {New York, NY, USA}
+ }
+
+ @Inbook{Herout2013,
+ author="Herout, Adam
+ and Dubsk{\'a}, Mark{\'e}ta
+ and Havel, Jir{\'i}",
+ title="Variants of the Hough Transform for Straight Line Detection",
+ bookTitle="Real-Time Detection of Lines and Grids: By PClines and Other Approaches",
+ year="2013",
+ publisher="Springer London",
+ address="London",
+ pages="17--34",
+ doi="10.1007/978-1-4471-4414-4_3",
+ url="https://doi.org/10.1007/978-1-4471-4414-4_3"
+ }
+
+ @article{AKINLAR20111633,
+ title = "EDLines: A real-time line segment detector with a false detection control",
+ journal = "Pattern Recognition Letters",
+ volume = "32",
+ number = "13",
+ pages = "1633 - 1642",
+ year = "2011",
+ issn = "0167-8655",
+ doi = "https://doi.org/10.1016/j.patrec.2011.06.001",
+ url = "http://www.sciencedirect.com/science/article/pii/S0167865511001772",
+ author = "Cuneyt Akinlar and Cihan Topal",
+ keywords = "Real-time line segment detection, Edge Drawing algorithm, LSD, Helmholtz principle, NFA"
+ }
+
+ @article{Gioi2012lsd,
+    title   = {{LSD: a Line Segment Detector}},
+    author  = {Grompone von Gioi, Rafael and Jakubowicz, Jérémie and Morel, Jean-Michel and Randall, Gregory},
+    journal = {{Image Processing On Line}},
+    volume  = {2},
+    pages   = {35--55},
+    year    = {2012},
+    doi     = {10.5201/ipol.2012.gjmr-lsd},
+}

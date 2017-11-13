@@ -132,7 +132,7 @@ Plusieurs modèles de distortion ont été proposés à travers le temps mais le
 \end{equation}
 Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distortion radial et $p_{[1,2]}$ les coefficients de distortion tangentiel. L'équation \ref{eq:focal_scaling} permet de mettre à l'échelle les coordonnées normalisées en coordonnées en pixels. Les paramètres de distortion et intrinsèques peuvent être estimés conjointement suivant la résolution d'un problème des moindres carrés non-linéaire \citep{Zhang2000}.
 
-Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadioptriques. 
+Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distortion équidistant proposé par \citep{Kannala2006} est apte à modéliser la distortion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationelle de \citep{Claus2005} adapté aux lentilles grand-angle et catadioptriques.
 
 \subsection{Vision stereo}
 \color{red}
@@ -141,10 +141,8 @@ Ajouter la théorie sur la géométrie épipolaire pour la résolution de profon
 
 \subsection{Détection de lignes}
 
-\begin{enumerate}
-  \item canny
-  \item HED
-  \item Transformée de hough
-  \item edlines
-  \item lsd
-\end{enumerate}
+La méthode la plus connue pour la détection de contours dans une image reste à ce jour celle proposée par \cite{Canny1986} qui consiste brièvement en un calcul de gradient suivit d'une suppresion des non-maxima. Avec la popularité grandissante de l'apprentissage machine, certaines nouvelles méthodes ont été proposées pour la détection de contours à base de réseau de neuronnes. Par exemple \textit{Holistically-Nested Edge Detection} proposé par \cite{Xie2015} est un réseau de neuronnes entièrement convolutionnel qui faut aussi usage d'apprentissage multi-échelle de caractéristiques imbriquées. L'avantage majeur des méthodes par apprentissage machine est qu'elles ne requirent pas la calibration de de paramètres.
+
+Une fois les contours détectés et inscrits dans une image binarisée, il devient possible d'appliquer une transformée de Hough pour la détection de lignes droites \citep{Duda:1972}. Avec le temps, plusieurs améliorations ont été proposées pour accélérer le calcul de la transformée, nottamment l'introduction de méthodes probabilistes utilisant qu'un sous-ensemble des données pour la détection des lignes \citep{Matas2000}. \citep{Herout2013} Dénombrait 39 différentes variantes de la transformée de Hough incluant des variantes faisant usage de matériel spécialisé tel que des GPU ou des FPGA.
+
+D'autres méthodes de détection de ligne ont aussi été proposées sans le besoin de passer par une transformée de Canny. Par exemple le \textit{Line Segment Detector} de \citep{Gioi2012lsd} fonctionnant par régions de support de ligne. D'un autre côté, EDLines proposé par \citep{AKINLAR20111633} fonctionne directement sur une image à tons de gris, des points d'ancrage sont calculés sur une image gradient pour effectuer un traçage de contours. LSD et EDLines ont tous les deux l'avantage d'être rapides et ont étés conçus pour ne pas avoir besoin de réglage de paramètres.
