@@ -35,7 +35,7 @@ Pour faire naviguer un robot mobile dans un environnement inconnu il est impéra
   \label{fig:octree}
 \end{figure}
 
-La structure de l'OctoMap la rend particulièrement efficace comparativement à une séparation naïve en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte.
+La structure de l'OctoMap la rend particulièrement efficace comparativement à une séparation naïve en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte. L'octomap peut ensuite être utilisé par divers algorithmes de génération de trajectoire tel que les RRT ou A*.
 
 \color{red}
 \begin{enumerate}
