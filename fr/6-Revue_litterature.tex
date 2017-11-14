@@ -31,20 +31,17 @@ Pour faire naviguer un robot mobile dans un environnement inconnu il est impéra
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\linewidth]{images/octree.jpg}
-  \caption[Représentation graphique d'une Octree]{L'octree est une structure en arbre souvent utilisé pour partitionner un espace tri-dimentionel.}
+  \caption[Représentation graphique d'une Octree]{L'octree est une structure en arbre souvent utilisé pour partitionner un espace tri-dimentionel. Figure prise de \citep{Hornung2013}.}
   \label{fig:octree}
 \end{figure}
 
-La structure de l'OctoMap la rend particulièrement efficace comparativement à une séparation naïve en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte. L'octomap peut ensuite être utilisé par divers algorithmes de génération de trajectoire tel que les RRT ou A*.
+La structure Octree rend l'OctoMap particulièrement efficace en termes de mémoire comparativement à une séparation naïve de l'espace en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte. L'OctoMap peut ensuite être utilisé par divers algorithmes de génération de trajectoire tel que les RRT ou A*.
 
-\color{red}
-\begin{enumerate}
-  \item signed distance fields
-  \item \url{http://people.eecs.berkeley.edu/%7Edfk/Atom_Mapping.pdf}
-\end{enumerate}
-\color{black}
+Par contre, une OctoMap n'est pas particulièrement bien adapté aux méthodes de planification de trajectoire par optimisation qui ont besoin de savoir la distance aux obstacles en tout point de la carte ainsi que les gradients de distance \citep{ratliff2009chomp, Oleynikova2016}. Ce calcul pouvant être coûteux, \cite{oleynikova2017voxblox} propose d'utiliser une représentation des surface par des fonctions de distance signées tronquées offrant une accélération par la suite dans le calcul des champs de distance euclidiennes signées.
 
-\section{Génération de trajectoires et couverture de surfaces}\label{subsec:generation}
+Dans un autre ordre d'idées \cite{Fridovich-Keil2017AtomMap} abandonnent complètement la représentation par grille et proposent d'utiliser des sphères (des \guillemotleft atômes \guillemotright) organisés dans un arbre $k$-d. Ceci permet une représentation plus précise de l'espace libre tangeant aux surfaces en plus de faire l'estimation de fonctions de distance signées en temps réel.
+
+\section{Génération de trajectoires d'exploration et couverture de surfaces}\label{subsec:generation}
 
 En général, le but des générateurs de trajectoire est d'optimiser une certaine métrique permettant de décider à quel endroit il faut placer le véhicule et son capteur pour faire l'inspection de la structure.
 
