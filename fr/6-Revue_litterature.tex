@@ -23,7 +23,7 @@ De base, le filtre de Kalman (KF) est un algorithme récursif permettant de fair
 
 Les GNSS n'étant pas la seule façon de corriger l'erreur cumulative d'un INS, certains auteurs proposent des filtres de Kalman modulaires permettant de fusionner une quantité arbitraire de capteurs hétérogènes tels que des IMU, l'odométrie d'encodeurs de roues, l'odométrie visuelle, receveurs GNSS, etc. \citep{MooreEkf2014} pour estimer la position et l'orientation du robot. Pour le cas spécifique des UAV \citep{Lynen2013} proposent aussi une architecture modulaire pour un filtre de Kalman étendu itéré qui permet de faire une calibration inter-capteurs en ligne pour estimer les délais temporels et les différences en d'échelle des mesures, chose importante dans le cas d'odométrie visuelle monoculaire où l'échelle des mesures est arbitraire et peut dériver avec le temps.
 
-\section{\textit{Simultaneous Localization and Mapping} et reconstruction 3D}\label{subsec:reconstruction}
+\section{\textit{Simultaneous Localization and Mapping}}\label{subsec:reconstruction}
 
 Les GNSS permettent de localiser un robot sur la surface de la terre, mais qu'en est-il des situations dépourvues de réception satellite adéquate tel que les environnements intérieurs ou les \guillemotleft canyons urbains \guillemotright ? De plus, nous sommes souvent plus intéressés à savoir la position du robot par rapport à son environnement plutôt que sa latitude et longitude. Nous cherchons dont à répondre à \guillemotleft Comment localiser un robot dans son environnement sans une carte de celle-ci?\guillemotright; Une question qui est l'essence du problème de localisation et cartographie simultanée (SLAM).
 
@@ -71,7 +71,11 @@ Comparativement à l'inspection par exploration (en temps réel) la génération
 
 \section{Méthodes de navigation}\label{subsec:navigation}
 
-Champs de potentiel
+\begin{enumerate}
+  \item champs de potentiel
+  \item rrt
+  \item a star
+\end{enumerate}
 
 \section{Méthodes automatiques d'inspection d'éoliennes}\label{subsec:eolienne}
 
@@ -148,7 +152,7 @@ Les paramètres $\kappa_{[1-6]}$ sont les coefficients de distorsion radial et $
 
 Bien que le modèle radial-tangentiel soit le plus populaire, entres-autres par sa présence dans la librairie de traitement d'images OpenCV, plusieurs auteurs proposent de nouveaux modèles avec divers avantages. Par exemple le modèle de distorsion équidistant proposé par \cite{Kannala2006} est apte à modéliser la distorsion à la fois de lentilles normales et de lentilles ultra-grand angle et le modèle par fonction rationnelle de \cite{Claus2005} adapté aux lentilles grand-angle et catadioptriques.
 
-\subsection{Vision stereo}
+\subsection{Vision stereo}\label{subsec:stereo_vision}
 
 \begin{figure}[h]
   \centering
