@@ -474,6 +474,7 @@ Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_an
 Le robot réussit à faire l'exploration du périmètre en sautant la cavité interne, le tout en temps réel malgré l'exécution du SLAM 3D et des différents algorithmes d'estimation d'odométrie et de planification de trajectoire. La partie la plus lente de l'algorithme reste la construction et l'analyse de la OctoMap pour la détection des cavités qui peut prendre plusieurs secondes de temps. Bien que la représentation multi résolution d'un OcTree nous permet d'accélérer les requêtes à la carte, un problème existe néanmoins dans l'insertion des points et du traçage des rayons associés qui se fait séquentiellement sans l'utilisation de fils d'exécution en parallèle. Ceci pourrait être règlé en changeant la représentation utilisée de OctoMap à quelque chose de plus efficace et parallélisable tel que la SkiMap récemment proposé par \citep{Gregorio2017}.
 
 \subsection{Sources de bruit et différences entre la simulation et l'expérience réelle}
+\label{subsec:ugv_noise_sim}
 
 En effectuant nos expériences, nous notons plusieurs différences entre notre environnement de simulation et la réalité. La première que nous remarquons est la quantité de bruit dans les capteurs. Dans notre environnement Gazebo, la caméra de profondeur est simulée avec un bruit gaussien sur les mesures de distances et chaque pixel de l'image de profondeur est en fait simulé par les mêmes mécanismes de simulation de laser. En réalité les capteurs fonctionnant par temps de vol possèdent des caractéristiques de bruit légèrement différentes entre autres de bruit poivre et sel et du bruit de chatoiement (de petites taches dans l'image). Cette dernière est particulièrement importante, car elle peut facilement faire échouer le calcul de la prochaine pose objectif tel que présenté dans la Figure \ref{fig:speckle_fail}.
 
@@ -490,7 +491,7 @@ Outre le bruit de capteur, certaines différences inattendues se sont présenté
 
 En somme, notre algorithme est surtout sujet à deux sortes de cas d'échec: i) l'échec du calcul de la trajectoire d'inspection par la présence de trous et de fenêtres dans la structure et ii) l'échec de la fermeture de boucle globale que nous pouvons mitiger à l'aide d'un marqueur visuel unique.
 
-\section{Conclusion et travail futur}
+\section{Conclusion et travail futur} \label{sec:ugv_conclusion}
 
 En conclusion, nous avons présenté une méthode pour la génération de trajectoire permettant de guider un UGV équipé d'une caméra de profondeur mobile pour l'inspection d'une structure fermée inconnue. Notre méthode ne requiert aucune information \textit{a priori} à propos de la taille ou de la géométrie de la structure. Utilisé en conjonction avec un système de SLAM visuel performant, nous obtenons une grande couverture de la surface de la structure dans le modèle reconstruit malgré les limites de la plateforme. Le système proposé est validé en simulation et dans des tests expérimentaux. Par une comparaison à l'algorithme classique d'exploration par frontier, nous démontrons clairement le gain en performance dans le cas d'une structure réaliste telle qu'une maison.
 

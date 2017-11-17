@@ -454,7 +454,7 @@ La mission d'inspection entièrement par laser se déroule avec succès dans une
 \begin{figure}[!htb]
   \centering
   \includegraphics[width=\linewidth]{images/sim_tower_ascent}
-  \caption{Trajectoire suivie pour la montée de la tour.}
+  \caption{Trajectoire suivie pour la montée de la tour et les commandes de vitesse associées.}
   \label{fig:sim_tower_ascent}
 \end{figure}
 
@@ -466,7 +466,7 @@ Dans la Figure \ref{fig:sim_tower_ascent}, nous pouvons voir la décomposition d
   \label{fig:sim_suivit_pale}
 \end{figure}
 
-La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de vitesses pour le suivi de la pale 1. Nous voyons que les vitesses en $z$ semblent saccadées, mais ceci est encore dû au petit nombre de rayons du scanneur laser. Chaque petit pic est en fait un instant où un rayon supplémentaire du laser parvient à toucher la surface de la pale et influencer le calcul de son centre. Vers la fin de la courbe, $vx$ nous pouvons observer une oscillation entre la commande $0$, $+5$ et $-5$ mètres par seconde. Ceci est dû au fait que la fin de la pale est assez petite pour passer entre deux rayons du scanneur laser, combiné au mouvement de tangage du véhicule pour avancer et reculer le laser parvient momentanément à toucher la pale. En réalité ceci ne devrait pas être un problème, car le LeddarVu8 ne souffre pas des angles morts entre ses rayons. Malgré cela, le robot poursuit son chemin jusqu'à ce que la fin de la pale soit officiellement détectée par le compteur de lectures vides.
+La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de vitesses pour le suivi de la pale 1. Nous voyons que les vitesses en $z$ semblent saccadées, mais ceci est encore dû au petit nombre de rayons du scanneur laser. Chaque petit pic est en fait un instant où un rayon supplémentaire du laser parvient à toucher la surface de la pale et influencer le calcul de son centre. Vers la fin de la courbe, $vx$ nous pouvons observer une oscillation entre les commandes $0$, $+5$ et $-5$ mètres par seconde. Ceci est dû au fait que le bout de la pale est assez petit pour passer entre deux rayons du scanneur laser, combiné au mouvement de tangage du véhicule pour avancer et reculer, le laser parvient momentanément à toucher la pale. En réalité ceci ne devrait pas être un problème, car le LeddarVu8 ne souffre pas des angles morts entre ses rayons. Malgré cela, le robot poursuit son chemin jusqu'à ce que le bout de la pale soit officiellement détectée par le compteur de lectures vides.
 \begin{figure}[htb]
   \centering
   \includegraphics[trim=30 10 10 50,clip,width=0.5\linewidth]{images/sim_tower_total}
@@ -485,7 +485,7 @@ La Figure \ref{fig:sim_suivit_pale} présente la trajectoire et les commandes de
   \label{fig:test_eolienne}
 \end{figure}
 
-Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 prise en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses au niveau de la vision stereo. Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia à fin de permettre au TX2 d'interfacer avec les différents périphériques à bord de la planche de support AuvIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
+Suivant les spécifications initiales, l'intégration des capteurs s'est faite sur un md4-1000 prise en photo dans la Figure \ref{fig:field_vehicle} pour faire un test de vol manuel nous permettant de confirmer certaines de nos hypothèses au niveau de la vision stéréo. Le système d'exploitation Ubuntu 16.04 a été installé sur l'ordinateur Nvidia TX2 avec des modifications apportées au noyau Linux fourni par Nvidia afin de permettre au TX2 de s'interfacer avec les différents périphériques montés sur la carte AuvIdea J140. Les LeddarVu8 et la caméra ZED sont branchés par USB3 alors que la communication au md4-1000 se fait par UART.
 
 \begin{figure}[htp]
   \centering
@@ -514,7 +514,7 @@ Les tests de vol ont été effectués au parc éolien Pierre-de-Saurel où la ha
 %   \item Un observateur se place près de la tour pour prévenir le pilote de dangers de collision.
 % \end{enumerate}
 
-La caméra stereo s'avère à avoir une performance extrêmement variable à travers le vol tel que l'on peut voir dans la Figure \ref{fig:field_stereo_fail}. Il est difficile de corréler exactement les caractéristiques de la scène au succès ou à l'échec de la résolution de profondeur. Dans certains cas une pale diagonale est invisible alors que dans le dernier exemple elle est parfaitement visible. On voit aussi que le ciel clair est parfois résolu par erreur. Par conséquent, nous prouvons notre hypothèse initiale et en concluons qu'une caméra stereo est inutilisable dans le contexte de l'inspection d'éoliennes.
+La caméra stéréo s'avère à avoir une performance extrêmement variable à travers le vol tel qu'on peut le voir dans la Figure \ref{fig:field_stereo_fail}. Il est difficile de corréler exactement les caractéristiques de la scène au succès ou à l'échec de la résolution de profondeur. Dans certains cas, une pale diagonale est invisible alors que dans le dernier exemple, elle est parfaitement visible. On voit aussi que le ciel clair est parfois résolu par erreur. Par conséquent, nous prouvons notre hypothèse initiale et en concluons qu'une caméra stéréo est inutilisable dans le contexte de l'inspection d'éoliennes.
 
 \begin{figure}
   \begin{tabular}{cc}
@@ -527,22 +527,21 @@ La caméra stereo s'avère à avoir une performance extrêmement variable à tra
     \includegraphics[width=0.5\linewidth]{images/field_stereo_success_rgb2.png} &
     \includegraphics[width=0.5\linewidth]{images/field_stereo_success_pcl2.png} \\
   \end{tabular}
-  \caption{Exemples de succès et d'échecs de perception de distance. À gauche les images RGB de la caméra de gauche et à droite les images de profondeur ramenées sur la caméra de gauche.}
+  \caption{Exemples de succès et d'échecs de perception de distance. À gauche, les images RGB de la caméra de gauche, et à droite, les images de profondeur ramenées sur la caméra de gauche.}
   \label{fig:field_stereo_fail}
 \end{figure}
 
-\color{red}
-En ce qui concerne l'approche par laser il n'a pas été possible de tester le système sur le terrain en raison de différentes circonstances (ils ont pas mit le frein alors l'éolienne bougeait, le gars en allemagne a fait une erreur dans le driver du laser etc...). Plus de temps serait requis pour faire l'intégration et le réglage des gains PID sur le vrai véhicule. Par contre, puisque l'entièreté du logiciel est déjà écrite en C++ et prête à installer sur le véhicule, il ne suffirait que de changer quelques branchements au niveau des flux de données pour faire les tests sur le terrain.
-\color{black}
+En ce qui concerne l'approche par laser il n'a pas été possible de tester le système sur le terrain en raison de différentes circonstances et d'une erreur logicielle survenue le jour du test. Plus de temps serait requis pour faire l'intégration et le réglage des gains PID sur le vrai véhicule. Par contre, puisque l'entièreté du logiciel est déjà écrite en C++ et prête à installer sur le véhicule, il ne suffirait que de changer quelques branchements au niveau des flux de données pour faire les tests sur le terrain.
 
 \clearpage
 \section{Discussion des résultats et travaux futurs}
+\label{uav:results_conclusion_future_work}
 
-Bien que nous n'avons pas pu valider notre approche sur le terrain, les résultats en simulation demeurent prometteurs et l'inspection d'éoliennes reste un projet important à poursuivre dans le futur. Par contre, suite à nos tests de vol manuels sur le terrain nous réalisons maintenant que la méthode d'inspection bénéficierait de plusieurs changements.
+Bien que nous n'avons pas pu valider notre approche sur le terrain, les résultats en simulation demeurent prometteurs et l'inspection d'éoliennes reste un projet important à poursuivre dans le futur. Par contre, suite à nos tests de vol manuels sur le terrain, nous réalisons maintenant que la méthode d'inspection bénéficierait de plusieurs changements.
 
-Tout d'abord, pour qu'un UAV entre $1$ et $25$ kg utilisé à des fins non-récréatives soit exempt du besoin d'un Certificat d'Opération Aériennes Spécialisées (COAS) par Transport Canada, il doit demeurer en dessous d'une altitude de $300$ pieds ($91$ mètres) \citep{transportscanada2016}. Puisque les grandes éoliennes ont leur nacelle à une altitude de $100$ mètres ou plus, ceci implique que chaque fois qu'un inspecteur voudrait aller travailler il faudrait appliquer pour un COAS à l'avance ce qui peut prendre beaucoup de temps à être approuvé. Sans quoi, l'UAV n'aurait pas le droit d'inspecter les pales autres que celles pointant vers le bas.
+Tout d'abord, pour qu'un UAV entre $1$ et $25$ kg utilisé à des fins non récréatives soit exempt du besoin d'un Certificat d'Opération Aériennes Spécialisées (COAS) par Transport Canada, il doit demeurer en dessous d'une altitude de $300$ pieds ($91$ mètres) \citep{transportscanada2016}. Puisque les grandes éoliennes ont leur nacelle à une altitude de $100$ mètres ou plus, ceci impliquerait que chaque fois qu'un inspecteur voudrait aller travailler, il faudrait appliquer pour un COAS à l'avance, ce qui peut prendre beaucoup de temps à être approuvé. Sans quoi, l'UAV n'aurait pas le droit d'inspecter les pales autres que celles pointant vers le bas.
 
-Il reste néanmoins une alternative possible qui comporterait plusieurs avantages sur le système proposé à condition de remettre en question les modalités de la participation de l'inspecteur et du budget alloué. Le système pourrait faire une inspection en 3 dimensions d'une seule pale à la fois pointée vers le bas suivant une trajectoire présenté dans la Figure \ref{fig:alternative}. En commençant sur le côté de la pale l'UAV longerait la pale vers bas. Il pivoterait ensuite pour remonter le bord d'attaque avant de pivoter une dernière fois pour longer le côté droit. Ceci demanderait des capteurs différents et que l'inspecteur fasse tourner les pales entre chaque vol, mais aurait l'avantage d'avoir de bien meilleures images puisque la caméra serait pointée perpendiculairement à la surface à inspecter.
+Il reste néanmoins une alternative possible qui comporterait plusieurs avantages sur le système proposé à condition de remettre en question les modalités de la participation de l'inspecteur et du budget alloué. Le système pourrait faire une inspection en 3 dimensions d'une seule pale à la fois pointée vers le bas suivant une trajectoire présentée dans la Figure \ref{fig:alternative}. En commençant sur le côté de la pale l'UAV longerait la pale vers bas. Il pivoterait ensuite pour remonter le bord d'attaque avant de pivoter une dernière fois pour longer le côté droit. Ceci demanderait des capteurs différents et nécessiterait que l'inspecteur fasse tourner les pales entre chaque vol. On aurait aussi l'avantage d'avoir de bien meilleures images puisque la caméra serait pointée perpendiculairement à la surface à inspecter.
 
 \begin{figure}[htb]
   \centering
@@ -551,11 +550,10 @@ Il reste néanmoins une alternative possible qui comporterait plusieurs avantage
   \label{fig:alternative}
 \end{figure}
 
-Pour en revenir à la méthode que nous proposons, l'UAV bénéficierait grandement de l'utilisation de D-GPS ou de GPS-RTK à deux antennes. Le premier avantage serait qu’avec un positionnement plus précis il serait possible de se rapprocher beaucoup plus de la structure et obtenir de meilleures images. Les distances utilisées en simulation prennent en compte que la précision du positionnement du md4-100 est typiquement entre $\sigma = 1.0$ et $\sigma = 1.5$ mètres. De plus, avec les systèmes à deux receveurs, il n'y aurait plus d'inquiétudes à propos de la zone d'interférence magnétique devant la nacelle.
+Pour en revenir à la méthode que nous proposons, l'UAV bénéficierait grandement de l'utilisation de D-GPS ou de GPS-RTK à deux antennes. Le premier avantage serait qu’avec un positionnement plus précis, il serait possible de se rapprocher beaucoup plus de la structure et obtenir de meilleures images. Les distances utilisées en simulation prennent en compte que la précision du positionnement du md4-100 est typiquement entre $\sigma = 1.0$ et $\sigma = 1.5$ mètres. De plus, avec les systèmes à deux receveurs, il n'y aurait plus d'inquiétudes à propos de la zone d'interférence magnétique devant la nacelle.
 
-Bien que ce soit rare, il arrive parfois que la mission échoue lorsque l'UAV perd de vue la pale qu'il est en train de suivre. La cause est habituellement une instabilité lorsque le dernier faisceau du lidar est près de la bordure de la pale. L'UAV tangue pour s'approcher ou reculer et le lidar perd et regagne de vue la pale. Ce mouvement peut se répéter jusqu'à ce que l'oscillation fasse perdre la pale complètement. Ce problème peut être palié en introduisant une meilleure gestion du cas où le lidar tombe en faute, une procédure de recherche lorsque la pale est perdue et une limite sur l'accélération à la sortie des contrôleurs.
+Bien que ce soit rare, il arrive parfois que la mission échoue lorsque l'UAV perd de vue la pale qu'il est en train de suivre. La cause est habituellement une instabilité lorsque le dernier faisceau du lidar est près de la bordure de la pale. L'UAV tangue pour s'approcher ou reculer et le lidar perd ou regagne la pale. Ce mouvement peut se répéter jusqu'à ce que l'oscillation fasse perdre la pale complètement. Ce problème peut être palié en introduisant une meilleure gestion du cas où le lidar tombe en faute, une procédure de recherche lorsque la pale est perdue et une limite sur l'accélération à la sortie des contrôleurs.
 
-En ce qui concerne les résultats du traitement visuel, il est difficile d'imaginer que ça vaille réellement la peine de poursuivre dans cette direction. Certaines possibilités pourraient être étudiées par exemple après une détection réussie, les descripteurs de caractéristiques tels que \textit{Oriented FAST and Rotated BRIEF} \citep{Rublee2011} pourraient êtres extraits et suivit par un algorithme de flux optique \citep{Lucas1981}. Ceci donnerait une deuxième mesure au filtre de Kalman potentiellement plus fiable. Une autre possibilité serait de remplacer la procédure de détection par un réseau de neurones entièrement convolutionnel qui calculerait conjointement la segmentation et l'orientation des pales.
-
+En ce qui concerne les résultats du traitement visuel, il est clair que la méthode proposée ne mérite pas plus d'investigations. Certaines possibilités pourraient être étudiées par exemple après une détection réussie, les descripteurs de caractéristiques tels que \textit{Oriented FAST and Rotated BRIEF} \citep{Rublee2011} pourraient êtres extraits et suivi par un algorithme de flux optique \citep{Lucas1981}. Ceci donnerait une deuxième mesure au filtre de Kalman potentiellement plus fiable. Une autre possibilité serait de remplacer la procédure de détection par un réseau de neurones entièrement convolutionnel qui calculerait conjointement la segmentation et l'orientation des pales. L'une des avenues prometteuses que nous avions commencé à étudier est l'utilisation de filtres non-linéaires tel qu'un filtre à particules pour le suivit et la localisation de l'éolienne \citep{Sugandi2009}. En somme, nous n'écartons pas la possibilité de faire une inspection entièrement par vision, mais ceci devrait être fait au moyen de méthodes plus avancées que celle examinée dans le présent mémoire.
 
 %Nous avions brièvement aussi étudié la possibilité d'utiliser un filtre à particule basé sur la couleur pour le suivit d'une objet basé sur \citep{truong2016object}, par contre puisque
