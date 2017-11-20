@@ -122,23 +122,24 @@ où $\boldsymbol{E}$ est une matrice de transformation 3D. La projection se fait
 \end{align}
 où le symbole $\sim$ indique une égalité à l'échelle et $\boldsymbol{x_s}$ doit être normalisé après la multiplication pour que la troisième composante soit $1$ \citep{Szeliski2011}.
 
-Ces formules sont valides dans le cas de projections entièrement linéaires. En revanche les systèmes optiques vont habituellement introduire une certaine distorsion de l'image. Par exemple dans la Figure \ref{fig:distortion} les lentilles de la caméra Zed avec un angle de vue de $110^\circ$ (D) introduisent beaucoup de distorsion courbant ainsi des lignes qui devraient normalement être droites.
+Ces formules sont valides dans le cas de projections entièrement linéaires. En revanche les systèmes optiques vont habituellement introduire une certaine distorsion de l'image, surtout dans le cas de lentilles grand angle.
+% Par exemple dans la Figure \ref{fig:distortion} les lentilles de la caméra Zed avec un angle de vue de $110^\circ$ (D) introduisent beaucoup de distorsion courbant ainsi des lignes qui devraient normalement être droites.
 
-\begin{figure}[htp]
-  \centering
-  \begin{minipage}{0.4\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{images/placeholder.png}
-    (A)
-  \end{minipage}
-  \begin{minipage}{0.4\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{images/placeholder.png}
-    (B)
-  \end{minipage}
-  \caption{Exemple de distorsion introduite par une lentille à grand angle. (A) l'image originale (B) l'image rectifiée}
-  \label{fig:distortion}
-\end{figure}
+%\begin{figure}[htp]
+%  \centering
+%  \begin{minipage}{0.4\textwidth}
+%    \centering
+%    \includegraphics[width=\linewidth]{images/placeholder.png}
+%    (A)
+%  \end{minipage}
+%  \begin{minipage}{0.4\textwidth}
+%    \centering
+%    \includegraphics[width=\linewidth]{images/placeholder.png}
+%    (B)
+%  \end{minipage}
+%  \caption{Exemple de distorsion introduite par une lentille à grand angle. (A) l'image originale (B) l'image %rectifiée}
+%  \label{fig:distortion}
+%\end{figure}
 
 Plusieurs modèles de distorsion ont été proposés à travers le temps mais le plus répandu est celui radial-tangentiel, radial puisqu'il dépend de la distance du pixel par rapport au centre optique, et tangentiel pour le déplacement des rayons tangents au cercle autour du centre optique. La distorsion radiale-tangentielle peut-être exprimée par un polynôme permettant de mettre en correspondance les pixels de l'image originale $(x_c, y_c)$ en coordonnées normalisées aux pixels de l'image rectifiée $(u, v)$:
 \begin{equation}

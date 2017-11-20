@@ -57,7 +57,7 @@ L'inspection se fait en 2 phases, l'exploration du périmètre (EP) présentée 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\linewidth]{images/ugv_goal}
-  \caption{Illustration du but de l'algorithme. La périmètre trajectoire en noir indique l'exploration du périmètre qui saute les cavités pour revenir au point de départ le plus tôt possible et fermer la boucle. Les trajectoires rouges de la phase d'exploration de cavités viennent par après une fois que suffisamment de contraintes ont été mises sur la carte.}
+  \caption[Illustration de l'algorithme de cartographie par UGV]{Illustration du but de l'algorithme. La périmètre trajectoire en noir indique l'exploration du périmètre qui saute les cavités pour revenir au point de départ le plus tôt possible et fermer la boucle. Les trajectoires rouges de la phase d'exploration de cavités viennent par après une fois que suffisamment de contraintes ont été mises sur la carte.}
   \label{fig:ugv_overview}
 \end{figure}
 
@@ -129,7 +129,7 @@ Finalement ${po^c}$ est transformé dans le repère $\mathsf{G}$ pour fins de na
   	\includegraphics[width=0.45\linewidth]{images/nbv_acute}
   	\label{subfig:ugv_acute_angle}
   }
-  \caption{
+  \caption[Illustration du calcul de la prochaine pose objectif]{
     Illustration du calcul de la prochaine pose objectif autour d'un coin a) dans le cas normal b) dans le cas d'un coin à angle aigu.
   }
   \label{fig:ugv_goal_determination}
@@ -164,7 +164,7 @@ En d'autres mots, considérons $\mathcal M_D = \left\lbrace x : J_{x} \neq \empt
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\linewidth]{images/champ_de_potentiel.eps}
-  \caption{Exemple de visualisation du champ de potentiel. Les carrés jaunes représentent un mur et les vecteurs représentent la direction du gradient. }
+  \caption[Visualisation du champ de potentiel]{Exemple de visualisation du champ de potentiel. Les carrés jaunes représentent un mur et les vecteurs représentent la direction du gradient. }
   \label{fig:potential_field}
 \end{figure}
 
@@ -186,7 +186,7 @@ Prenons maintenant l'exemple de la Figure \ref{fig:ugv_exploration}, alors que l
 	\includegraphics[width=0.45\linewidth]{images/ugv_interference.jpg}
 	\label{subfig:ugv_interference}
 }
-\caption{
+\caption[Exemple de détection d'obstacle et de saut de cavité.]{
 Exemple de détection d'obstacle et de saut de cavité. a) Le robot (transparent) tente de tourner autour du coin, mais détecte un mur vers l'avant. La trajectoire est replanifiée pour continuer vers la gauche sans entrer dans la cavité.}
 \label{fig:ugv_exploration}
 \end{figure}
@@ -223,8 +223,8 @@ Suivant la définition posée par \citep{Yamauchi1997}, un voxel frontière (\em
   	\includegraphics[width=0.45\linewidth]{images/frontier_voxels}
   	\label{subfig:ugv_entrance}
   }
-  \caption{
-    Analyse de la OctoMap avant le début de la phase d'exploration de cavités.
+  \caption[Recherche de voxel frontières dans une OctoMap]{
+    Analyse de l'OctoMap avant le début de la phase d'exploration de cavités.
     a) En jaune les voxels frontières et en bleu les voxels faisant partie de la structure.
     b) En rouge les voxels frontières identifiant une entrée de cavité.
   }
@@ -304,7 +304,7 @@ Le système a été implémenté en simulation en combinant du code en C++ et en
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\linewidth]{images/ugv_gazebo_husky.jpg}
-  \caption{L'UGV ClearPath Husky avec un modèle de Microsoft Kinect v1 à l'extrémité d'un manipulateur UR5 et un lidar balayeur vers l'avant.}
+  \caption[L'UGV utilisé lors des simulations]{L'UGV ClearPath Husky avec un modèle de Microsoft Kinect v1 à l'extrémité d'un manipulateur UR5 et un lidar balayeur vers l'avant.}
   \label{fig:ugv_gazebo_husky}
 \end{figure}
 
@@ -355,7 +355,7 @@ Grand \large{a} & $94$ & $4.5$ & $179.65$ \\
   	\includegraphics[width=0.4\linewidth]{images/LargeA_Husky_4_5}
   	\label{subfig:large a husky 4.5}
   }
-  \caption{
+  \caption[Résultats de reconstruction en simulation.]{
   Projection du modèle reconstruit sur le plan $\vect{x}_{\fr g}\vect{y}_{\fr g}$ en noir et la trajectoire exécutée par le robot en suivant nos algorithmes en bleu.
   }
   \label{fig:relative size}
@@ -392,7 +392,7 @@ Nous comparons notre algorithme à une implémentation de l'exploration par fron
 	\label{subfig:house husky 4.5 FBE}
 }
 \hfil
-\caption{ Comparaison entre les résultats de notre algorithme par rapport à l'exploration par frontières avec un capteur de profondeur avec une portée de $4.5\, \mathrm{m}$. On peut voir en (a) par rapport à (B) que l'EF n'assure pas une couverture complète de la surface visible du modèle.
+\caption[Notre algorithme vs l'exploration par frontières]{ Comparaison entre les résultats de notre algorithme par rapport à l'exploration par frontières avec un capteur de profondeur avec une portée de $4.5\, \mathrm{m}$. On peut voir en (a) par rapport à (B) que l'EF n'assure pas une couverture complète de la surface visible du modèle.
 }
 \label{fig:simulation FBE}
 \end{figure}
@@ -440,7 +440,7 @@ Puisque l'espace dans notre aire de test était limité, nous réduisons la port
 	}
 }
 	\centering
-    \caption{
+    \caption[Équipement utilisé lors des expériences UGV]{
     (a) Le robot Husky utilisé dans nos expériences avec le bras articulé, le capteur de profondeur et le scanner lidar. Les autres capteurs non identifiés ne sont pas utilisés dans lors de l'expérience.
     (b) La structure intérieure sous inspection.}
     \label{fig:husky_exp}
@@ -457,7 +457,7 @@ Puisque l'espace dans notre aire de test était limité, nous réduisons la port
   	\includegraphics[width=0.8\linewidth]{images/loop_closure_fail}
   	\label{subfig:fail_loop_closure}
   }
-  \caption{
+  \caption[Tentatives de fermetures de boucle du système de SLAM]{
     Tentatives de fermetures de boucle du système de SLAM RTAB-Map. Les lignes cyan représentent des mises en correspondances de caractéristiques entre l'image de référence (gauche) et l'image courante (droite).
     (a) Succès de la fermeture de boucle avec plusieurs mises en correspondances. (b) Tentative échouée de fermeture de boucle avec qu'une seule mise en correspondance.
   }
@@ -469,7 +469,7 @@ Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_an
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.5\linewidth]{images/exp_angled_view}
-  \caption{Résultat expérimental, en cyan la trajectoire, en gris la carte d'occupation et d'obstacles créée par l'assemblage des balayages du lidar et en couleur la reconstruction du modèle par nuage de points.}
+  \caption[Résultat de l'expérience par UGV]{Résultat expérimental, en cyan la trajectoire, en gris la carte d'occupation et d'obstacles créée par l'assemblage des balayages du lidar et en couleur la reconstruction du modèle par nuage de points.}
   \label{fig:exp_angled_view}
 \end{figure}
 
@@ -485,7 +485,7 @@ En effectuant nos expériences, nous notons plusieurs différences entre notre e
 \begin{figure}[!th]
   \centering
   \includegraphics[width=0.7\linewidth]{images/speckle.png}
-  \caption{Échec du suivit de la structure par la présence de bruit de chatoiement. Les cubes rouges sont en fait des taches qui ont étés considérées comme une partie de la structure alors qu'en réalité elles n'existent pas.}
+  \caption[Échec du suivit de la structure par la présence de bruit de chatoiement]{Échec du suivit de la structure par la présence de bruit de chatoiement. Les cubes rouges sont en fait des taches qui ont étés considérées comme une partie de la structure alors qu'en réalité elles n'existent pas.}
   \label{fig:speckle_fail}
 \end{figure}
 
