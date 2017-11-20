@@ -1,3 +1,5 @@
+% !TEX root = Document.tex
+% !TeX spellcheck = fr
 % Résumé du mémoire.
 %
 %   Le résumé est un bref exposé du sujet traité, des objectifs visés,
@@ -15,15 +17,29 @@
 \chapter*{RÉSUMÉ}\thispagestyle{headings}
 \addcontentsline{toc}{compteur}{RÉSUMÉ}
 
-Le résumé est un bref exposé du sujet traité, des objectifs visés,
-des hypothèses émises, des méthodes expérimentales utilisées et de
-l'analyse des résultats obtenus. On y présente également les
-principales conclusions de la recherche ainsi que ses applications
-éventuelles. En général, un résumé ne dépasse pas quatre pages.
+La robotique est un domaine voué à la création de machines permettant d'aider
+ou de remplacer les humains lors de tâches difficiles ou dangereuses. Plus souvent
+utilisés dans le secteur manufacturier ou la recherche et sauvetage, les robots
+trouvent maintenant leur place dans les secteurs de l'arpentage et l'inspection
+d'infrastructure civile grâce à leur mobilité et leur capacité à effectuer des
+tâches répétitives. Cependant, ces robots sont souvent encore opérés à distance
+et ne possèdent que de l'autonomie partielle, étant toujours incapable de prendre
+des décisions eux-mêmes.
 
-Le résumé doit donner une idée exacte du contenu du mémoire ou de la thèse. Ce ne
-peut pas être une simple énumération des parties du document, car il
-doit faire ressortir l'originalité de la recherche, son aspect
-créatif et sa contribution au développement de la technologie ou à
-l'avancement des connaissances en génie et en sciences appliquées.
-Un résumé ne doit jamais comporter de références ou de figures.
+Dans ce mémoire, nous tentons de répondre à ce problème en présentant deux
+méthodes permettant de guider un robot autour d'une structure pour en faire
+l'inspection. Premièrement, nous attaquons le problème d'inspection au sol de
+structures fermées. Fonctionnant au moyen d'un robot terrestre équipé d'une
+caméra de profondeur, notre méthode permet de cartographier la surface visible
+d'une structure fermée. En particulier, nous proposons un système qui cherche
+à effectuer l'inspection tout en minimisant la possibilité d'erreur sur le système
+de localisation du robot. Deuxièmement, nous proposons un système spécifiquement
+pour l'inspection d'éoliennes. Au moyen d'un véhicule aérien
+non habité et de scanneurs lasers 2D, notre méthode permet à un quadricoptère de décoller
+du sol et suivre la tour pour ensuite automatiquement parcourir la surface avant
+des pales d'une éolienne.
+
+Nos systèmes sont tous les deux implémentés et démontrés dans des environnements
+de simulation. L'inspection terrestre est démontrée sur un vrai robot dans un
+scénario d'inspection intérieur et nous présentons des résultats préliminaires
+sur le déploiement de l'inspection aérienne.

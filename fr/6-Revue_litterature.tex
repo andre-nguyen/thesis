@@ -2,7 +2,35 @@
 %!TeX spellcheck = fr
 \Chapter{REVUE DE LITTÉRATURE}\label{sec:RevLitt}
 
-Bien que les deux types d'inspections traités dans ce mémoire sont exécutés sur des véhicules entièrement différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans ce chapitre nous présentons d'abord dans la section \ref{subsec:positionnement} diverses méthodes de positionnement couramment utilisées par les robots mobiles pour naviguer dans leur environnement. Dans le même ordre d'idée nous présentons ensuite dans la section \ref{subsec:reconstruction} diverses façons pour un robot de résoudre le problème de \textit{Simultaneous Localization and Mapping} (SLAM) pour calculer la position relative du robot dans son environnement. La section \ref{subsec:generation} présente l'état de l'art en termes de génération de trajectoires pour la couverture de surfaces et de volumes. Puis la section \ref{subsec:navigation} présente quelques algorithmes couramment utilisés pour la navigation de robots mobiles. Finalement dans la section \ref{subsec:eolienne} nous abordons le sujet spécifique de l'inspection d'éoliennes au moyen de robots autonomes.
+\color{red}
+Bien que les deux types d'inspections traités dans ce mémoire sont exécutés sur des véhicules entièrement différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans ce chapitre nous présentons d'abord dans la section \ref{subsec:positionnement} diverses méthodes de positionnement couramment utilisées par les robots mobiles pour naviguer dans leur environnement. Dans le même ordre d'idée nous présentons ensuite dans la section \ref{subsec:reconstruction} diverses façons pour un robot de résoudre le problème de \textit{Simultaneous Localization and Mapping} (SLAM) pour calculer la position relative du robot dans son environnement. La section \ref{subsec:generation} présente l'état de l'art en termes de génération de trajectoires pour la couverture de surfaces et de volumes.
+%Puis la section \ref{subsec:navigation} présente quelques algorithmes couramment utilisés pour la navigation de robots mobiles.
+Finalement dans la section \ref{subsec:eolienne} nous abordons le sujet spécifique de l'inspection d'éoliennes au moyen de robots autonomes.
+\color{black}
+
+\section{Génération de trajectoires d'exploration et couverture de surfaces}\label{subsec:generation}
+
+En général, le but des générateurs de trajectoire est d'optimiser une certaine métrique permettant de décider à quel endroit il faut placer le véhicule et son capteur pour faire l'inspection de la structure. Tout d'abord, considérons le cas d'une mission sans information \textit{a priori}. Il s'agit d'une mission d'exploration où la génération de trajectoires doit se faire itérativement en temps réel pour envoyer le robot aux confins de l'espace connu. On tente en fait de répondre à la question:
+
+\begin{quote}
+  \emph{Given what you know about the world, where should you move to gain as much new information as possible?} (Sachant ce que nous savons à propos du monde, où devrions nous aller pour gagner le plus d'information possible?) \citep{Yamauchi1997}.
+\end{quote}
+
+Pour ce faire, Yamauchi introduit le concept de \textit{frontier-based exploration} qui cherche à guider un robot vers la frontière entre l'espace connu et libre, et l'espace inconnu. Suivant cette idée plusieurs chercheurs proposent des fonctions de coût à minimiser permettant de choisir à quel endroit de la frontière explorer. \citep{Wirth2007} proposent de subdiviser une carte 2D en cellules pour lesquelles une fonction de coût est calculée en prenant en compte non seulement la plus courte distance par rapport au robot mais aussi la distance par rapport à l'obstacle le plus proche. Chaque nouvelle position objectif minimise ainsi la distance pour s'y rendre mais aussi le risque encouru par le robot. Au lieu d'utiliser les frontières comme objectifs \citep{Dornhege2011} proposent une formulation du problème utilisant les frontières en tant que candidates possibles d'ouvertures dans les murs qui permettraient à une caméra de cartographier l'espace vide se trouvant derrière.
+
+\citep{Bircher2016} proposent une méthode d'exploration 3D basée sur l'algorithme \textit{Rapidly exploring Random Trees} (RRT) où un arbre est construit dans l'espace ouvert connu. À chaque sommet, l'angle de vue de la caméra est utilisé pour estimer le gain exploratoire de la position. Une fois l'arbre construit, le véhicule exécute la première étape de la branche possédant le plus grand gain total. L'arbre complet est ensuite recalculé en utilisant la branche choisie comme point de départ. En d'autres mots, leur méthode tente de maximiser le gain exploratoire en prenant aussi en compte les gains futurs d'une trajectoire. Outre les gains exploratoires, certains auteurs tentent aussi de prendre en compte l'effet des trajectoires sur leurs systèmes de navigation. Par exemple \citep{Papachristos2017} améliorent la méthode de Bircher en sélectionnant un trajectoire qui permet aussi de minimiser l'incertitude sur leur système de cartographie et d'odométrie visuelle. \citep{Wirth2007} notent d'ailleurs que la proximité d'un obstacle est un danger (de collision) mais l'éloignement des obstacles en est aussi puisque la portée limitée des capteurs pourrait rendre un système de SLAM temporairement aveugle.
+
+Alors que les méthodes précédentes se préoccupent de maximiser le gain d'information, elles ne prennent pas en compte les contraintes de temps liées à l'autonomie des robots, un problème qui affecte grandement les véhicules aériens multi-rotors. En combinant une fonction d'entropie calculée dans un voisinage local avec le coût en distance d'une trajectoire, \citep{Wang2017} proposent une méthode d'exploration se basant sur les \textit{Information Potential Fields} (les champs de potentiels d'information). Similaire à la méthode des champs de potentiels pour l'évitement d'obstacles, le robot finit par être attiré dans les régions les plus proches à haut gain d'information. Toutefois, minimiser la longueur de la trajectoire n'assure pas nécessairement une minimisation du temps d'exploration si nous prenons aussi en compte l'accélération ou le jerk requis pour exécuter celle-ci. Pour résoudre ce problème \citep{Cieslewski2017} proposent une extension de la méthode de \citep{Yamauchi1997} où la prochaine frontière est choisie est sélectionnée dans le champ de vision du véhicule de telle sorte qu'il minimise le changement de vitesse requis pour le robot. Ainsi, la trajectoire exécutée peut être plus longue que les méthodes conventionnelles mais elle permet de maintenir une vitesse de navigation plus élevée.
+
+Dans un autre ordre d'idée, une trajectoire complète et globalement optimale peut être générée au préalable si de l'information \textit{a priori} est disponible. Pour une mission où la géométrie de la structure à inspecter est connue, \citep{Bircher2015} proposent de résoudre le problème en deux temps. En subdivisant le modèle en un maillage de triangles, on obtient pour chaque face un ensemble de points de vues admissibles. À chaque itération, des points de vue sont choisis séquentiellement en résolvant un problème d'optimisation QP (\emph{Quadratic Programming}) où la fonction de coût minimise la distance par rapport aux points de vue voisins et où les contraintes assurent que la surface soit visible par le véhicule. Une fois l'ensemble choisi, une recherche heuristique est effectuée pour résoudre un problème de type commis voyageur à travers l'ensemble. Bircher réexécute les deux étapes jusqu'à ce qu'une trajectoire satisfaisante soit trouvée.
+
+Comparativement à l'inspection par exploration (en temps réel) la génération de trajectoires hors-ligne permet de créer des plans optimaux en termes de temps et de distance à parcourir. Par contre, cette trajectoire peut avoir un risque de collision s'il s'avère que le modèle utilisé diffère de la structure réelle, par exemple dans la cas d'un édifice partiellement endommagé par un désastre naturel ou une variation dans l'angle des pales d'une éolienne. \citep{Hepp2017} présentent un système faisant une première passe à haute altitude pour construire une carte rudimentaire dans laquelle la seconde inspection de près est planifiée suivant une maximisation du gain d'information.
+
+\section{Méthodes automatiques d'inspection d'éoliennes}\label{subsec:eolienne}
+
+L'inspection d'éoliennes par UAV autonome étant une application relativement nouvelle, peu de travaux ont été publiés sur ce sujet particulier et à ce jour, la majorité du travail accompli demeure théorique, en simulation seulement ou en environnement à petite échelle. Avant tout, \citep{Zhang2014} démontrent la faisabilité de repérer automatiquement des fissures sur la surface d'une éolienne au moyen de détecteurs de bordures bien connus Canny et Sobel. Un travail préliminaire a été réalisé sur les éléments de base requis pour faire une inspection autonome. Notamment au niveau de l'utilisation du principe du flux optique pour l'estimation de la vitesse relative entre un véhicule aérien et une éolienne \citep{Hoglund2014} ainsi que l'utilisation de la transformée de Hough linéaire et de traitements géométriques pour la reconnaissance automatique d'éoliennes \citep{Stokkeland2015}. Stokkeland explique qu'une inspection entièrement visuelle est difficile à réaliser dû à la grande quantité de bruit et de sources d'erreurs présentes sur le terrain. Par exemple, la segmentation entre la surface blanche de l'éolienne et les nuages en arrière plan est extrêmement sensible au réglage des paramètres du filtre de couleur. C'est pourquoi \citep{Heggem2017} fait usage de vision active au moyen d'un projecteur laser et de caméras stéréo pour détecter la distance et la forme de la pale. Avec une matrice de seulement 11x11 points, Heggem parvient ensuite à calculer dans quelle direction son UAV doit se diriger pour poursuivre son inspection.
+
+Du côté commercial, peu de compagnies se sont aventurées dans le domaine \footnote{Nous notons la présence de SkySpecs aux États-Unis, Pro-Drones en Italie et Perceptual Robotics en Angleterre.} mais tous semblent faire usage de radars lasers et de caméras sous une forme ou une autre.
 
 \section{Méthodes de positionnement}\label{subsec:positionnement}
 
@@ -41,46 +69,28 @@ Pour faire naviguer un robot mobile dans un environnement inconnu il est impéra
   \label{fig:octree}
 \end{figure}
 
-La structure Octree rend l'OctoMap particulièrement efficace en termes de mémoire comparativement à une séparation naïve de l'espace en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte. L'OctoMap peut ensuite être utilisé par divers algorithmes de génération de trajectoire tel que les RRT ou A*.
-
+La structure Octree rend l'OctoMap particulièrement efficace en termes de mémoire comparativement à une séparation naïve de l'espace en voxels car l'arbre n'est étendu qu'au besoin. Alors que certaines représentations de l'espace utilisent une forme binaire où tout voxel est soit occupé ou libre, OctoMap utilise une forme probabiliste où chaque voxel est inconnu ou a une probabilité d'être occupé ou libre permettant donc l'OctoMap de représenter l'incertitude et le bruit de mesure sur le capteur utilisé pour construire la carte. Nous avons la probabilité $P(n|z_{1:t})$ qu'une feuille $n$ de l'Octree soit occupée étant donné les mesures de capteurs $z_{1:t}$ est estimé selon
+\begin{align}
+  P(n|z_{1:t}) = \Bigg[ 1 +
+    \frac{1 - P(n|z_{t})}{P(n|z_{t})}
+    \frac{1 - P(n|z_{1:t-1})}{P(n|z_{1:t-1})}
+    \frac{P(n)}{1 - P(n)}
+  \Bigg]^{-1}
+  \label{eq:octomap_probability}
+\end{align}
+avec la probabilité par défaut $P(n) = 0.5$. Les probabilités des voxels peuvent ensuite être dicrétisées pour définiter l'espace vide ($P(n) < 0.12$), l'espace inconnu ($P(n) \in [0.12, 0.97]$) et l'espace occupé ($P(n) > 0.97$) pour appliquer divers algorithmes de génération de trajectoire tel que les RRT ou A*.
 
 Par contre, une OctoMap n'est pas particulièrement bien adapté aux méthodes de planification de trajectoire par optimisation qui ont besoin de savoir la distance aux obstacles en tout point de la carte ainsi que les gradients de distance \citep{ratliff2009chomp, Oleynikova2016}. Ce calcul pouvant être coûteux, \cite{oleynikova2017voxblox} propose d'utiliser une représentation des surface par des fonctions de distance signées tronquées offrant une accélération par la suite dans le calcul des champs de distance euclidiennes signées.
 
 Dans un autre ordre d'idées \cite{Fridovich-Keil2017AtomMap} abandonnent complètement la représentation par grille et proposent d'utiliser des sphères (des \guillemotleft atomes \guillemotright) organisés dans un arbre $k$-d. Ceci permet une représentation plus précise de l'espace libre tangent aux surfaces en plus de faire l'estimation de fonctions de distance signées en temps réel.
 
-\section{Génération de trajectoires d'exploration et couverture de surfaces}\label{subsec:generation}
+%\section{Méthodes de navigation}\label{subsec:navigation}
 
-En général, le but des générateurs de trajectoire est d'optimiser une certaine métrique permettant de décider à quel endroit il faut placer le véhicule et son capteur pour faire l'inspection de la structure.
-
-Tout d'abord, considérons le cas d'une mission sans information \textit{a priori}. Il s'agit d'une mission d'exploration où la génération de trajectoires doit se faire itérativement en temps réel pour envoyer le robot aux confins de l'espace connu. On tente en fait de répondre à la question:
-
-\begin{quote}
-  \emph{Given what you know about the world, where should you move to gain as much new information as possible?} (Sachant ce que nous savons à propos du monde, où devrions nous aller pour gagner le plus d'information possible?) \citep{Yamauchi1997}.
-\end{quote}
-
-Pour ce faire, Yamauchi introduit le concept de \textit{frontier-based exploration} qui cherche à guider un robot vers la frontière entre l'espace connu et libre, et l'espace inconnu. Suivant cette idée plusieurs chercheurs proposent des fonctions de coût à minimiser permettant de choisir à quel endroit de la frontière explorer. \citep{Wirth2007} proposent de subdiviser une carte 2D en cellules pour lesquelles une fonction de coût est calculée en prenant en compte non seulement la plus courte distance par rapport au robot mais aussi la distance par rapport à l'obstacle le plus proche. Chaque nouvelle position objectif minimise ainsi la distance pour s'y rendre mais aussi le risque encouru par le robot. Au lieu d'utiliser les frontières comme objectifs \citep{Dornhege2011} proposent une formulation du problème utilisant les frontières en tant que candidates possibles d'ouvertures dans les murs qui permettraient à une caméra de cartographier l'espace vide se trouvant derrière.
-
-\citep{Bircher2016} proposent une méthode d'exploration 3D basée sur l'algorithme \textit{Rapidly exploring Random Trees} (RRT) où un arbre est construit dans l'espace ouvert connu. À chaque sommet, l'angle de vue de la caméra est utilisé pour estimer le gain exploratoire de la position. Une fois l'arbre construit, le véhicule exécute la première étape de la branche possédant le plus grand gain total. L'arbre complet est ensuite recalculé en utilisant la branche choisie comme point de départ. En d'autres mots, leur méthode tente de maximiser le gain exploratoire en prenant aussi en compte les gains futurs d'une trajectoire. Outre les gains exploratoires, certains auteurs tentent aussi de prendre en compte l'effet des trajectoires sur leurs systèmes de navigation. Par exemple \citep{Papachristos2017} améliorent la méthode de Bircher en sélectionnant un trajectoire qui permet aussi de minimiser l'incertitude sur leur système de cartographie et d'odométrie visuelle. \citep{Wirth2007} notent d'ailleurs que la proximité d'un obstacle est un danger (de collision) mais l'éloignement des obstacles en est aussi puisque la portée limitée des capteurs pourrait rendre un système de SLAM temporairement aveugle.
-
-Alors que les méthodes précédentes se préoccupent de maximiser le gain d'information, elles ne prennent pas en compte les contraintes de temps liées à l'autonomie des robots, un problème qui affecte grandement les véhicules aériens multi-rotors. En combinant une fonction d'entropie calculée dans un voisinage local avec le coût en distance d'une trajectoire, \citep{Wang2017} proposent une méthode d'exploration se basant sur les \textit{Information Potential Fields} (les champs de potentiels d'information). Similaire à la méthode des champs de potentiels pour l'évitement d'obstacles, le robot finit par être attiré dans les régions les plus proches à haut gain d'information. Toutefois, minimiser la longueur de la trajectoire n'assure pas nécessairement une minimisation du temps d'exploration si nous prenons aussi en compte l'accélération ou le jerk requis pour exécuter celle-ci. Pour résoudre ce problème \citep{Cieslewski2017} proposent une extension de la méthode de \citep{Yamauchi1997} où la prochaine frontière est choisie est sélectionnée dans le champ de vision du véhicule de telle sorte qu'il minimise le changement de vitesse requis pour le robot. Ainsi, la trajectoire exécutée peut être plus longue que les méthodes conventionnelles mais elle permet de maintenir une vitesse de navigation plus élevée.
-
-Dans un autre ordre d'idée, une trajectoire complète et globalement optimale peut être générée au préalable si de l'information \textit{a priori} est disponible. Pour une mission où la géométrie de la structure à inspecter est connue, \citep{Bircher2015} proposent de résoudre le problème en deux temps. En subdivisant le modèle en un maillage de triangles, on obtient pour chaque face un ensemble de points de vues admissibles. À chaque itération, des points de vue sont choisis séquentiellement en résolvant un problème d'optimisation QP (\emph{Quadratic Programming}) où la fonction de coût minimise la distance par rapport aux points de vue voisins et où les contraintes assurent que la surface soit visible par le véhicule. Une fois l'ensemble choisi, une recherche heuristique est effectuée pour résoudre un problème de type commis voyageur à travers l'ensemble. Bircher réexécute les deux étapes jusqu'à ce qu'une trajectoire satisfaisante soit trouvée.
-
-Comparativement à l'inspection par exploration (en temps réel) la génération de trajectoires hors-ligne permet de créer des plans optimaux en termes de temps et de distance à parcourir. Par contre, cette trajectoire peut avoir un risque de collision s'il s'avère que le modèle utilisé diffère de la structure réelle, par exemple dans la cas d'un édifice partiellement endommagé par un désastre naturel ou une variation dans l'angle des pales d'une éolienne. \citep{Hepp2017} présentent un système faisant une première passe à haute altitude pour construire une carte rudimentaire dans laquelle la seconde inspection de près est planifiée suivant une maximisation du gain d'information.
-
-\section{Méthodes de navigation}\label{subsec:navigation}
-
-\begin{enumerate}
-  \item champs de potentiel
-  \item rrt
-  \item a star
-\end{enumerate}
-
-\section{Méthodes automatiques d'inspection d'éoliennes}\label{subsec:eolienne}
-
-L'inspection d'éoliennes par UAV autonome étant une application relativement nouvelle, peu de travaux ont été publiés sur ce sujet particulier et à ce jour, la majorité du travail accompli demeure théorique, en simulation seulement ou en environnement à petite échelle. Avant tout, \citep{Zhang2014} démontrent la faisabilité de repérer automatiquement des fissures sur la surface d'une éolienne au moyen de détecteurs de bordures bien connus Canny et Sobel. Un travail préliminaire a été réalisé sur les éléments de base requis pour faire une inspection autonome. Notamment au niveau de l'utilisation du principe du flux optique pour l'estimation de la vitesse relative entre un véhicule aérien et une éolienne \citep{Hoglund2014} ainsi que l'utilisation de la transformée de Hough linéaire et de traitements géométriques pour la reconnaissance automatique d'éoliennes \citep{Stokkeland2015}. Stokkeland explique qu'une inspection entièrement visuelle est difficile à réaliser dû à la grande quantité de bruit et de sources d'erreurs présentes sur le terrain. Par exemple, la segmentation entre la surface blanche de l'éolienne et les nuages en arrière plan est extrêmement sensible au réglage des paramètres du filtre de couleur. C'est pourquoi \citep{Heggem2017} fait usage de vision active au moyen d'un projecteur laser et de caméras stereo pour détecter la distance et la forme de la pale. Avec une matrice de seulement 11x11 points, Heggem parvient ensuite à calculer dans quelle direction son UAV doit se diriger pour poursuivre son inspection.
-
-Du côté commercial, peu de compagnies se sont aventurées dans le domaine \footnote{Nous notons la présence de SkySpecs aux États-Unis, Pro-Drones en Italie et Perceptual Robotics en Angleterre.} mais tous semblent faire usage de radars lasers et de caméras sous une forme ou une autre.
+%\begin{enumerate}
+%  \item champs de potentiel
+%  \item rrt
+%  \item a star
+%\end{enumerate}
 
 \section{Traitement d'images}
 
@@ -175,3 +185,91 @@ La méthode la plus connue pour la détection de contours dans une image reste �
 Une fois les contours détectés et inscrits dans une image binarisée, il devient possible d'appliquer une transformée de Hough pour la détection de lignes droites \citep{Duda1972}. Avec le temps, plusieurs améliorations ont été proposées pour accélérer le calcul de la transformée, notamment l'introduction de méthodes probabilistes n'utilisant qu'un sous-ensemble des données pour la détection des lignes \citep{Matas2000}. \cite{Herout2013} dénombrait 39 variantes de la transformée de Hough incluant des variantes faisant usage de matériel spécialisé tel que des unités de traitement graphiques (GPU) ou des processeurs configurables (FPGA).
 
 D'autres méthodes de détection de ligne ont aussi été proposées sans le besoin de passer par une transformée de Canny. Par exemple, le \textit{Line Segment Detector} de \citep{Gioi2012lsd} fonctionne par régions de support de ligne. D'un autre côté, EDLines proposé par \citep{AKINLAR20111633} fonctionne directement sur une image à tons de gris: des points d'ancrage sont calculés sur une image gradient pour effectuer un tracé de contours. LSD et EDLines ont tous les deux l'avantage d'être rapides et ont été conçus pour ne pas avoir besoin de réglage de paramètres.
+
+% !TEX root = Document.tex
+\section{Choix de capteurs}\label{sec:capteurs}
+%\color{red}
+%Intégrer ce chapitre à la revue de littérature? Ou faire un chapitre très court.
+%\color{black}
+
+Il va de soi que pour qu'un robot puisse éviter des obstacles et se déplacer de façon autonome, il doit avoir un moyen de percevoir son environnement. Dans ce chapitre, nous traitons des capteurs utilisables dans le contexte de la navigation de robots mobiles, et possiblement de la reconstruction 3D. En général, il existe trois capteurs couramment utilisés: la vision passive, la vision active et les télémètres laser.
+
+\subsection{Systèmes de vision passive}
+
+Dans la section \ref{subsec:stereo_vision}, nous avons touché au sujet de vision stéréo, qui est un exemple de premier plan d'un capteur passif, c'est-à-dire un capteur capable de percevoir un phénomène quelconque sans devoir émettre un signal. En effet, les caméras sont un moyen peu coûteux de percevoir la profondeur et sont couramment utilisées dans des micro-véhicules aériens commerciaux tel que le Yuneec Typhoon H de la Figure \ref{subfig:yuneec_full}. Par contre, la vision stéréo n'étant pas infaillible, la perception de profondeur peut échouer dans les environnement comportant peu de textures ou trop peu de lumière. Malgré certaines méthodes de régularisation pour tenter de remplir les trous en propageant l'information des régions aux alentours \citep{Hirschmuller2008}, l'état de l'art est à un point où les entreprises jugent encore prudent d'ajouter un capteur secondaire, tel qu'un sonar dans la (fig. \ref{subfig:yuneec_closeup}), pour compenser les échecs de perception.
+
+\begin{figure}[ht]
+  \centering
+  \subfloat[]{
+  	\includegraphics[width=0.60\linewidth]{images/yuneec_full.png}
+  	\label{subfig:yuneec_full}
+  }
+  \hfil
+  \subfloat[]{
+  	\includegraphics[width=0.35\linewidth]{images/yuneec_closeup.png}
+  	\label{subfig:yuneec_closeup}
+  }
+  \caption[Systèmes de caméra stéréo augmentés de capteurs secondaires.]{
+    (a) Le multi-rotor Yuneec Typhoon H (b) La caméra stéréo infrarouge Intel RealSense augmentée d'un sonar pour détecter les obstacles lors des échecs de perception.
+  }
+  \label{fig:yuneec}
+\end{figure}
+
+Dans le contexte des micro-véhicules aériens, il arrive parfois que l'on veuille miniaturiser et simplifier le système à un point où il serait désirable d'avoir un système monoculaire au lieu d'un système stéréo. Tel que mentionné dans la section \ref{subsec:reconstruction}, il est possible de mettre à l'échelle une carte 3D construite monoculairement au moyen d'une source d'information métrique secondaire tel qu'une centrale inertielle \citep{muratal2017vimonoslam}. Par contre, pour que cette carte soit utilisable pour la navigation, elle doit être construite de façon à pouvoir représenter les surfaces des obstacles. \cite{Yang2017} proposent de profiter de l'exactitude d'un système d'odométrie visuo-inertiel pour construire des cartes de profondeur au moyen de résolution stéréo par mouvement. En d'autres mots, au lieu d'avoir deux caméras pour la triangulation de points, nous avons une seule caméra qui se déplace dans l'espace pour la triangulation.
+
+\subsection{Systèmes de vision active}
+
+Une autre façon de compenser pour les lacunes de la vision stéréo est d'utiliser la vision active, c'est-à-dire de projeter une onde quelconque pour en détecter le retour. L'un des exemples les mieux connus de ce type de système est la ligne de produits Microsoft Kinect. Originalement prévue pour permettre aux usager des consoles de jeux Xbox360 de jouer à des jeux contrôlés par gestuelle, la caméra de profondeur a rapidement été adoptée par le milieu académique pour son faible coût et sa précision relativement élevée \citep{khoshelham2012}. La Kinect pour Xbox360 fonctionnait originalement au moyen d'un projecteur laser quasi-infrarouge (NIR) et d'une caméra NIR. Suivant le principe de la \guillemotleft lumière structurée \guillemotright un motif NIR connu est projeté sur la scène et une caméra analysant la déformation du motif permet de calculer la profondeur de la scène \citep{Zhang2012}.
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[]{
+    \includegraphics[width=0.5\linewidth]{images/ensenso3d.jpg}
+    \label{subfig:ensenso}
+  }
+  \subfloat[]{
+    \includegraphics[width=0.4\linewidth]{images/konolidge_stereo.jpg}
+    \label{subfig:kono_stereo}
+  }
+  \caption[Caméras 3D par projection de texture]{
+    (a) Caméra Ensenso 3D fonctionnant par projection de texture et résolution stéréo.
+    (b) Résultat de la méthode proposée par \citep{konolige2010}.
+  }
+  \label{fig:3d_cams}
+\end{figure}
+
+\cite{konolige2010} propose une méthode similaire où une caméra stéréo est augmentée d'un projecteur de texture pour permettre la résolution de la profondeur dans les scènes dépourvues de texture adéquate. La mise en correspondance des blocs stéréo se fait avec la connaissance \textit{a priori} de la texture qui avait été projetée. À ce jour, ce principe est utilisé dans une variété de produits commerciaux tel que la caméra Ensenso 3D de IDS Imaging.
+
+Par contre, les caméras par lumière structurée souffrent de plusieurs inconvénients, notamment leur sensibilité à la lumière infrarouge ambiante et leur imprécision dans le cas de scènes en mouvement \citep{khoshelham2012}. Durant les cinq dernières années, nous avons assisté à une baisse de prix considérable dans les capteurs de profondeur fonctionnant par \textit{time-of-flight (ToF)} (temps de vol). Le principe du ToF se résume à projeter périodiquement une lumière NIR modulée en intensité et d'en mesurer le temps de retour. Bien sûr, cette dernière n'est pas mesurée directement; elle est plutôt calculée à partir du déphasage du signal de retour capté par la caméra. L'avantage de caméras ToF est qu'elles offrent une bonne performance dans des environnements à haute et basse luminosité, en plus d'offrir un temps de réponse rapide. Encore ici, l'exemple le plus répandu d'une caméra ToF est la Microsoft Kinect v2 pour Xbox One.
+
+Une dernière amélioration récente dans le domaine des caméras de profondeur est la ligne de produits Intel RealSense (ex. Fig. \ref{subfig:yuneec_closeup}) fonctionnant par lumière non-structurée (\emph{unstructured light}) dont le traitement est accéléré par un circuit intégré à application dédiée (ASIC). Une texture fixe est projetée sur la scène au moyen d'un projecteur laser infrarouge. Cette texture est précalculée pour maximiser le contraste et pour minimiser la similitude le long de l'axe de recherche épipolaire. À l'inverse de la Kinect 1, la texture est inconnue au moment de la résolution stéréo et ne sert que d'aide secondaire au système. L'originalité de la solution provient du fait que la caméra stéréo infrarouge permet d'opérer une RealSense dans un environnement où la lumière du soleil est de forte intensité ainsi que dans la noirceur totale grâce au projecteur. De plus, la nature matérielle des caméras stéréo fait en sorte que la RealSense peut être produite à faible coût, dans un petit emballage et avec une consommation électrique relativement basse \citep{Keselman_2017_CVPR_Workshops}.
+
+\subsection{Télémètres laser}
+
+Un dernier type de capteur à considérer est le télémètre laser ou LIDAR pour \textit{Light Detection and Ranging}. Opérant souvent par ToF, les télémètres lasers sont combinés à des assemblages de moteurs et de miroirs pour obtenir des scanners laser en 2D ou 3D. L'un des exemples les plus médiatisés de l'utilisation de lidars pour la navigation de véhicules terrestres était Stanley, la voiture autonome de Stanford qui a gagné le DARPA Grand Challenge en 2005 \citep{thrun2006stanley}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/stanley.jpg}
+  \caption[Stanley la voiture autonome fonctionnant par lidar.]{Stanley était équipé de 5 lidar 2D sur son toit pour la détection d'obstacles et la navigation \citep{thrun2006stanley}.}
+  \label{fig:stanley}
+\end{figure}
+
+Avec le temps, les lidars se sont améliorés pour devenir plus compacts et moins dispendieux à un point où il est possible de les installer sur des véhicules multi-rotors pour fins de cartographie et de localisation \citep{zhang2018aerial}. La tendance de miniaturisation se maintient avec l'arrivée récente sur le marché de lidars à état solide sans moteurs ou mirroirs pour la déflection du faisceau laser. Dans le chapitre \ref{sec:uav} nous démontrerons l'utilisation d'un tel capteur, le LeddarVu8 pour la navigation d'un véhicule aérien.
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[]{
+    \includegraphics[width=0.5\linewidth]{images/quanergy.png}
+    \label{subfig:quanergy}
+  }
+  \subfloat[]{
+    \includegraphics[width=0.2\linewidth]{images/leddar.jpg}
+    \label{subfig:leddarvu}
+  }
+  \caption[Lidars à état solide]{
+    (a) Le Quanergy S3 avec $8000$ points dans un angle de vue de $120^\circ$ horizontal et vertical \citep{eldada2016}.
+    (b) Le LeddarVu8 avec $8$ segments de détection.
+  }
+  \label{fig:lidars}
+\end{figure}
