@@ -9,15 +9,13 @@ La Section \ref{sec:ugv_problem_description} mets en contexte le problème que n
 
 \section{Description du problème} \label{sec:ugv_problem_description}
 
-Une composante importante de tout système de SLAM est sa capacité de fermeture de boucle, c'est-à-dire d'être capable de reconnaître quand le robot retourne à un endroit déjà visité, particulièrement en l'absence de systèmes de positionnement absolus. Ceci peut être fait localement sur un sous-ensemble local des observations courantes ou globalement sur toutes les observations faites jusqu'au présent. Ceci peut être réalisé d'une variété de façons dépendamment des capteurs utilisés par l'algorithme de SLAM. \citep{Hess2016} proposent Google Cartographer une approche hybride fonctionnant par scanner laser, où les nouveaux balayages sont insérés et appariés par rapport à une sous-carte locale alors que la recherche de fermeture de boucle globale est exécutée en arrière plan par un algorithme de séparation et d'évaluation progressive (\textit{branch-and-bound}). En revanche RTAB-MAP \citep{Labbe2014} utilisent une approche par sac-de-mots (\textit{bag-of-words}) appliquée à des descripteurs extraits d'une image couleur. Pour assurer une opération en temps réel les n\oeu ds du graphe de pose, contenant aussi les mots visuels extraits à chaque endroit, sont séparés dans différentes mémoires: la mémoire court terme, la mémoire de travail et la mémoire long terme. Seuls les noeuds dans la mémoire de travail sont considérés pour la fermeture de boucle. Dans les deux cas de Google Cartographer et RTAB-Map, il est donc possible que la détection de la fermeture de boucle échoue si la pose estimée courante du robot a trop dérivé au point que les algorithmes ne cherchent plus à apparier l'environnement courant avec les éléments de la carte connue.
+Le but du projet présenté dans ce chapitre est de développer une stratégie permettant de guider un robot terrestre équipé d'une caméra ou d'un capteur de profondeur pour cartographier la partie visible d'une structure 3D. Nous décrivons une méthode de planification de trajectoire qui permet de générer des points de vues successifs pour parcourir le périmètre de la structure suivit d'une deuxième inspection dans laquelle nous cherchons à compléter le modèle en inspectant les trous provenant de cavités dans la structure. 
 
-Le but de la fermeture de boucle est de réduire les erreurs de localisation en imposant certaines contraintes sur la carte en cours de construction. Cette minimisation d'erreur peut-être réalisée de plusieurs façons, notamment par optimisation de graphe de poses \citep{Carlone2016}, par compensation par faisceaux (\textit{Bundle Adjustment}) \citep{Mei2011} ou tel que proposé dans ORB-SLAM2 une combinaison des deux \citep{Mur-Artal2017}.
+Plus spécifiquement, nous contribuons une méthode de génération de trajectoire qui, d'une part assure une couverture complète de la surface de la structure, et d'autre part qui facilite la précision de la reconstruction. Cette dernière, est réalisée en tentant de faire une fermeture de boucle le plus tôt possible dans la trajectoire (voir sec. \ref{subsec:reconstruction}). La minimisation d'erreur de localisation par la fermeture de boucle se traduit directement en une amélioration de la précision de reconstruction du modèle 3D de la structure. Nous évaluons donc la performance de nos algorithmes selon la précision du modèle reconstruit et nous illustrons les avantages de notre méthode en la comparant à l'approche classique de l'exploration de frontières.
 
-C'est dans ce contexte que nous proposons une méthode de planification de trajectoires pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreurs de localisation.
+%C'est dans ce contexte que nous proposons une méthode de planification de trajectoires pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreurs de localisation. Ceci s'inscrit dans le cadre plus large de la navigation autonome d'un robot pour la capture de points de vues pour la reconstruction du modèle 3D de la structure.
 
-
-Pour ce faire, nous équipons l'UGV d'un capteur de profondeur (une caméra) monté sur un joint à un degré de liberté en lacet ainsi que d'un scanner lidar permettant de détecter des obstacles dans un rayon de $180^\circ$ devant le véhicule.
-
+%Pour ce faire, nous équipons l'UGV d'un capteur de profondeur (une caméra) monté sur un joint à un degré de liberté en lacet ainsi que d'un scanner lidar permettant de détecter des obstacles dans un rayon de $180^\circ$ devant le véhicule.
 
 % Plus spécifiquement étant donné une structure de taille finie et un robot équipé d'un capteur de profondeur mobile, nous cherchons à optimiser le positionnement de ce capteur pour cartographier la structure tout en maximisant la performance du système de SLAM.
 
@@ -47,7 +45,7 @@ Pour ce faire, nous équipons l'UGV d'un capteur de profondeur (une caméra) mon
 
 \begin{figure}[htp]
   \centering
-  \includegraphics[width=0.3\linewidth]{images/placeholder.png}
+  \includegraphics[width=0.8\linewidth]{images/husky}
   \caption{Visualisation des repères présents sur le système d'inspection par UGV.}
   \label{fig:ugv_frames}
 \end{figure}
