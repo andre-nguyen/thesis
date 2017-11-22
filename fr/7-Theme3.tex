@@ -34,12 +34,12 @@ quadricoptère md4-1000. Nous installons sur le véhicule deux scanners lasers L
   \begin{tabular}[htp]{|c|l|p{10cm}|}
     \hline
     Symbole & Nom                   & Description\\\hline
-    $W$     &  \textit{World}       & Suivant la convention \textit{East-North-Up} (ENU), centrée au point de décollage du véhicule avec l'axe $x$ pointant vers l'Est, $y$ pointant vers le Nord et $z$ pointant vers le haut.\\ \hline
-    $B$     &  \textit{Body}        & Encore suivant la convention ENU, l'axe $x$ pointant vers la droite, $y$ vers l'avant et $z$ vers le haut. \\ \hline
-    $\mathit{BT}$  &  \textit{Body Tangent} & Repère centré sur, $B$ mais compensé pour ses angles de roulis et de tangage (mais pas de lacet). En d'autres mots, le repère ${BT}$ est donc tangent à la surface de la Terre et centré sur $B$. \\ \hline
-    $\mathit{C[L,R]}$ & \textit{Camera} & Suivant la convention de représentation d'images, nous avons l'axe $x$ vers la droite, $y$ vers le bas et $z$ sortant de la caméra. Les suffixes $L$ et $R$ indiquent les caméras gauche et droite respectivement. Par souci de brièveté si le repère est écrit $C$ sans préciser la caméra gauche ou la caméra droite, il indique la caméra gauche.   \\ \hline
-    $\mathit{L[H,V]}$ & \textit{Laser}& Les lasers aussi suivent un repère main droite avec $x$ vers l'avant, $y$ à gauche et $z$ vers le haut. Les données de distance du laser se situent toutes sur son plan $XY$. Les suffixes $H$ et $V$ indiquent la direction du balayage respectivement horizontal et vertical, par rapport au repère $B$. \\ \hline
-    $\mathit{T}$ & \textit{Turbine} & Le système de coordonnées de la turbine est centré sur le rotor avec $x$ vers la droite (vu de devant), $y$ vers l'intérieur de la nacelle et $z$ vers le haut. \\ \hline
+    $\mathsf{W}$     &  \textit{World}       & Suivant la convention \textit{East-North-Up} (ENU), centrée au point de décollage du véhicule avec l'axe $x$ pointant vers l'Est, $y$ pointant vers le Nord et $z$ pointant vers le haut.\\ \hline
+    $\mathsf{B}$     &  \textit{Body}        & Encore suivant la convention ENU, l'axe $x$ pointant vers la droite, $y$ vers l'avant et $z$ vers le haut. \\ \hline
+    $\mathsf{BT}$  &  \textit{Body Tangent} & Repère centré sur, $B$ mais compensé pour ses angles de roulis et de tangage (mais pas de lacet). En d'autres mots, le repère ${BT}$ est donc tangent à la surface de la Terre et centré sur $B$. \\ \hline
+    $\mathsf{C[L,R]}$ & \textit{Camera} & Suivant la convention de représentation d'images, nous avons l'axe $x$ vers la droite, $y$ vers le bas et $z$ sortant de la caméra. Les suffixes $L$ et $R$ indiquent les caméras gauche et droite respectivement. Par souci de brièveté si le repère est écrit $C$ sans préciser la caméra gauche ou la caméra droite, il indique la caméra gauche.   \\ \hline
+    $\mathsf{L[H,V]}$ & \textit{Laser}& Les lasers aussi suivent un repère main droite avec $x$ vers l'avant, $y$ à gauche et $z$ vers le haut. Les données de distance du laser se situent toutes sur son plan $XY$. Les suffixes $H$ et $V$ indiquent la direction du balayage respectivement horizontal et vertical, par rapport au repère $B$. \\ \hline
+    $\mathsf{T}$ & \textit{Turbine} & Le système de coordonnées de la turbine est centré sur le rotor avec $x$ vers la droite (vu de devant), $y$ vers l'intérieur de la nacelle et $z$ vers le haut. \\ \hline
   \end{tabular}
   \setlength{\tabcolsep}{6pt}
   \caption{Repères présents dans le système d'inspection d'éoliennes}
@@ -240,7 +240,7 @@ où $\boldsymbol{w}_k$ est un bruit blanc gaussien. Le modèle de mesure inclut 
 \end{align}
 Le terme d'entrée de commande $\boldsymbol{u}_k$ pourrait être utilisé pour prendre en compte les vitesses angulaires commandées au robot. Par contre sachant qu'elles ne seront pas disponibles sur le lien de télémétrie du md4-1000, nous ne les prenons pas en compte. La meilleure façon d'améliorer le filtre serait d'ajouter des mesures de $\dot{u}$ et de $\dot{v}$, chose qui pourrait être faite par des méthodes de calcul de flux optique.
 
-Une fois le point $(u,v)$ trouvé dans l'image, il suffit d'appliquer le modèle de caméra sténopé de la section \ref{subsec:modele_camera} et sa matrice de paramètres intrinsèques $K$ pour obtenir un vecteur unitaire $u_C$ dans le repère caméra pointant vers le rotor. Puisque la distance entre l'UAV et le rotor est beaucoup plus grande que la distance entre la caméra ($C$) et le centre du véhicule ($B$) nous pouvons la négliger. Ce qui implique que nous pouvons appliquer quelques rotations pour remettre ce vecteur unitaire dans le système d'axes $W$ (centré sur $B$) à partir de $C$ pour obtenir $\vect{u}_W$. En supposant que le point $(u,v)$ provient de l'image rectifiée il suffit de suivre l'équation suivante:
+Une fois le point $(u,v)$ trouvé dans l'image, il suffit d'appliquer le modèle de caméra sténopé de la section \ref{subsec:modele_camera} et sa matrice de paramètres intrinsèques $K$ pour obtenir un vecteur unitaire $u_C$ dans le repère caméra pointant vers le rotor. Puisque la distance entre l'UAV et le rotor est beaucoup plus grande que la distance entre la caméra ($\mathsf{C}$) et le centre du véhicule ($\mathsf{B}$) nous pouvons la négliger. Ce qui implique que nous pouvons appliquer quelques rotations pour remettre ce vecteur unitaire dans le système d'axes $\mathsf{W}$ (centré sur $\mathsf{B}$) à partir de $\mathsf{C}$ pour obtenir $\vect{u}_W$. En supposant que le point $(u,v)$ provient de l'image rectifiée il suffit de suivre l'équation suivante:
 \begin{align}
   \vect{u}^W = \vect{R}^W_B \vect{R}^B_C \vect{u}^C = \vect{R}^W_B \vect{R}^B_C \vect{K}^{-1} \begin{bmatrix}u \\ v \\ 1\end{bmatrix}
 \end{align}
@@ -270,7 +270,7 @@ Le principe opérationnel est simple et illustré dans la Figure \ref{fig:approa
   \caption{Principe d'opération de l'approche du rotor par laser.}
   \label{fig:approach}
 \end{figure}
-L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $\vect{T}_{LH}^B$, $\vect{T}_{LV}^B$ ainsi que la rotation $\vect{R}_B^{BT}$ sont connues, il suffit de transformer chaque $\vect{p}^L$ au repère ${BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
+L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser correspondant, puisque les matrices de transformées homogènes $\vect{T}_{LH}^B$, $\vect{T}_{LV}^B$ ainsi que la rotation $\vect{R}_B^{BT}$ sont connues, il suffit de transformer chaque $\vect{p}^L$ au repère $\mathsf{BT}$ suivant l'équation \ref{eq:pointcloud_bodytangent}.
 \begin{align}
   \begin{bmatrix}\vect{p}^{BT}_i \\ 1\end{bmatrix} = \begin{bmatrix}
     \vect{R}_B^{BT} & 0 \\
@@ -279,7 +279,7 @@ L'équation \ref{eq:scan2cloud} nous donne des points dans le repère du laser c
   \label{eq:pointcloud_bodytangent}
 \end{align}
 
-Une fois ces mesures transformées dans le bon repère, nous pouvons appliquer une loi de contrôle de type PID sur les axes $x$ et $y$ en plus d'une vitesse constante $v_z$ en $z$ pour calculer la commande de vitesse $\vect{v}(t)$ dans le repère ${BT}$ à envoyer à l'UAV tel que présenté dans l'équation \ref{eq:tower_pid}.
+Une fois ces mesures transformées dans le bon repère, nous pouvons appliquer une loi de contrôle de type PID sur les axes $x$ et $y$ en plus d'une vitesse constante $v_z$ en $z$ pour calculer la commande de vitesse $\vect{v}(t)$ dans le repère $\mathsf{BT}$ à envoyer à l'UAV tel que présenté dans l'équation \ref{eq:tower_pid}.
 
 \begin{align}
   \vect{v}(t) = \begin{bmatrix}v_x(t)\\ v_y(t)\\ v_z(t)\end{bmatrix} =
@@ -353,7 +353,7 @@ Le bout de la pale est détectée de la même façon qu'un mur à angle aigu est
 
 Le suivi par scanner laser se fait de la même façon que la montée de la tour au moyen de deux scanners lasers perpendiculaires l'un à l'autre. Suivant les mêmes formules de projection 2D à 3D présentées dans la section \ref{subsec:laser_tower}, le véhicule tente de se centrer par rapport à la pale en moyennant les points du nuage résultant tout en appliquant une vitesse constante $V_C$ dans la direction estimée de suivie. Dépendamment de l'angle de la pale seulement l'un des deux lasers est utilisé pour le suivi.
 
-La loi de commande est donc encore un PID où les termes d'erreurs sont calculés à partir de la projection laser et la sortie est une commande de vitesse dans le repère ${BT}$.
+La loi de commande est donc encore un PID où les termes d'erreurs sont calculés à partir de la projection laser et la sortie est une commande de vitesse dans le repère $\mathsf{BT}$.
 \begin{align}
   \vect{u}(t) = \vect{V}_C(t) + \vect{K}_P \vect{e}(t) + \vect{K}_I\int{\vect{e}(t)dt} + \vect{K}_D\dot{e}(t)
   \label{eq:pid_laser_blade}
