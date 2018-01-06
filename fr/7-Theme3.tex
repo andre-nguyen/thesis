@@ -15,7 +15,7 @@ En temps normal, une inspection se fait par une équipe de deux personnes devant
 
 Certains opérateurs d'UAV, offrent maintenant des services d'inspection d'éoliennes. Une caméra haute définition est montée sur un cardan stabilisateur à trois axes, lui-même monté sur le véhicule. Ce dernier est parfois aussi augmenté d'un télémètre permettant au pilote de savoir à quelle distance il est de la structure, chose difficile à estimer lorsque le véhicule est à 100 mètres d'altitude. Ces inspections peuvent prendre jusqu'à trois employés, dont un pilote, un opérateur pour la caméra et un observateur sous l'éolienne.
 
-Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de piloter un quadricoptère de façon autonome autour des pales d'une éolienne à l'aide de capteurs peu coûteux avec seulement un pilote de sécurité de présent et le moins d'informations \emph{a priori}. Ce projet peut aussi servir de tremplin vers un projet dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque man\oe uvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cherche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners laser et l'autre par caméras stéréo.
+Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de piloter un quadricoptère de façon autonome autour des pales d'une éolienne à l'aide de capteurs à coût raisonnable (étant donné les contraintes de charge utile) avec seulement un pilote de sécurité de présent et le moins d'informations \emph{a priori}. Ce projet peut aussi servir de tremplin vers un projet dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque man\oe uvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cherche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners laser et l'autre par caméras stéréo.
 
 La mission se divise en deux phases: l'approche du rotor et le suivi de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor, nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanners lasers. Pour le suivi des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivie à tâtons. La compagnie pour laquelle nous travaillons désirait que le système soit implémenté sur
 %la compagnie Microdrones,
@@ -222,8 +222,8 @@ Le point détecté passe ensuite dans un filtre de Kalman linéaire permettant a
 \begin{align}
   \begin{sbmatrix}{\boldsymbol{x}_k}u(k) \\ v(k) \\ \dot{u}(k) \\ \dot{v}(k)\end{sbmatrix} =
   \begin{sbmatrix}{\boldsymbol{F}_k}
-    1 & 0 & 1 & 0\\
-    0 & 1 & 0 & 1\\
+    1 & 0 & \Delta t & 0\\
+    0 & 1 & 0 & \Delta t\\
     0 & 0 &  \gamma_x & 0\\
     0 & 0 & 0 &  \gamma_y
   \end{sbmatrix} \begin{sbmatrix}{\boldsymbol{x}_{k-1}}u(k-1) \\ v(k-1) \\ \dot{u}(k-1) \\ \dot{v}(k-1)\end{sbmatrix}
