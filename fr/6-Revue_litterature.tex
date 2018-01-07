@@ -8,7 +8,7 @@
 %Finalement dans la section \ref{subsec:eolienne} nous abordons le sujet spécifique de l'inspection d'éoliennes au moyen de robots autonomes.
 %\color{black}
 
-Bien que les deux types d'inspections traités dans ce mémoire sont exécutés sur des véhicules entièrement différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans ce chapitre, nous présentons d'abord dans la section \ref{subsec:generation} le travail antérieur directement en lien avec la génération de trajectoires d'inspection. Par la suite, nous traitons du sujet plus spécifique d'inspection d'éoliennes au moyen de robots aériens autonomes dans la section \ref{subsec:eolienne}. Ensuite nous présentons les théories et les méthodes connexes requises pour l'opération des robots dans des environnements inconnus, en particulieur les méthodes de positionnement dans la section \ref{subsec:positionnement} et les méthodes de localisation et cartographie simultanée dans la section \ref{subsec:reconstruction}. Finalement, nous terminons la revue de littérature par un survol des capteurs couramment utilisés pour la navigation de robots autonomes dans la section \ref{sec:capteurs}.
+Bien que les deux types d'inspections traités dans ce mémoire sont exécutés sur des véhicules entièrement différents, les concepts utilisées lors de ces opérations se recoupent énormément. Dans ce chapitre, nous présentons d'abord dans la section \ref{subsec:generation} le travail antérieur directement en lien avec la génération de trajectoires d'inspection. Par la suite, nous traitons du sujet plus spécifique d'inspection d'éoliennes au moyen de robots aériens autonomes dans la section \ref{subsec:eolienne}. Ensuite nous présentons les théories et les méthodes connexes requises pour l'opération des robots dans des environnements inconnus, en particulieur les méthodes de positionnement dans la section \ref{subsec:positionnement} et les méthodes de localisation et cartographie simultanée dans la section \ref{subsec:reconstruction}. Dans la section \ref{sec:representations} nous survolons les méthodes communes de représentation d'environnement et dans la section \ref{sec:traitement_images} nous examinons la théorie importante pour le traitement d'images et la vision 3D. Finalement, nous terminons la revue de littérature par un survol des capteurs couramment utilisés pour la navigation de robots autonomes dans la section \ref{sec:capteurs}.
 
 \section{Génération de trajectoires d'inspection et couverture de surfaces}\label{subsec:generation}
 
@@ -31,6 +31,10 @@ Dans un autre ordre d'idée, une trajectoire complète et globalement optimale p
 Comparativement à l'inspection par exploration (en temps réel) la génération de trajectoires hors-ligne permet de créer des plans optimaux en termes de temps et de distance à parcourir. Par contre, cette trajectoire peut avoir un risque de collision s'il s'avère que le modèle utilisé diffère de la structure réelle, par exemple dans la cas d'un édifice partiellement endommagé par un désastre naturel ou une variation dans l'angle des pales d'une éolienne. \cite{Hepp2017} présentent un système faisant une première passe à haute altitude pour construire une carte rudimentaire dans laquelle la seconde inspection de près est planifiée suivant une maximisation du gain d'information.
 
 Tel que mentionné brièvement précédemment, le travail que nous effectuons est aussi relié au problème de la planification de trajectoires pour la couverture de surfaces qui, par le passé, a surtout été étudié dans le domaine 2D et supposent normalement un système de localisation précis \citep{Hert1996, acar2002morse, Acar2002, lim2014crack}. Nous soulignons que notre contribution n'offre pas d'avancement théorique de ces méthodes de couverture. Nous proposons plutôt des solutions pratiques permettant de mettre en \oe uvre ces systèmes dans des situations réelles en présence de bruit de localisation et de capteurs.
+
+\subsection{\textit{Active} SLAM et l'exploration sous incertitude}\label{subsec:active_slam}
+
+Le travail que nous présentons au niveau de l'inspection d'édifices par UGV est aussi étroitement lié aux domaines de l'\textit{Active} SLAM et de l'exploration sous incertitude.
 
 \section{Méthodes automatiques d'inspection d'éoliennes}\label{subsec:eolienne}
 
@@ -68,7 +72,7 @@ Une composante importante de tout système de SLAM est sa capacité de fermeture
 
 Le but de la fermeture de boucle est de réduire les erreurs de localisation en imposant certaines contraintes sur la carte en cours de construction. Cette minimisation d'erreur peut être réalisée de plusieurs façons, notamment par optimisation de graphe de poses \citep{Carlone2016}, par compensation par faisceaux (\textit{Bundle Adjustment}) \citep{Mei2011} ou tel que proposé dans ORB-SLAM2 une combinaison des deux \citep{Mur-Artal2017}.
 
-\section{Méthodes de représentation de l'environnement}\label{subsec:representations}
+\section{Méthodes de représentation de l'environnement}\label{sec:representations}
 
 Pour faire naviguer un robot mobile dans un environnement inconnu, il est impératif d'avoir une représentation de l'environnement dans laquelle la planification de trajectoire et la vérification de collision est possible. L'important est d'utiliser la représentation appropriée correspondant aux mouvements possibles du robot. Pour la navigation en 3D, le cadriciel OctoMap de \citep{Hornung2013} est particulièrement populaire par son code source ouvert, sa représentation probabiliste de l'environnement connu et inconnu, et son efficacité en termes de mémoire. Une OctoMap représente l'espace volumique par un Octree, subdivisant ainsi récursivement l'espace par un arbre d'octants. Chaque niveau de l'arbre représente une résolution différente de l'espace tel qu'on peut le voir dans la Figure \ref{fig:octree}.
 
@@ -102,7 +106,7 @@ Dans un autre ordre d'idées, \cite{Fridovich-Keil2017AtomMap} abandonnent compl
 %  \item a star
 %\end{enumerate}
 
-\section{Traitement d'images}
+\section{Traitement d'images}\label{sec:traitement_images}
 
 \subsection{Modèle de caméra}
 \label{subsec:modele_camera}
