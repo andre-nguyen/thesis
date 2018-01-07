@@ -11,7 +11,7 @@ La section \ref{sec:ugv_problem_description} met en contexte le problème que no
 
 Le but du projet présenté dans ce chapitre est de développer une stratégie permettant de guider un robot terrestre équipé d'une caméra ou d'un capteur de profondeur pour cartographier la partie visible d'une structure 3D. Nous décrivons une méthode de planification de trajectoire qui permet de générer des points de vues successifs pour parcourir le périmètre de la structure suivi d'une deuxième inspection dans laquelle nous cherchons à compléter le modèle en inspectant les trous provenant de cavités dans la structure.
 
-Plus spécifiquement, notre contribution consiste en une méthode de génération de trajectoires qui, d'une part, assure une couverture complète de la surface de la structure, et qui d'autre part, facilite la précision de la reconstruction. Cette dernière est réalisée en tentant de faire une fermeture de boucle le plus tôt possible dans la trajectoire (voir sec. \ref{subsec:reconstruction}). La minimisation d'erreur de localisation par la fermeture de boucle se traduit directement en une amélioration de la précision de reconstruction du modèle 3D de la structure. Nous évaluons donc la performance de nos algorithmes selon la précision du modèle reconstruit et nous illustrons les avantages de notre méthode en la comparant à l'approche classique de l'exploration de frontières.
+Plus spécifiquement, notre contribution consiste en une méthode de génération de trajectoires qui, d'une part, assure une couverture complète de la surface de la structure, et qui d'autre part, facilite la précision de la reconstruction. Cette dernière est réalisée en tentant de faire une fermeture de boucle le plus tôt possible dans la trajectoire (voir sec. \ref{subsec:reconstruction}). La minimisation d'erreur de localisation par la fermeture de boucle se traduit directement en une amélioration de la précision de reconstruction du modèle 3D de la structure. Nous évaluons donc la performance de nos algorithmes selon la précision du modèle reconstruit et nous illustrons les avantages de notre méthode en la comparant à l'approche classique de l'exploration de frontières. Dans le cas des expériences pratiques, nous n'évaluons que la trajectoire effectuée car nous n'avions pas de moyen de comparer le modèle reconstruit à la vérité-terrain. Nous notons par contre qu'il est possible d'obtenir la vérité terrain de la structure sous inspection au moyen de radars lasers industriels tel qu'un Leica ScanStation. De plus, la longueur de la trajectoire n'est pas une métrique que nous prenons en compte.
 
 %C'est dans ce contexte que nous proposons une méthode de planification de trajectoires pour l'inspection de structures au sol cherchant à fermer la boucle le plus tôt possible pour d'une part augmenter les chances de succès de la détection de la fermeture de boucle et d'autre part minimiser les erreurs de localisation. Ceci s'inscrit dans le cadre plus large de la navigation autonome d'un robot pour la capture de points de vues pour la reconstruction du modèle 3D de la structure.
 
@@ -59,13 +59,19 @@ Plus spécifiquement, notre contribution consiste en une méthode de génératio
 
 L'inspection se fait en 2 phases: l'exploration du périmètre (EP) présentée dans la section \ref{sec:perimeter_exploration} suivie de l'exploration des cavités (EC) présentée dans la section \ref{sec:cavity_exploration}. Dans la première phase, l'UGV fait le tour de la structure en sautant les cavités pour fermer la boucle le plus tôt possible. Ensuite, une analyse de la carte 3D est effectuée pour trouver les frontières indiquant des cavités non explorées dans la structure. Une trajectoire est planifiée pour diriger le robot vers la cavité pour cartographier l'intérieur de la structure. L'inspection se termine quand toutes les cavités ont été inspectées.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.75\linewidth]{images/flowchart}
+  \caption[Diagramme de séquence]{Diagramme de séquence des phases de l'inspection.}
+\end{figure}
+
 \section{Exploration du périmètre} \label{sec:perimeter_exploration}
 
 Suivant les hypothèses de la section \ref{sec:ugv_hypothesis}, le problème d'inspection se simplifie au parcours de la partie de la structure située entre les plans $z^g = 0$ et $z^g = H_{max}$. Pour ce faire la phase EP débute avec le robot près de l'un des murs de la structure. Le robot parcourt le périmètre dans le sens horaire gardant toujours une partie visible de la structure dans son champ de vision vers sa droite. À chaque itération de l'algorithme, l'UGV détermine la prochaine pose objectif à laquelle se rendre pour placer la caméra à une distance $D$ perpendiculairement à la surface de la structure, maximisant ainsi la qualité des détails perçus et la densité des points captés.
 
 \subsection{Choix de la prochaine pose objectif}
 
-L'algorithme \ref{alg:PE_next_goal} présente la méthode par laquelle nous calculons la prochaine pose objectif, permettant à l'UGV de suivre la surface de la structure.
+L'algorithme \ref{alg:PE_next_goal} présente la méthode par laquelle nous calculons la prochaine pose objectif, permettant à l'UGV de suivre la surface de la structure. Une visualisation du résultat de l'algorithme est disponible dans l'annexe \ref{annexe:suivi_mur}.
 
 \begin{algorithm}[ht]
   \SetAlgoLined
@@ -77,7 +83,8 @@ L'algorithme \ref{alg:PE_next_goal} présente la méthode par laquelle nous calc
   \Output{${po}$ la position objectif de la caméra}
   \Output{$\vect{u}$ le vecteur d'orientation de la caméra}
 
-  $\mathcal S$  $\gets$ FiltrageDuSol($\mathcal P$)   \\
+  $\mathcal S$  $\gets$ Downsampling($\mathcal P$)   \\
+  $\mathcal S$  $\gets$ FiltrageDuSol($\mathcal S$)   \\
   $\mathcal S$  $\gets$ DécoupeAvant($\mathcal S$) \label{alg:slice:decoupe}   \\
   $\vect{p}^c$         $\gets$ Moyenne($\mathcal S$)         \\
   $[\vect{v}_1, \vect{v}_2, \vect{v}_3; \lambda_1, \lambda_2, \lambda_3] \gets$ AnalyseComposantesPrincipales($\mathcal S$) \label{alg:slice:pca}\\
@@ -215,18 +222,24 @@ Suivant la définition posée par \cite{Yamauchi1997}, un voxel frontière (\emp
 \begin{figure}[!h]
   \centering
   \subfloat[]{
-  	\includegraphics[width=0.45\linewidth]{images/frontier_candidates}
+  	\includegraphics[width=0.3\linewidth]{images/frustrum}
+    \label{subfig:frustrum}
+  }
+  \hfil
+  \subfloat[]{
+  	\includegraphics[width=0.3\linewidth]{images/frontier_candidates}
   	\label{subfig:ugv_frontier}
   }
   \hfil
   \subfloat[]{
-  	\includegraphics[width=0.45\linewidth]{images/frontier_voxels}
+  	\includegraphics[width=0.3\linewidth]{images/frontier_voxels}
   	\label{subfig:ugv_entrance}
   }
   \caption[Recherche de voxel frontières dans une OctoMap]{
     Analyse de l'OctoMap avant le début de la phase d'exploration de cavités.
-    a) En jaune les voxels frontières et en bleu les voxels faisant partie de la structure.
-    b) En rouge les voxels frontières identifiant une entrée de cavité.
+    a) Tronc de vue donnant lieu aux voxels frontières indésirables.
+    b) En jaune les voxels frontières et en bleu les voxels faisant partie de la structure.
+    c) En rouge les voxels frontières identifiant une entrée de cavité.
   }
   \label{fig:ugv_frontier}
 \end{figure}
@@ -337,26 +350,37 @@ Grand \large{a} & $94$ & $4.5$ & $179.65$ \\
 \begin{figure}[p]
   \centering
   \subfloat[Modèle: Petit $\Gamma$, Profondeur Max.: $4.5m$]{
-      \includegraphics[width=0.4\linewidth]{images/SmallGamma_Husky_4_5}
+      \includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_4_5}
   	\label{subfig:small gamma husky 4.5}
   }
   \hfil
   \subfloat[Modèle: Petit $\Gamma$, Profondeur Max.: $12m$]{
-  	\includegraphics[width=0.4\linewidth]{images/SmallGamma_Husky_12}
+  	\includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_12}
   	\label{subfig:small gamma husky 12}
   }
   \hfil
   \subfloat[Modèle: Grand $\Gamma$, Profondeur Max.: $4.5m$]{
-  	\includegraphics[width=0.4\linewidth]{images/LargeGamma_Husky_4_5}
+  	\includegraphics[width=0.3\linewidth]{images/LargeGamma_Husky_4_5}
   	\label{subfig:large gamma husky 4.5}
   }
   \hfil
   \subfloat[Modèle: Grand {\large a}, Profondeur Max.: $4.5m$]{
-  	\includegraphics[width=0.4\linewidth]{images/LargeA_Husky_4_5}
+  	\includegraphics[width=0.3\linewidth]{images/LargeA_Husky_4_5}
   	\label{subfig:large a husky 4.5}
   }
+  \hfil
+  \subfloat[Petit $\Gamma$, Exploration par frontières]{
+  	\includegraphics[width=0.3\linewidth]{images/SmallGamma_Husky_FBE_4_5}
+  	\label{subfig:small gamma husky 4.5 FBE}
+  }
+  \hfil
+  \subfloat[Maison, Exploration par frontières]{
+  	\includegraphics[width=0.3\linewidth]{images/House_Husky_FBE_4_5}
+  	\label{subfig:house husky 4.5 FBE}
+  }
+  \hfil
   \caption[Résultats de reconstruction en simulation.]{
-  Projection du modèle reconstruit sur le plan $\vect{x}_{\fr g}\vect{y}_{\fr g}$ en noir et la trajectoire empruntée par le robot en suivant nos algorithmes en bleu.
+  Projection du modèle reconstruit sur le plan $\vect{x}_{\fr g}\vect{y}_{\fr g}$ en noir et la trajectoire empruntée par le robot en bleu.
   }
   \label{fig:relative size}
 \end{figure}
@@ -381,17 +405,6 @@ Nous comparons notre algorithme à une implémentation de l'exploration par fron
 	\includegraphics[width=0.8\linewidth]{images/House_FBE_Model}
 	\label{subfig:house husky 4.5 FBE model}
 }
-\hfil
-\subfloat[Petit $\Gamma$, Exploration par frontières]{
-	\includegraphics[width=0.4\linewidth]{images/SmallGamma_Husky_FBE_4_5}
-	\label{subfig:small gamma husky 4.5 FBE}
-}
-\hfil
-\subfloat[Maison, Exploration par frontières]{
-	\includegraphics[width=0.4\linewidth]{images/House_Husky_FBE_4_5}
-	\label{subfig:house husky 4.5 FBE}
-}
-\hfil
 \caption[Notre algorithme vs l'exploration par frontières]{ Comparaison entre les résultats de notre algorithme par rapport à l'exploration par frontières avec un capteur de profondeur avec une portée de $4.5\, \mathrm{m}$. On peut voir en (a) par rapport à (B) que l'EF n'assure pas une couverture complète de la surface visible du modèle.
 }
 \label{fig:simulation FBE}
@@ -499,4 +512,4 @@ En somme, notre algorithme est surtout sujet à deux sortes de cas d'échecs: i)
 
 En conclusion, nous avons présenté une méthode pour la génération de trajectoires permettant de guider un UGV équipé d'une caméra de profondeur mobile pour l'inspection d'une structure fermée inconnue. Notre méthode ne requiert aucune information \textit{a priori} sur la taille ou sur la géométrie de la structure. Utilisé en conjonction avec un système de SLAM visuel performant, nous obtenons une grande couverture de la surface de la structure dans le modèle reconstruit malgré les limites de la plateforme. Le système proposé est validé en simulation et dans des tests expérimentaux. Par une comparaison à l'algorithme classique d'exploration par frontières, nous démontrons clairement le gain en performance dans le cas d'une structure réaliste telle qu'une maison.
 
-Finalement, la méthode proposée garanti que le robot parcourt la totalité du périmètre de la structure, mais elle ne garantit pas que l'entièreté de la surface sera cartographiée. Pour ce faire, nous pourrions ajouter un planificateur de trajectoire secondaire pour déplacer la caméra localement au moyen du bras articulé pour assurer une couverture complète à chaque point d'inspection. De plus, il reste plusieurs améliorations possibles à apporter à l'algorithme, notamment l'utilisation d'une représentation autre que l'OctoMap telle que AtomMap, SkiMap ou les TSDF ou du moins la parallélisation du calcul des entrées de cavité. D'un autre côté, nous pourrions profiter du bras articulé pour ajouter des degrés de liberté à la caméra de profondeur. Ceci permettrait de faire une planification de trajectoire secondaire pour optimiser davantage le positionnement de la caméra ou même de faire une planification de trajectoire globale prenant en compte les possibilités additionnelles.
+Finalement, la méthode proposée favorise la couverture de la surface du périmètre de la structure par le capteur, mais elle ne garantit pas que l'entièreté de la surface sera cartographiée. Pour ce faire, nous pourrions ajouter un planificateur de trajectoire secondaire pour déplacer la caméra localement au moyen du bras articulé pour assurer une couverture complète à chaque point d'inspection. De plus, il reste plusieurs améliorations possibles à apporter à l'algorithme, notamment l'utilisation d'une représentation autre que l'OctoMap telle que AtomMap, SkiMap ou les TSDF ou du moins la parallélisation du calcul des entrées de cavité. D'un autre côté, nous pourrions profiter du bras articulé pour ajouter des degrés de liberté à la caméra de profondeur. Ceci permettrait de faire une planification de trajectoire secondaire pour optimiser davantage le positionnement de la caméra ou même de faire une planification de trajectoire globale prenant en compte les possibilités additionnelles.

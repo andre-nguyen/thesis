@@ -4,6 +4,23 @@
 %%
 %%  Note: Ne pas modifier la ligne ci-dessous.
 \addcontentsline{toc}{compteur}{ANNEXES}
+
+\Annexe{Visualisation des étapes de l'algorithme de suivi de mur}
+\label{annexe:suivi_mur}
+\begin{tabular}{cc}
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_060} &
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_061} \\
+  (1) & (2) \\
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_062} &
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_063} \\
+  (3) & (4) \\
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_064} &
+  \includegraphics[width=0.5\linewidth]{images/pcl/Selection_065} \\
+  (5) & (6)
+\end{tabular}
+
+(1) Nuage de points initial. (2) Downsampling du nuage. (3) Filtrage du sol par seuillage de la coordonnée $z$. (4) Sélection de un tiers du nuage vers l'avant du robot. (5) Calcul de la normale par ACP. (6) Calcul de la nouvelle pose objectif en prenant une longueur de pas dans la direction obtenue par le produit vectoriel entre la normale et l'axe $z$ du robot.
+
 \Annexe{Machine à états pour l'inspection d'éoliennes}
 \includegraphics[width=\linewidth]{images/state_machine.pdf}
 \label{annexe:state_machine}

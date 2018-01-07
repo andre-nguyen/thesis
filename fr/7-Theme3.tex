@@ -17,7 +17,7 @@ Certains opérateurs d'UAV, offrent maintenant des services d'inspection d'éoli
 
 Le but du projet est d'explorer les solutions possibles pour réaliser un système capable de piloter un quadricoptère de façon autonome autour des pales d'une éolienne à l'aide de capteurs à coût raisonnable (étant donné les contraintes de charge utile) avec seulement un pilote de sécurité de présent et le moins d'informations \emph{a priori}. Ce projet peut aussi servir de tremplin vers un projet dans lequel aucun humain n'interviendrait, par exemple pour une flotte d'UAV chargée d'inspecter régulièrement un parc éolien entier. Puisque man\oe uvrer précisément autour des pales demanderait l'usage de capteurs dépassant le budget du projet et nécessiterait que l'UAV soit équipé de capteurs de position haute précision tel qu'un GPS différentiel, nous simplifions le problème en un problème à deux dimensions où le véhicule cherche à suivre le bord d'attaque (ou le bord de fuite) des pales. Deux approches ont été développées, l'une entièrement au moyen de scanners laser et l'autre par caméras stéréo.
 
-La mission se divise en deux phases: l'approche du rotor et le suivi de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor, nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanners lasers. Pour le suivi des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivie à tâtons. La compagnie pour laquelle nous travaillons désirait que le système soit implémenté sur
+La mission se divise en deux phases principales: l'approche du rotor et le suivi de ses pales qui peuvent être gérées par une simple machine à états finis. Pour l'approche du rotor, nous comparons une approche à longue distance au moyen de traitement d'images à une approche à tâtons où l'UAV remonte la tour au moyen de scanners lasers. Pour le suivi des pales, nous comparons encore une méthode par traitement d'images à une méthode de suivie à tâtons. La compagnie pour laquelle nous travaillons désirait que le système soit implémenté sur
 %la compagnie Microdrones,
 quadricoptère md4-1000. Nous installons sur le véhicule deux scanners lasers LeddarTech Vu8, l'un horizontal et l'autre vertical, ainsi qu'une caméra stéréo ZED. Il est à noter que ces capteurs ne servent qu'à la navigation de l'UAV alors que la caméra haute définition sur stabilisateur demeure le moyen par lequel prendre des photos des défauts à la surface des pales.
 
@@ -45,6 +45,13 @@ quadricoptère md4-1000. Nous installons sur le véhicule deux scanners lasers L
   \caption{Repères présents dans le système d'inspection d'éoliennes}
   \label{table:coordinate_frames}
 \end{table}
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{images/nous_vs_microdrones}
+  \caption{Vue d'ensemble du système développé}
+  \label{fig:systeme_developpe}
+\end{figure}
 
 \section{Approche du rotor}
 
@@ -218,7 +225,7 @@ Dans la Figure \ref{fig:detect_result_step6}, nous pouvons observer les étapes 
 %C'est ici que nous voyons l'amélioration de l'algorithme par rapport à Stokkeland où malgré la grande quantité de segments provenant de l'arrière plan, les pales sont quand même bien choisies.
 Les pales finales sont indiquées par les lignes bleu, bleu foncé et vert pâle. Finalement, avec l'application des étapes $5$ et $6$ on peut voir que l'intersection des pales se croise bien sur le centre du rotor.
 
-Le point détecté passe ensuite dans un filtre de Kalman linéaire permettant ainsi de garder une estimation de la position du rotor dans l'image lorsque la détection échoue. Le vecteur d'état $\vect{x}_k$ contient la position et la vitesse de déplacement en coordonnées image du centre du rotor. La matrice de transition $\vect{F}_k$ contient les termes $\gamma_x, \gamma_y \in [0, 1]$ faisant décroître la vitesse exponentiellement avec le temps. Ceci empêche l'estimation de diverger à l'infini quand aucune mesure n'entre dans le filtre pendant de longues périodes de temps.
+Le point détecté passe ensuite dans un filtre de Kalman linéaire permettant ainsi de garder une estimation de la position du rotor dans l'image lorsque la détection échoue. Le vecteur d'état $\vect{x}_k$ contient la position et la vitesse de déplacement en coordonnées image du centre du rotor. La matrice de transition $\vect{F}_k$ contient les termes $\gamma_x, \gamma_y \in [0, 1]$ faisant décroître la vitesse exponentiellement avec le temps. Ceci empêche l'estimation de diverger à l'infini quand aucune mesure n'entre dans le filtre pendant de longues périodes de temps. Nous précisons que les équations suivantes sont en temps discret et le filtre suit la même fréquence que celle de la caméra.
 \begin{align}
   \begin{sbmatrix}{\boldsymbol{x}_k}u(k) \\ v(k) \\ \dot{u}(k) \\ \dot{v}(k)\end{sbmatrix} =
   \begin{sbmatrix}{\boldsymbol{F}_k}
