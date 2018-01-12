@@ -1,6 +1,6 @@
 ﻿% !TEX root = Document.tex
 % !TeX spellcheck = fr
-\Chapter{Inspection d'infrastructures par UGV}
+\Chapter{INSPECTION D'INFRASTRUCTURES PAR UGV}
 \label{sec:ugv}
 
 Dans cette section, nous présentons notre travail réalisé dans le cadre de l'article \textit{Motion Planning Strategy for the Active Vision-Based Mapping of Ground-Level Structures} paru dans IEEE Transations on Automation Science and Engineering \citep{Ramanagopal2017}. Le contenu diffère de l'article pour ajouter des explications à propos de certains sujets qui avaient été écourtés par manque d'espace et pour mettre plus d'emphase sur la partie d'implémentation de la méthode. Certaines figures produites en simulation ont aussi été remplacées par leurs équivalents en photo réalisées lors des expériences et plusieurs figures ont été ajoutées pour mieux illustrer certains phénomènes expliqués. La théorie a initialement été développée par M. S. Ramanagopal et notre contribution se situe au niveau de l'expérimentation et l'implémentation sur la vraie plateforme robotique. Cette expérimentation a permis de dénicher certaines lacunes au niveau des algorithmes et de la gestion du bruit de capteur que nous avons par la suite corrigées.
@@ -29,6 +29,7 @@ Plus spécifiquement, notre contribution consiste en une méthode de génératio
 \textit{Hypothèse 3} Finalement, nous supposons que la structure repose sur le plan horizontal $z^g = 0$. Ceci nous permet de simplifier certains de nos algorithmes pour filtrer le sol des nuages de points. Par extension, nous supposons aussi que la mission de l'UGV n'est que d'inspecter la partie de la structure visible dans le champ de vision de la caméra au sol. Ainsi, la hauteur maximale de la structure pouvant être cartographiée est $H_{max} = h_c + D \tan{\psi/2}$ où $\psi$ est l'angle de vue vertical de la caméra.
 
 \begin{table}[htp]
+  \caption{Repères présents dans le système d'inspections par UGV}
   \centering
   \setlength{\tabcolsep}{12pt}
   \begin{tabular}[htp]{|c|l|p{9cm}|}
@@ -39,7 +40,6 @@ Plus spécifiquement, notre contribution consiste en une méthode de génératio
     $\mathsf{C} \coloneqq \{\mathsf{O_C}, \vect{x_c}, \vect{y_c}, \vect{z_c} \}$     &  \textit{Camera}      & Repère centré sur la caméra, la transformée est rigide par rapport à $\mathsf{R}$ sauf pour l'angle de lacet. \\\hline
   \end{tabular}
   \setlength{\tabcolsep}{6pt}
-  \caption{Repères présents dans le système d'inspections par UGV}
   \label{table:ugv_frames}
 \end{table}
 
@@ -312,7 +312,7 @@ La phase EC requiert une méthode de navigation légèrement différente de la p
 
 \subsection{Résultats en simulation}
 
-Le système a été implémenté en simulation en combinant du code en C++ et en Python à l'aide de le logiciel middleware Robot Operating System\footnote{http://www.ros.org/} (ROS). Les opérations sur les nuages de points ont étés implémentées grâce à la Point Cloud Library (PCL) de \citep{Rusu2011}. Le système de SLAM utilisé est RTAB-Map \citep{Labbe2014}, mais nous rappelons que tout autre système de SLAM 3D basé sur des graphes de poses est utilisable. L'une des particularités de RTAB-Map est qu'il supporte en entrée une source d'odométrie arbitraire, nous optons donc pour l'utilisation de l'odométrie provenant des roues du Husky. L'implémentation de nos algorithmes de mouvement incluant le choix de la prochaine pose et le calcul du champ de potentiel ont été faits dans la pile de navigation ROS \citep{Mader2010} que nous avons modifiée.
+Le système a été implémenté en simulation en combinant du code en C++ et en Python à l'aide de le logiciel middleware Robot Operating System\footnote{http://www.ros.org/} (ROS). Les opérations sur les nuages de points ont étés implémentées grâce à la Point Cloud Library (PCL) de \cite{Rusu2011}. Le système de SLAM utilisé est RTAB-Map \citep{Labbe2014}, mais nous rappelons que tout autre système de SLAM 3D basé sur des graphes de poses est utilisable. L'une des particularités de RTAB-Map est qu'il supporte en entrée une source d'odométrie arbitraire, nous optons donc pour l'utilisation de l'odométrie provenant des roues du Husky. L'implémentation de nos algorithmes de mouvement incluant le choix de la prochaine pose et le calcul du champ de potentiel ont été faits dans la pile de navigation ROS \citep{Mader2010} que nous avons modifiée.
 
 \begin{figure}[h]
   \centering
@@ -488,7 +488,7 @@ Le comportement de notre algorithme est illustré dans la Figure \ref{fig:exp_an
 
 \subsubsection{Performance à l'exécution}
 
-Le robot réussit à faire l'exploration du périmètre en sautant la cavité interne, le tout en temps réel malgré l'exécution du SLAM 3D et des différents algorithmes d'estimation d'odométrie et de planification de trajectoire. La partie la plus lente de l'algorithme reste la construction et l'analyse de l'OctoMap pour la détection des cavités qui peut prendre plusieurs secondes de temps. Bien que la représentation multirésolution d'un OcTree nous permet d'accélérer les requêtes à la carte, un problème existe néanmoins dans l'insertion des points et du traçage des rayons associés qui se fait séquentiellement sans l'utilisation de fils d'exécution en parallèle. Ceci pourrait être réglé en changeant la représentation utilisée d'OctoMap à une représentation parallélisable tel que la SkiMap récemment proposé par \citep{Gregorio2017}.
+Le robot réussit à faire l'exploration du périmètre en sautant la cavité interne, le tout en temps réel malgré l'exécution du SLAM 3D et des différents algorithmes d'estimation d'odométrie et de planification de trajectoire. La partie la plus lente de l'algorithme reste la construction et l'analyse de l'OctoMap pour la détection des cavités qui peut prendre plusieurs secondes de temps. Bien que la représentation multirésolution d'un OcTree nous permet d'accélérer les requêtes à la carte, un problème existe néanmoins dans l'insertion des points et du traçage des rayons associés qui se fait séquentiellement sans l'utilisation de fils d'exécution en parallèle. Ceci pourrait être réglé en changeant la représentation utilisée d'OctoMap à une représentation parallélisable tel que la SkiMap récemment proposé par \cite{Gregorio2017}.
 
 \subsection{Sources de bruit et différences entre la simulation et l'expérience réelle}
 \label{subsec:ugv_noise_sim}
