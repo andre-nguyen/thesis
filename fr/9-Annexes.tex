@@ -7,6 +7,9 @@
 
 \Annexe{VISUALISATION DES ÉTAPES DE L'ALGORITHME DE SUIVI DE MUR}
 \label{annexe:suivi_mur}
+\newlength{\savedtabcolsep}
+\setlength{\savedtabcolsep}{\tabcolsep}
+\setlength{\tabcolsep}{0pt}
 \begin{tabular}{cc}
   \includegraphics[width=0.5\linewidth]{images/pcl/Selection_060} &
   \includegraphics[width=0.5\linewidth]{images/pcl/Selection_061} \\
@@ -18,6 +21,7 @@
   \includegraphics[width=0.5\linewidth]{images/pcl/Selection_065} \\
   (5) & (6)
 \end{tabular}
+\setlength{\tabcolsep}{\savedtabcolsep}
 
 (1) Nuage de points initial. (2) Downsampling du nuage. (3) Filtrage du sol par seuillage de la coordonnée $z$. (4) Sélection de un tiers du nuage vers l'avant du robot. (5) Calcul de la normale par ACP. (6) Calcul de la nouvelle pose objectif en prenant une longueur de pas dans la direction obtenue par le produit vectoriel entre la normale et l'axe $z$ du robot.
 
