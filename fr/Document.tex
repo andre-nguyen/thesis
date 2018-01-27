@@ -35,6 +35,7 @@
 \usepackage{subfig}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage[authoryear,round,longnamesfirst]{natbib}
 
 \newlength{\commentWidth}
 \setlength{\commentWidth}{7cm}
@@ -185,6 +186,7 @@ a été dûment accepté\ifthenelse{\equal{\monDiplome}{M}}{}{e} par le jury d'e
 \bibliographystyle{polymtl}  % Format de la bibliographie.
 %\bibliographystyle{IEEEtranSN-francais}  % Format de la bibliographie.
 %
+
 \ifthenelse{\equal{\AnnexesPresentes}{O}}{
 \appendix%
 \newcommand{\Annexe}[1]{\annexe{#1}\setcounter{figure}{0}\setcounter{table}{0}\setcounter{footnote}{0}}%
